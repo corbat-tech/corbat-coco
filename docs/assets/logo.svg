@@ -29,7 +29,4 @@
   <circle cx="155" cy="100" r="8" fill="#22c55e" />
   <circle cx="145" cy="125" r="8" fill="#22c55e" />
 
-  <!-- Code brackets -->
-  <text x="60" y="110" font-family="monospace" font-size="40" font-weight="bold" fill="#e0e7ff">&lt;</text>
-  <text x="110" y="110" font-family="monospace" font-size="40" font-weight="bold" fill="#e0e7ff">/&gt;</text>
 </svg>

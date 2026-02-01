@@ -9,8 +9,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/corbat/corbat-coco/actions/workflows/ci.yml"><img src="https://github.com/corbat/corbat-coco/actions/workflows/ci.yml/badge.svg" alt="CI Status" /></a>
-  <a href="https://codecov.io/gh/corbat/corbat-coco"><img src="https://codecov.io/gh/corbat/corbat-coco/branch/main/graph/badge.svg" alt="Coverage" /></a>
+  <a href="https://github.com/corbat/corbat-coco/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/corbat/corbat-coco/ci.yml?branch=main&label=CI" alt="CI Status" /></a>
+  <a href="https://codecov.io/gh/corbat/corbat-coco"><img src="https://img.shields.io/codecov/c/github/corbat/corbat-coco?label=coverage" alt="Coverage" /></a>
   <a href="https://www.npmjs.com/package/corbat-coco"><img src="https://img.shields.io/npm/v/corbat-coco.svg" alt="npm version" /></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a>
   <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D22.0.0-brightgreen" alt="Node.js Version" /></a>
@@ -109,6 +109,91 @@ Task 2/6: Auth service ✓ (4 iterations, score: 89/100)
 └─ Security issues: 0
 ```
 
+### Example Session: Working on Existing Projects
+
+For day-to-day development work on existing projects, use `coco task` to execute specific tasks:
+
+```bash
+$ cd my-existing-backend
+$ coco task
+
+? Describe your task (paste from Jira, GitHub issue, etc.):
+> ## JIRA-1234: Add GET endpoint for user orders
+>
+> **Story Points:** 5
+> **Acceptance Criteria:**
+> - Create GET /api/v1/users/{userId}/orders endpoint
+> - Return paginated list of orders (default: 20 items)
+> - Support query params: status, fromDate, toDate, page, size
+> - Include order items in response
+> - Return 404 if user not found
+> - Add unit tests (>80% coverage)
+> - Update OpenAPI spec
+
+🔍 Analyzing codebase...
+✓ Detected: Java 17 + Spring Boot 3.2
+✓ Found: OrderRepository, UserRepository, existing /api/v1/* structure
+✓ Style: Following existing patterns in UserController.java
+
+📋 Task breakdown:
+1. Create OrderController with GET endpoint
+2. Create OrderService with business logic
+3. Create OrderDTO and OrderPageDTO
+4. Add validation and error handling
+5. Write unit tests for Service layer
+6. Write integration tests for Controller
+7. Update OpenAPI documentation
+
+? Proceed with implementation? (Y/n) Y
+
+🔨 Executing task...
+
+Step 1/7: OrderController ✓ (2 iterations, score: 94/100)
+  → Created: src/main/java/com/example/controller/OrderController.java
+  → Follows existing controller patterns
+
+Step 2/7: OrderService ✓ (3 iterations, score: 91/100)
+  → Created: src/main/java/com/example/service/OrderService.java
+  → Using existing OrderRepository
+
+Step 3/7: DTOs ✓ (1 iteration, score: 96/100)
+  → Created: OrderDTO.java, OrderPageDTO.java, OrderFilterDTO.java
+
+Step 4/7: Error handling ✓ (2 iterations, score: 93/100)
+  → Added: UserNotFoundException handling
+  → Updated: GlobalExceptionHandler.java
+
+Step 5/7: Unit tests ✓ (2 iterations, score: 89/100)
+  → Created: OrderServiceTest.java (12 tests)
+  → Coverage: 94%
+
+Step 6/7: Integration tests ✓ (3 iterations, score: 88/100)
+  → Created: OrderControllerIntegrationTest.java (8 tests)
+
+Step 7/7: OpenAPI ✓ (1 iteration, score: 97/100)
+  → Updated: openapi.yaml with new endpoint schema
+
+📊 Task Complete!
+├─ Files created: 6
+├─ Files modified: 2
+├─ Tests added: 20 (all passing)
+├─ Coverage: 92%
+├─ Average quality: 92/100
+└─ Time: 12 minutes
+
+? Create commit? (Y/n) Y
+✓ Committed: feat(orders): add GET endpoint for user orders [JIRA-1234]
+
+? Push to remote? (Y/n) Y
+✓ Pushed to origin/feature/JIRA-1234-user-orders
+```
+
+**Pro tips for existing projects:**
+- Coco automatically detects your tech stack and coding patterns
+- Paste your Jira/GitHub issue directly - it parses acceptance criteria
+- Use `coco task --dry-run` to preview without changes
+- Use `coco task --no-commit` to skip auto-commit
+
 ---
 
 ## Features
@@ -194,10 +279,18 @@ Four phases from idea to deployment:
 ## Commands
 
 ```bash
+# New projects
 coco init [path]              # Initialize new project
 coco plan                     # Run discovery and planning
 coco build                    # Execute tasks with quality iteration
 coco build --sprint=N         # Build specific sprint
+
+# Existing projects (day-to-day workflow)
+coco task                     # Execute a single task (Jira, GitHub issue, etc.)
+coco task --dry-run           # Preview changes without applying
+coco task --no-commit         # Skip auto-commit after task
+
+# Utilities
 coco status                   # Show current progress
 coco status --verbose         # Detailed status
 coco resume                   # Resume from checkpoint
