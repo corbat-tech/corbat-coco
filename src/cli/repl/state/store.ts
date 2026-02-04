@@ -4,23 +4,18 @@
  * Persistent storage for project state in .coco/state.json
  */
 
-import * as fs from 'node:fs/promises';
-import * as path from 'node:path';
-import type {
-  ProjectState,
-  StateFile,
-  StateManager,
-  CocoPhase,
-} from './types.js';
-import { PHASE_METADATA } from './types.js';
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
+import type { ProjectState, StateFile, StateManager, CocoPhase } from "./types.js";
+import { PHASE_METADATA } from "./types.js";
 
 /** Current state version */
 const STATE_VERSION = 1;
 
 /** Default empty state */
 const DEFAULT_STATE: ProjectState = {
-  path: '',
-  currentPhase: 'none',
+  path: "",
+  currentPhase: "none",
   completedPhases: [],
   version: STATE_VERSION,
   updatedAt: new Date().toISOString(),
@@ -30,7 +25,7 @@ const DEFAULT_STATE: ProjectState = {
  * Get state file path
  */
 function getStatePath(projectPath: string): string {
-  return path.join(projectPath, '.coco', 'state.json');
+  return path.join(projectPath, ".coco", "state.json");
 }
 
 /**
@@ -42,17 +37,17 @@ export function createStateManager(): StateManager {
    */
   async function load(projectPath: string): Promise<ProjectState> {
     const statePath = getStatePath(projectPath);
-    
+
     try {
-      const content = await fs.readFile(statePath, 'utf-8');
+      const content = await fs.readFile(statePath, "utf-8");
       const file = JSON.parse(content) as StateFile;
-      
+
       // Validate version
       if (file.version !== STATE_VERSION) {
         // Could add migration logic here
         console.warn(`State version mismatch: ${file.version} vs ${STATE_VERSION}`);
       }
-      
+
       return {
         ...DEFAULT_STATE,
         ...file.state,
@@ -72,10 +67,10 @@ export function createStateManager(): StateManager {
    */
   async function save(state: ProjectState): Promise<void> {
     const statePath = getStatePath(state.path);
-    
+
     // Ensure .coco directory exists
     await fs.mkdir(path.dirname(statePath), { recursive: true });
-    
+
     const file: StateFile = {
       version: STATE_VERSION,
       state: {
@@ -83,8 +78,8 @@ export function createStateManager(): StateManager {
         updatedAt: new Date().toISOString(),
       },
     };
-    
-    await fs.writeFile(statePath, JSON.stringify(file, null, 2), 'utf-8');
+
+    await fs.writeFile(statePath, JSON.stringify(file, null, 2), "utf-8");
   }
 
   /**
@@ -92,7 +87,7 @@ export function createStateManager(): StateManager {
    */
   async function clear(projectPath: string): Promise<void> {
     const statePath = getStatePath(projectPath);
-    
+
     try {
       await fs.unlink(statePath);
     } catch {
@@ -105,7 +100,7 @@ export function createStateManager(): StateManager {
    */
   async function exists(projectPath: string): Promise<boolean> {
     const statePath = getStatePath(projectPath);
-    
+
     try {
       await fs.access(statePath);
       return true;
@@ -128,17 +123,17 @@ export function createStateManager(): StateManager {
    */
   async function completePhase(projectPath: string, phase: CocoPhase): Promise<void> {
     const state = await load(projectPath);
-    
+
     if (!state.completedPhases.includes(phase)) {
       state.completedPhases.push(phase);
     }
-    
+
     // Update current phase to next
     const metadata = PHASE_METADATA[phase];
-    if (metadata.nextPhase !== 'none') {
+    if (metadata.nextPhase !== "none") {
       state.currentPhase = metadata.nextPhase;
     }
-    
+
     await save(state);
   }
 
@@ -156,33 +151,33 @@ export function createStateManager(): StateManager {
   async function getSuggestion(projectPath: string): Promise<string> {
     const state = await load(projectPath);
     const metadata = PHASE_METADATA[state.currentPhase];
-    
+
     switch (state.currentPhase) {
-      case 'none':
+      case "none":
         return `Run ${metadata.command} to create a project specification`;
-      
-      case 'converge':
+
+      case "converge":
         if (state.specification) {
           return `Specification "${state.specification.name}" created. Run ${metadata.command} to design architecture`;
         }
         return `Run ${metadata.command} to design architecture`;
-      
-      case 'orchestrate':
+
+      case "orchestrate":
         if (state.architecture) {
           return `Architecture with ${state.architecture.components} components defined. Run ${metadata.command} to start implementation`;
         }
         return `Run ${metadata.command} to start implementation`;
-      
-      case 'complete':
+
+      case "complete":
         if (state.sprint) {
           const { tasksCompleted, tasksTotal, currentSprint } = state.sprint;
           return `Sprint ${currentSprint}: ${tasksCompleted}/${tasksTotal} tasks completed. Run ${metadata.command} to continue`;
         }
         return `Run ${metadata.command} to continue implementation`;
-      
-      case 'output':
+
+      case "output":
         return `Project ready! Run ${metadata.command} to generate CI/CD and documentation`;
-      
+
       default:
         return `Run ${metadata.command}`;
     }
@@ -221,16 +216,16 @@ export function getStateManager(): StateManager {
 export function formatStateStatus(state: ProjectState): string {
   const { emoji, name } = PHASE_METADATA[state.currentPhase];
   const parts: string[] = [`${emoji} ${name}`];
-  
+
   if (state.specification) {
     parts.push(`📋 ${state.specification.name}`);
   }
-  
+
   if (state.sprint) {
     parts.push(`🔨 Sprint ${state.sprint.currentSprint}`);
   }
-  
-  return parts.join(' | ');
+
+  return parts.join(" | ");
 }
 
 /**
@@ -242,8 +237,8 @@ export function getStateSummary(state: ProjectState): {
   implementation: boolean;
 } {
   return {
-    spec: state.completedPhases.includes('converge'),
-    architecture: state.completedPhases.includes('orchestrate'),
-    implementation: state.completedPhases.includes('complete'),
+    spec: state.completedPhases.includes("converge"),
+    architecture: state.completedPhases.includes("orchestrate"),
+    implementation: state.completedPhases.includes("complete"),
   };
 }

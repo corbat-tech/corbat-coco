@@ -170,7 +170,9 @@ describe("registerConfigCommand", () => {
     registerConfigCommand(mockProgram as any);
 
     expect(mockConfigCmd.command).toHaveBeenCalledWith("init");
-    expect(mockSubCommand.description).toHaveBeenCalledWith("Initialize configuration interactively");
+    expect(mockSubCommand.description).toHaveBeenCalledWith(
+      "Initialize configuration interactively",
+    );
   });
 
   it("should register action handlers for all subcommands", async () => {
@@ -548,10 +550,7 @@ describe("config set action handler", () => {
     await promise;
 
     expect(mockFsMkdir).toHaveBeenCalledWith(".coco", { recursive: true });
-    expect(mockFsWriteFile).toHaveBeenCalledWith(
-      ".coco/config.json",
-      expect.any(String)
-    );
+    expect(mockFsWriteFile).toHaveBeenCalledWith(".coco/config.json", expect.any(String));
   });
 });
 
@@ -719,10 +718,12 @@ describe("config init action handler", () => {
     await vi.runAllTimersAsync();
     await promise;
 
-    expect(p.text).toHaveBeenCalledWith(expect.objectContaining({
-      message: "Enter your Anthropic API key:",
-      placeholder: "sk-ant-...",
-    }));
+    expect(p.text).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "Enter your Anthropic API key:",
+        placeholder: "sk-ant-...",
+      }),
+    );
   });
 
   it("should prompt for model selection", async () => {
@@ -731,31 +732,31 @@ describe("config init action handler", () => {
     await vi.runAllTimersAsync();
     await promise;
 
-    expect(p.select).toHaveBeenCalledWith(expect.objectContaining({
-      message: "Select the default model:",
-    }));
+    expect(p.select).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "Select the default model:",
+      }),
+    );
   });
 
   it("should prompt for quality threshold", async () => {
-    vi.mocked(p.text)
-      .mockResolvedValueOnce("sk-ant-test-key")
-      .mockResolvedValueOnce("85");
+    vi.mocked(p.text).mockResolvedValueOnce("sk-ant-test-key").mockResolvedValueOnce("85");
 
     expect(initHandler).not.toBeNull();
     const promise = initHandler!();
     await vi.runAllTimersAsync();
     await promise;
 
-    expect(p.text).toHaveBeenCalledWith(expect.objectContaining({
-      message: "Minimum quality score (0-100):",
-      initialValue: "85",
-    }));
+    expect(p.text).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "Minimum quality score (0-100):",
+        initialValue: "85",
+      }),
+    );
   });
 
   it("should save configuration on success", async () => {
-    vi.mocked(p.text)
-      .mockResolvedValueOnce("sk-ant-test-key")
-      .mockResolvedValueOnce("85");
+    vi.mocked(p.text).mockResolvedValueOnce("sk-ant-test-key").mockResolvedValueOnce("85");
 
     expect(initHandler).not.toBeNull();
     const promise = initHandler!();
@@ -765,14 +766,12 @@ describe("config init action handler", () => {
     expect(mockFsMkdir).toHaveBeenCalledWith(".coco", { recursive: true });
     expect(mockFsWriteFile).toHaveBeenCalledWith(
       ".coco/config.json",
-      expect.stringContaining("provider")
+      expect.stringContaining("provider"),
     );
   });
 
   it("should display success outro message", async () => {
-    vi.mocked(p.text)
-      .mockResolvedValueOnce("sk-ant-test-key")
-      .mockResolvedValueOnce("85");
+    vi.mocked(p.text).mockResolvedValueOnce("sk-ant-test-key").mockResolvedValueOnce("85");
 
     expect(initHandler).not.toBeNull();
     const promise = initHandler!();
@@ -795,9 +794,7 @@ describe("config init action handler", () => {
   });
 
   it("should exit if user cancels model selection", async () => {
-    vi.mocked(p.isCancel)
-      .mockReturnValueOnce(false)
-      .mockReturnValueOnce(true);
+    vi.mocked(p.isCancel).mockReturnValueOnce(false).mockReturnValueOnce(true);
 
     expect(initHandler).not.toBeNull();
     const promise = initHandler!();
@@ -809,9 +806,7 @@ describe("config init action handler", () => {
   });
 
   it("should exit if user cancels quality threshold input", async () => {
-    vi.mocked(p.text)
-      .mockResolvedValueOnce("sk-ant-test-key")
-      .mockResolvedValueOnce("85");
+    vi.mocked(p.text).mockResolvedValueOnce("sk-ant-test-key").mockResolvedValueOnce("85");
     vi.mocked(p.isCancel)
       .mockReturnValueOnce(false)
       .mockReturnValueOnce(false)
@@ -834,8 +829,8 @@ describe("config init action handler", () => {
 
     // Get the text call and extract the validate function
     const textCalls = vi.mocked(p.text).mock.calls;
-    const apiKeyCall = textCalls.find(call =>
-      call[0].message === "Enter your Anthropic API key:"
+    const apiKeyCall = textCalls.find(
+      (call) => call[0].message === "Enter your Anthropic API key:",
     );
     expect(apiKeyCall).toBeDefined();
 
@@ -849,9 +844,7 @@ describe("config init action handler", () => {
   });
 
   it("should validate quality score range", async () => {
-    vi.mocked(p.text)
-      .mockResolvedValueOnce("sk-ant-test-key")
-      .mockResolvedValueOnce("85");
+    vi.mocked(p.text).mockResolvedValueOnce("sk-ant-test-key").mockResolvedValueOnce("85");
 
     expect(initHandler).not.toBeNull();
     const promise = initHandler!();
@@ -860,8 +853,8 @@ describe("config init action handler", () => {
 
     // Get the text call for quality score and extract the validate function
     const textCalls = vi.mocked(p.text).mock.calls;
-    const qualityCall = textCalls.find(call =>
-      call[0].message === "Minimum quality score (0-100):"
+    const qualityCall = textCalls.find(
+      (call) => call[0].message === "Minimum quality score (0-100):",
     );
     expect(qualityCall).toBeDefined();
 
@@ -883,13 +876,21 @@ describe("config init action handler", () => {
     await vi.runAllTimersAsync();
     await promise;
 
-    expect(p.select).toHaveBeenCalledWith(expect.objectContaining({
-      options: expect.arrayContaining([
-        expect.objectContaining({ value: "claude-sonnet-4-20250514", hint: "Recommended for coding" }),
-        expect.objectContaining({ value: "claude-opus-4-20250514", hint: "Most capable" }),
-        expect.objectContaining({ value: "claude-3-5-sonnet-20241022", hint: "Fast and capable" }),
-      ]),
-    }));
+    expect(p.select).toHaveBeenCalledWith(
+      expect.objectContaining({
+        options: expect.arrayContaining([
+          expect.objectContaining({
+            value: "claude-sonnet-4-20250514",
+            hint: "Recommended for coding",
+          }),
+          expect.objectContaining({ value: "claude-opus-4-20250514", hint: "Most capable" }),
+          expect.objectContaining({
+            value: "claude-3-5-sonnet-20241022",
+            hint: "Fast and capable",
+          }),
+        ]),
+      }),
+    );
   });
 });
 
@@ -993,7 +994,9 @@ describe("helper functions", () => {
       await vi.runAllTimersAsync();
       await promise;
 
-      expect(p.log.error).toHaveBeenCalledWith("Configuration key 'provider.type.nonexistent' not found.");
+      expect(p.log.error).toHaveBeenCalledWith(
+        "Configuration key 'provider.type.nonexistent' not found.",
+      );
       expect(process.exit).toHaveBeenCalledWith(1);
     });
 

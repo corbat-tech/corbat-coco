@@ -25,11 +25,7 @@ import type {
   AgentEvent,
   AgentEventType,
 } from "./types.js";
-import {
-  getAgentConfig,
-  AGENT_NAMES,
-  AGENT_DESCRIPTIONS,
-} from "./prompts.js";
+import { getAgentConfig, AGENT_NAMES, AGENT_DESCRIPTIONS } from "./prompts.js";
 
 /**
  * Maximum number of concurrent agents
@@ -114,7 +110,7 @@ export class AgentManager extends EventEmitter {
   async spawn(
     type: AgentType,
     task: string,
-    options: SpawnAgentOptions = {}
+    options: SpawnAgentOptions = {},
   ): Promise<AgentResult> {
     // Check concurrent agent limit
     if (this.activeAgents.size >= MAX_CONCURRENT_AGENTS) {
@@ -333,10 +329,7 @@ export class AgentManager extends EventEmitter {
   /**
    * Execute an agent's task
    */
-  private async executeAgent(
-    agent: SubAgent,
-    options: SpawnAgentOptions
-  ): Promise<AgentResult> {
+  private async executeAgent(agent: SubAgent, options: SpawnAgentOptions): Promise<AgentResult> {
     // Get agent configuration
     const config = getAgentConfig(agent.type);
 
@@ -348,9 +341,7 @@ export class AgentManager extends EventEmitter {
     const tools = this.getToolsForAgent(config);
 
     // Build conversation
-    const messages: Message[] = [
-      { role: "user", content: agent.task },
-    ];
+    const messages: Message[] = [{ role: "user", content: agent.task }];
 
     let totalInputTokens = 0;
     let totalOutputTokens = 0;
@@ -461,7 +452,7 @@ export class AgentManager extends EventEmitter {
    */
   private async executeToolCalls(
     toolCalls: ToolCall[],
-    config: AgentConfig
+    config: AgentConfig,
   ): Promise<ToolResultContent[]> {
     const results: ToolResultContent[] = [];
     const allowedTools = new Set(config.tools);
@@ -484,9 +475,7 @@ export class AgentManager extends EventEmitter {
         results.push({
           type: "tool_result",
           tool_use_id: toolCall.id,
-          content: result.success
-            ? String(result.data ?? "Success")
-            : `Error: ${result.error}`,
+          content: result.success ? String(result.data ?? "Success") : `Error: ${result.error}`,
           is_error: !result.success,
         });
       } catch (error) {
@@ -543,7 +532,7 @@ export class AgentManager extends EventEmitter {
  */
 export function createAgentManager(
   provider: LLMProvider,
-  toolRegistry: ToolRegistry
+  toolRegistry: ToolRegistry,
 ): AgentManager {
   return new AgentManager(provider, toolRegistry);
 }

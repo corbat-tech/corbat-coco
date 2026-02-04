@@ -7,13 +7,13 @@
  * - Mejor manejo de errores
  */
 
-import * as p from '@clack/prompts';
-import chalk from 'chalk';
-import * as fs from 'node:fs/promises';
-import * as path from 'node:path';
-import { createProvider, type ProviderType } from '../../providers/index.js';
-import type { ReplConfig } from './types.js';
-import { VERSION } from '../../version.js';
+import * as p from "@clack/prompts";
+import chalk from "chalk";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
+import { createProvider, type ProviderType } from "../../providers/index.js";
+import type { ReplConfig } from "./types.js";
+import { VERSION } from "../../version.js";
 import {
   getAllProviders,
   getProviderDefinition,
@@ -21,7 +21,7 @@ import {
   getConfiguredProviders,
   formatModelInfo,
   type ProviderDefinition,
-} from './providers-config.js';
+} from "./providers-config.js";
 
 /**
  * Resultado del onboarding
@@ -49,7 +49,7 @@ export async function runOnboardingV2(): Promise<OnboardingResult | null> {
 ║   Your AI Coding Agent                                    ║
 ║                                                          ║
 ╚══════════════════════════════════════════════════════════╝
-`)
+`),
   );
 
   p.log.message(chalk.dim("Welcome! Let's get you set up with an AI provider.\n"));
@@ -60,12 +60,12 @@ export async function runOnboardingV2(): Promise<OnboardingResult | null> {
   if (configuredProviders.length > 0) {
     p.log.info(
       `Found ${configuredProviders.length} configured provider(s): ${configuredProviders
-        .map((p) => p.emoji + ' ' + p.name)
-        .join(', ')}`
+        .map((p) => p.emoji + " " + p.name)
+        .join(", ")}`,
     );
 
     const useExisting = await p.confirm({
-      message: 'Use an existing provider?',
+      message: "Use an existing provider?",
       initialValue: true,
     });
 
@@ -85,26 +85,26 @@ export async function runOnboardingV2(): Promise<OnboardingResult | null> {
  * Seleccionar provider existente
  */
 async function selectExistingProvider(
-  providers: ProviderDefinition[]
+  providers: ProviderDefinition[],
 ): Promise<OnboardingResult | null> {
   const options = providers.map((p) => ({
     value: p.id,
     label: `${p.emoji} ${p.name}`,
-    hint: 'Configured',
+    hint: "Configured",
   }));
 
-  options.push({ value: '__new__' as ProviderType, label: '➕ Setup new provider', hint: '' });
+  options.push({ value: "__new__" as ProviderType, label: "➕ Setup new provider", hint: "" });
 
   const choice = await p.select({
-    message: 'Select provider:',
+    message: "Select provider:",
     options,
   });
 
   if (p.isCancel(choice)) return null;
-  if (choice === ('__new__' as ProviderType)) return setupNewProvider();
+  if (choice === ("__new__" as ProviderType)) return setupNewProvider();
 
   const provider = getProviderDefinition(choice as ProviderType);
-  const apiKey = process.env[provider.envVar] || '';
+  const apiKey = process.env[provider.envVar] || "";
 
   // Seleccionar modelo
   const model = await selectModel(provider);
@@ -128,7 +128,7 @@ async function setupNewProvider(): Promise<OnboardingResult | null> {
   const providers = getAllProviders();
 
   const providerChoice = await p.select({
-    message: 'Choose an AI provider:',
+    message: "Choose an AI provider:",
     options: providers.map((p) => ({
       value: p.id,
       label: `${p.emoji} ${p.name}`,
@@ -157,11 +157,11 @@ async function setupNewProvider(): Promise<OnboardingResult | null> {
 
     if (!p.isCancel(customUrl) && customUrl) {
       const url = await p.text({
-        message: 'Enter API URL:',
+        message: "Enter API URL:",
         placeholder: provider.baseUrl,
         validate: (v) => {
-          if (!v) return 'URL is required';
-          if (!v.startsWith('http')) return 'Must start with http:// or https://';
+          if (!v) return "URL is required";
+          if (!v.startsWith("http")) return "Must start with http:// or https://";
           return;
         },
       });
@@ -180,7 +180,7 @@ async function setupNewProvider(): Promise<OnboardingResult | null> {
   const valid = await testConnection(provider, apiKey, model, baseUrl);
   if (!valid) {
     const retry = await p.confirm({
-      message: 'Would you like to try again?',
+      message: "Would you like to try again?",
       initialValue: true,
     });
 
@@ -202,7 +202,7 @@ async function setupNewProvider(): Promise<OnboardingResult | null> {
  * Mostrar información del provider
  */
 function showProviderInfo(provider: ProviderDefinition): void {
-  p.log.message('');
+  p.log.message("");
   p.log.step(`Setting up ${provider.emoji} ${provider.name}`);
 
   p.log.message(chalk.dim(`\n📖 Documentation: ${provider.docsUrl}`));
@@ -210,13 +210,13 @@ function showProviderInfo(provider: ProviderDefinition): void {
 
   if (provider.features) {
     const features = [];
-    if (provider.features.streaming) features.push('streaming');
-    if (provider.features.functionCalling) features.push('tools');
-    if (provider.features.vision) features.push('vision');
-    p.log.message(chalk.dim(`✨ Features: ${features.join(', ')}`));
+    if (provider.features.streaming) features.push("streaming");
+    if (provider.features.functionCalling) features.push("tools");
+    if (provider.features.vision) features.push("vision");
+    p.log.message(chalk.dim(`✨ Features: ${features.join(", ")}`));
   }
 
-  p.log.message('');
+  p.log.message("");
 }
 
 /**
@@ -227,7 +227,7 @@ async function requestApiKey(provider: ProviderDefinition): Promise<string | nul
     message: `Enter your ${provider.name} API key:`,
     validate: (value) => {
       if (!value || value.length < 10) {
-        return 'Please enter a valid API key (min 10 chars)';
+        return "Please enter a valid API key (min 10 chars)";
       }
       return;
     },
@@ -241,8 +241,8 @@ async function requestApiKey(provider: ProviderDefinition): Promise<string | nul
  * Seleccionar modelo
  */
 async function selectModel(provider: ProviderDefinition): Promise<string | null> {
-  p.log.message('');
-  p.log.step('Select a model');
+  p.log.message("");
+  p.log.step("Select a model");
 
   // Opciones de modelos
   const modelOptions = provider.models.map((m) => ({
@@ -253,24 +253,24 @@ async function selectModel(provider: ProviderDefinition): Promise<string | null>
   // Añadir opción de modelo personalizado
   if (provider.supportsCustomModels) {
     modelOptions.push({
-      value: '__custom__',
-      label: '✏️  Custom model (enter ID manually)',
+      value: "__custom__",
+      label: "✏️  Custom model (enter ID manually)",
     });
   }
 
   const choice = await p.select({
-    message: 'Choose a model:',
+    message: "Choose a model:",
     options: modelOptions,
   });
 
   if (p.isCancel(choice)) return null;
 
   // Manejar modelo personalizado
-  if (choice === '__custom__') {
+  if (choice === "__custom__") {
     const custom = await p.text({
-      message: 'Enter model ID:',
-      placeholder: provider.models[0]?.id || 'model-name',
-      validate: (v) => (!v || !v.trim() ? 'Model ID is required' : undefined),
+      message: "Enter model ID:",
+      placeholder: provider.models[0]?.id || "model-name",
+      validate: (v) => (!v || !v.trim() ? "Model ID is required" : undefined),
     });
 
     if (p.isCancel(custom)) return null;
@@ -287,14 +287,14 @@ async function testConnection(
   provider: ProviderDefinition,
   apiKey: string,
   model: string,
-  baseUrl?: string
+  baseUrl?: string,
 ): Promise<boolean> {
-  p.log.message('');
+  p.log.message("");
   const spinner = p.spinner();
   spinner.start(`Testing connection to ${provider.name}...`);
 
   // Debug info (solo en desarrollo)
-  const debug = process.env.DEBUG === 'true';
+  const debug = process.env.DEBUG === "true";
   if (debug) {
     p.log.message(chalk.dim(`\n[Debug] Provider: ${provider.id}`));
     p.log.message(chalk.dim(`[Debug] Model: ${model}`));
@@ -310,46 +310,48 @@ async function testConnection(
     }
 
     const testProvider = await createProvider(provider.id, { model });
-    
+
     if (debug) {
       p.log.message(chalk.dim(`[Debug] Provider created: ${testProvider.id}`));
     }
-    
+
     const available = await testProvider.isAvailable();
 
     if (!available) {
-      spinner.stop('Connection failed');
+      spinner.stop("Connection failed");
       p.log.error(chalk.red(`\n❌ Could not connect to ${provider.name}`));
-      p.log.message(chalk.dim('\nPossible causes:'));
-      p.log.message(chalk.dim('  • Invalid API key'));
-      p.log.message(chalk.dim('  • Invalid model name'));
-      p.log.message(chalk.dim('  • Network connectivity issues'));
-      p.log.message(chalk.dim('  • Provider service unavailable'));
-      
+      p.log.message(chalk.dim("\nPossible causes:"));
+      p.log.message(chalk.dim("  • Invalid API key"));
+      p.log.message(chalk.dim("  • Invalid model name"));
+      p.log.message(chalk.dim("  • Network connectivity issues"));
+      p.log.message(chalk.dim("  • Provider service unavailable"));
+
       // Para Kimi, mostrar información específica
-      if (provider.id === 'kimi') {
-        p.log.message(chalk.dim('\n🌙 Kimi/Moonshot specific:'));
-        p.log.message(chalk.dim('  • Get your key from: https://platform.moonshot.cn/console/api-keys'));
-        p.log.message(chalk.dim('  • Ensure your account has credits'));
-        p.log.message(chalk.dim('  • Try model: moonshot-v1-8k (most compatible)'));
+      if (provider.id === "kimi") {
+        p.log.message(chalk.dim("\n🌙 Kimi/Moonshot specific:"));
+        p.log.message(
+          chalk.dim("  • Get your key from: https://platform.moonshot.cn/console/api-keys"),
+        );
+        p.log.message(chalk.dim("  • Ensure your account has credits"));
+        p.log.message(chalk.dim("  • Try model: moonshot-v1-8k (most compatible)"));
       }
-      
+
       return false;
     }
 
-    spinner.stop(chalk.green('✅ Connected successfully!'));
+    spinner.stop(chalk.green("✅ Connected successfully!"));
     return true;
   } catch (error) {
-    spinner.stop('Connection failed');
+    spinner.stop("Connection failed");
     const errorMsg = error instanceof Error ? error.message : String(error);
     p.log.error(chalk.red(`\n❌ Error: ${errorMsg}`));
-    
+
     if (debug) {
       if (error instanceof Error && error.stack) {
         p.log.message(chalk.dim(`\n[Debug] Stack: ${error.stack}`));
       }
     }
-    
+
     return false;
   }
 }
@@ -357,28 +359,26 @@ async function testConnection(
 /**
  * Guardar configuración
  */
-export async function saveConfiguration(
-  result: OnboardingResult
-): Promise<void> {
+export async function saveConfiguration(result: OnboardingResult): Promise<void> {
   const provider = getProviderDefinition(result.type);
 
   const saveOptions = await p.select({
-    message: 'How would you like to save this configuration?',
+    message: "How would you like to save this configuration?",
     options: [
       {
-        value: 'env',
-        label: '📝 Save to .env file',
-        hint: 'Current directory only',
+        value: "env",
+        label: "📝 Save to .env file",
+        hint: "Current directory only",
       },
       {
-        value: 'global',
-        label: '🔧 Save to shell profile',
-        hint: 'Available in all terminals',
+        value: "global",
+        label: "🔧 Save to shell profile",
+        hint: "Available in all terminals",
       },
       {
-        value: 'session',
-        label: '💨 This session only',
-        hint: 'Will be lost when you exit',
+        value: "session",
+        label: "💨 This session only",
+        hint: "Will be lost when you exit",
       },
     ],
   });
@@ -386,15 +386,15 @@ export async function saveConfiguration(
   if (p.isCancel(saveOptions)) return;
 
   switch (saveOptions) {
-    case 'env':
+    case "env":
       await saveToEnvFile(provider.envVar, result.apiKey, result.baseUrl);
       break;
-    case 'global':
+    case "global":
       await saveToShellProfile(provider.envVar, result.apiKey, result.baseUrl);
       break;
-    case 'session':
+    case "session":
       // Ya está en process.env
-      p.log.message(chalk.dim('\n💨 Configuration will be lost when you exit.'));
+      p.log.message(chalk.dim("\n💨 Configuration will be lost when you exit."));
       break;
   }
 }
@@ -402,21 +402,17 @@ export async function saveConfiguration(
 /**
  * Guardar en archivo .env
  */
-async function saveToEnvFile(
-  envVar: string,
-  apiKey: string,
-  baseUrl?: string
-): Promise<void> {
-  const envPath = path.join(process.cwd(), '.env');
+async function saveToEnvFile(envVar: string, apiKey: string, baseUrl?: string): Promise<void> {
+  const envPath = path.join(process.cwd(), ".env");
 
-  let content = '';
+  let content = "";
   try {
-    content = await fs.readFile(envPath, 'utf-8');
+    content = await fs.readFile(envPath, "utf-8");
   } catch {
     // Archivo no existe
   }
 
-  const lines = content.split('\n');
+  const lines = content.split("\n");
 
   // Actualizar o añadir variables
   const updateVar = (name: string, value?: string) => {
@@ -432,41 +428,37 @@ async function saveToEnvFile(
 
   updateVar(envVar, apiKey);
   if (baseUrl) {
-    updateVar(`${envVar.replace('_API_KEY', '_BASE_URL')}`, baseUrl);
+    updateVar(`${envVar.replace("_API_KEY", "_BASE_URL")}`, baseUrl);
   }
 
-  await fs.writeFile(envPath, lines.join('\n').trim() + '\n', 'utf-8');
+  await fs.writeFile(envPath, lines.join("\n").trim() + "\n", "utf-8");
   p.log.success(`\n✅ Saved to ${envPath}`);
 }
 
 /**
  * Guardar en perfil de shell
  */
-async function saveToShellProfile(
-  envVar: string,
-  apiKey: string,
-  baseUrl?: string
-): Promise<void> {
-  const shell = process.env.SHELL || '';
-  const home = process.env.HOME || '~';
+async function saveToShellProfile(envVar: string, apiKey: string, baseUrl?: string): Promise<void> {
+  const shell = process.env.SHELL || "";
+  const home = process.env.HOME || "~";
 
   let profilePath: string;
-  if (shell.includes('zsh')) {
-    profilePath = path.join(home, '.zshrc');
-  } else if (shell.includes('bash')) {
-    profilePath = path.join(home, '.bashrc');
+  if (shell.includes("zsh")) {
+    profilePath = path.join(home, ".zshrc");
+  } else if (shell.includes("bash")) {
+    profilePath = path.join(home, ".bashrc");
   } else {
-    profilePath = path.join(home, '.profile');
+    profilePath = path.join(home, ".profile");
   }
 
-  let content = '';
+  let content = "";
   try {
-    content = await fs.readFile(profilePath, 'utf-8');
+    content = await fs.readFile(profilePath, "utf-8");
   } catch {
     // Archivo no existe
   }
 
-  const lines = content.split('\n');
+  const lines = content.split("\n");
 
   const addVar = (name: string, value?: string) => {
     if (!value) return;
@@ -475,16 +467,16 @@ async function saveToShellProfile(
     if (idx >= 0) {
       lines[idx] = exportLine;
     } else {
-      lines.push(`# Corbat-Coco ${name}`, exportLine, '');
+      lines.push(`# Corbat-Coco ${name}`, exportLine, "");
     }
   };
 
   addVar(envVar, apiKey);
   if (baseUrl) {
-    addVar(`${envVar.replace('_API_KEY', '_BASE_URL')}`, baseUrl);
+    addVar(`${envVar.replace("_API_KEY", "_BASE_URL")}`, baseUrl);
   }
 
-  await fs.writeFile(profilePath, lines.join('\n').trim() + '\n', 'utf-8');
+  await fs.writeFile(profilePath, lines.join("\n").trim() + "\n", "utf-8");
   p.log.success(`\n✅ Saved to ${profilePath}`);
   p.log.message(chalk.dim(`Run: source ${profilePath}`));
 }
@@ -492,14 +484,10 @@ async function saveToShellProfile(
 /**
  * Asegurar configuración antes de iniciar REPL
  */
-export async function ensureConfiguredV2(
-  config: ReplConfig
-): Promise<ReplConfig | null> {
+export async function ensureConfiguredV2(config: ReplConfig): Promise<ReplConfig | null> {
   // Verificar si ya tenemos provider configurado
   const providers = getAllProviders();
-  const configured = providers.find(
-    (p) => process.env[p.envVar] && p.id === config.provider.type
-  );
+  const configured = providers.find((p) => process.env[p.envVar] && p.id === config.provider.type);
 
   if (configured) {
     // Testear conexión
@@ -533,7 +521,7 @@ export async function ensureConfiguredV2(
         provider: {
           ...config.provider,
           type: anyConfigured.id,
-          model: recommended?.id || anyConfigured.models[0]?.id || '',
+          model: recommended?.id || anyConfigured.models[0]?.id || "",
         },
       };
     }

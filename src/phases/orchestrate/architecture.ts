@@ -5,11 +5,7 @@
  */
 
 import { randomUUID } from "node:crypto";
-import type {
-  ArchitectureDoc,
-  ArchitectureDiagram,
-  OrchestrateConfig,
-} from "./types.js";
+import type { ArchitectureDoc, ArchitectureDiagram, OrchestrateConfig } from "./types.js";
 import type { Specification } from "../converge/types.js";
 import type { LLMProvider } from "../../providers/types.js";
 import {
@@ -59,10 +55,7 @@ export class ArchitectureGenerator {
     }
 
     if (this.config.generateSequenceDiagrams) {
-      const seqDiagrams = await this.generateSequenceDiagrams(
-        baseArchitecture,
-        specification
-      );
+      const seqDiagrams = await this.generateSequenceDiagrams(baseArchitecture, specification);
       diagrams.push(...seqDiagrams);
     }
 
@@ -75,9 +68,7 @@ export class ArchitectureGenerator {
   /**
    * Generate base architecture
    */
-  private async generateBaseArchitecture(
-    specification: Specification
-  ): Promise<ArchitectureDoc> {
+  private async generateBaseArchitecture(specification: Specification): Promise<ArchitectureDoc> {
     const prompt = fillPrompt(GENERATE_ARCHITECTURE_PROMPT, {
       specification: JSON.stringify(specification.overview),
       techStack: JSON.stringify(specification.technical.stack),
@@ -118,9 +109,7 @@ export class ArchitectureGenerator {
   /**
    * Generate C4 diagrams
    */
-  private async generateC4Diagrams(
-    architecture: ArchitectureDoc
-  ): Promise<ArchitectureDiagram[]> {
+  private async generateC4Diagrams(architecture: ArchitectureDoc): Promise<ArchitectureDiagram[]> {
     const prompt = fillPrompt(GENERATE_C4_DIAGRAMS_PROMPT, {
       architecture: JSON.stringify({
         overview: architecture.overview,
@@ -168,16 +157,14 @@ export class ArchitectureGenerator {
    */
   private async generateSequenceDiagrams(
     architecture: ArchitectureDoc,
-    specification: Specification
+    specification: Specification,
   ): Promise<ArchitectureDiagram[]> {
     const prompt = fillPrompt(GENERATE_SEQUENCE_DIAGRAMS_PROMPT, {
       architecture: JSON.stringify({
         overview: architecture.overview,
         components: architecture.components,
       }),
-      functionalRequirements: JSON.stringify(
-        specification.requirements.functional.slice(0, 5)
-      ),
+      functionalRequirements: JSON.stringify(specification.requirements.functional.slice(0, 5)),
     });
 
     try {
@@ -217,9 +204,7 @@ export class ArchitectureGenerator {
   /**
    * Generate fallback C4 diagrams if LLM fails
    */
-  private generateFallbackC4Diagrams(
-    architecture: ArchitectureDoc
-  ): ArchitectureDiagram[] {
+  private generateFallbackC4Diagrams(architecture: ArchitectureDoc): ArchitectureDiagram[] {
     const diagrams: ArchitectureDiagram[] = [];
 
     // Simple context diagram
@@ -272,7 +257,7 @@ export class ArchitectureGenerator {
  */
 export function createArchitectureGenerator(
   llm: LLMProvider,
-  config: OrchestrateConfig
+  config: OrchestrateConfig,
 ): ArchitectureGenerator {
   return new ArchitectureGenerator(llm, config);
 }

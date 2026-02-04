@@ -14,28 +14,20 @@ import { FileSystemError, ToolError } from "../utils/errors.js";
  * Sensitive file patterns that should be protected
  */
 const SENSITIVE_PATTERNS = [
-  /\.env(?:\.\w+)?$/,        // .env, .env.local, etc.
-  /credentials\.\w+$/i,      // credentials.json, etc.
-  /secrets?\.\w+$/i,         // secret.json, secrets.yaml
-  /\.pem$/,                  // Private keys
-  /\.key$/,                  // Private keys
-  /id_rsa(?:\.pub)?$/,       // SSH keys
-  /\.npmrc$/,                // npm auth
-  /\.pypirc$/,               // PyPI auth
+  /\.env(?:\.\w+)?$/, // .env, .env.local, etc.
+  /credentials\.\w+$/i, // credentials.json, etc.
+  /secrets?\.\w+$/i, // secret.json, secrets.yaml
+  /\.pem$/, // Private keys
+  /\.key$/, // Private keys
+  /id_rsa(?:\.pub)?$/, // SSH keys
+  /\.npmrc$/, // npm auth
+  /\.pypirc$/, // PyPI auth
 ];
 
 /**
  * System paths that should be blocked
  */
-const BLOCKED_PATHS = [
-  "/etc",
-  "/var",
-  "/usr",
-  "/root",
-  "/sys",
-  "/proc",
-  "/boot",
-];
+const BLOCKED_PATHS = ["/etc", "/var", "/usr", "/root", "/sys", "/proc", "/boot"];
 
 /**
  * Validate encoding is safe
@@ -67,7 +59,10 @@ function normalizePath(filePath: string): string {
 /**
  * Check if a path is allowed for file operations
  */
-function isPathAllowed(filePath: string, operation: "read" | "write" | "delete"): { allowed: boolean; reason?: string } {
+function isPathAllowed(
+  filePath: string,
+  operation: "read" | "write" | "delete",
+): { allowed: boolean; reason?: string } {
   // Check for null bytes (path injection)
   if (hasNullByte(filePath)) {
     return { allowed: false, reason: "Path contains invalid characters" };
@@ -98,10 +93,16 @@ function isPathAllowed(filePath: string, operation: "read" | "write" | "delete")
         const basename = path.basename(absolute);
         // Block .npmrc, .pypirc as they may contain auth tokens
         if (!allowedHomeReads.includes(basename)) {
-          return { allowed: false, reason: "Reading files outside project directory is not allowed" };
+          return {
+            allowed: false,
+            reason: "Reading files outside project directory is not allowed",
+          };
         }
       } else {
-        return { allowed: false, reason: `${operation} operations outside project directory are not allowed` };
+        return {
+          allowed: false,
+          reason: `${operation} operations outside project directory are not allowed`,
+        };
       }
     }
   }
@@ -111,7 +112,10 @@ function isPathAllowed(filePath: string, operation: "read" | "write" | "delete")
     const basename = path.basename(absolute);
     for (const pattern of SENSITIVE_PATTERNS) {
       if (pattern.test(basename)) {
-        return { allowed: false, reason: `Operation on sensitive file '${basename}' requires explicit confirmation` };
+        return {
+          allowed: false,
+          reason: `Operation on sensitive file '${basename}' requires explicit confirmation`,
+        };
       }
     }
   }
@@ -123,7 +127,10 @@ function isPathAllowed(filePath: string, operation: "read" | "write" | "delete")
  * Resolve path safely, following symlinks and verifying final destination
  * @internal Reserved for future use with symlink validation
  */
-export async function resolvePathSecurely(filePath: string, operation: "read" | "write" | "delete"): Promise<string> {
+export async function resolvePathSecurely(
+  filePath: string,
+  operation: "read" | "write" | "delete",
+): Promise<string> {
   const normalized = normalizePath(filePath);
   const absolute = path.resolve(normalized);
 
@@ -140,10 +147,9 @@ export async function resolvePathSecurely(filePath: string, operation: "read" | 
       // Path was a symlink - verify the target is also allowed
       const postCheck = isPathAllowed(realPath, operation);
       if (!postCheck.allowed) {
-        throw new ToolError(
-          `Symlink target '${realPath}' is not allowed: ${postCheck.reason}`,
-          { tool: `file_${operation}` }
-        );
+        throw new ToolError(`Symlink target '${realPath}' is not allowed: ${postCheck.reason}`, {
+          tool: `file_${operation}`,
+        });
       }
     }
     return realPath;
@@ -172,9 +178,12 @@ function validatePath(filePath: string, operation: "read" | "write" | "delete"):
  */
 export function validateEncoding(encoding: string): void {
   if (!isEncodingSafe(encoding)) {
-    throw new ToolError(`Unsupported encoding: ${encoding}. Use one of: ${[...SAFE_ENCODINGS].join(", ")}`, {
-      tool: "file_read",
-    });
+    throw new ToolError(
+      `Unsupported encoding: ${encoding}. Use one of: ${[...SAFE_ENCODINGS].join(", ")}`,
+      {
+        tool: "file_read",
+      },
+    );
   }
 }
 
@@ -261,8 +270,16 @@ Examples:
   parameters: z.object({
     path: z.string().describe("Absolute or relative path to the file"),
     content: z.string().describe("Content to write"),
-    createDirs: z.boolean().optional().default(true).describe("Create parent directories if needed"),
-    dryRun: z.boolean().optional().default(false).describe("Preview operation without making changes"),
+    createDirs: z
+      .boolean()
+      .optional()
+      .default(true)
+      .describe("Create parent directories if needed"),
+    dryRun: z
+      .boolean()
+      .optional()
+      .default(false)
+      .describe("Preview operation without making changes"),
   }),
   async execute({ path: filePath, content, createDirs, dryRun }) {
     validatePath(filePath, "write");
@@ -546,7 +563,7 @@ Examples:
     if (confirm !== true) {
       throw new ToolError(
         "Deletion requires explicit confirmation. Set confirm: true to proceed.",
-        { tool: "delete_file" }
+        { tool: "delete_file" },
       );
     }
 
@@ -558,10 +575,9 @@ Examples:
 
       if (stats.isDirectory()) {
         if (!recursive) {
-          throw new ToolError(
-            "Cannot delete directory without recursive: true",
-            { tool: "delete_file" }
-          );
+          throw new ToolError("Cannot delete directory without recursive: true", {
+            tool: "delete_file",
+          });
         }
         await fs.rm(absolutePath, { recursive: true });
       } else {
@@ -614,9 +630,12 @@ Examples:
       if (!overwrite) {
         try {
           await fs.access(destPath);
-          throw new ToolError(`Destination already exists: ${destination}. Use overwrite: true to replace.`, {
-            tool: "copy_file",
-          });
+          throw new ToolError(
+            `Destination already exists: ${destination}. Use overwrite: true to replace.`,
+            {
+              tool: "copy_file",
+            },
+          );
         } catch (error) {
           if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
             throw error;
@@ -678,9 +697,12 @@ Examples:
       if (!overwrite) {
         try {
           await fs.access(destPath);
-          throw new ToolError(`Destination already exists: ${destination}. Use overwrite: true to replace.`, {
-            tool: "move_file",
-          });
+          throw new ToolError(
+            `Destination already exists: ${destination}. Use overwrite: true to replace.`,
+            {
+              tool: "move_file",
+            },
+          );
         } catch (error) {
           if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
             throw error;

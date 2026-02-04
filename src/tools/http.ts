@@ -141,7 +141,7 @@ Examples:
 
       throw new ToolError(
         `HTTP request failed: ${error instanceof Error ? error.message : String(error)}`,
-        { tool: "http_fetch", cause: error instanceof Error ? error : undefined }
+        { tool: "http_fetch", cause: error instanceof Error ? error : undefined },
       );
     }
   },
@@ -218,7 +218,7 @@ Examples:
 
       throw new ToolError(
         `HTTP JSON request failed: ${error instanceof Error ? error.message : String(error)}`,
-        { tool: "http_json", cause: error instanceof Error ? error : undefined }
+        { tool: "http_json", cause: error instanceof Error ? error : undefined },
       );
     }
   },

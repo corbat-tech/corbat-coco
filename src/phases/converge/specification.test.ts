@@ -46,17 +46,43 @@ describe("SpecificationGenerator", () => {
     ],
     assumptions: [
       { statement: "Assumption 1", confidence: "high" as const, confirmed: true },
-      { statement: "Assumption 2", confidence: "low" as const, confirmed: false, impactIfWrong: "May delay project" },
+      {
+        statement: "Assumption 2",
+        confidence: "low" as const,
+        confirmed: false,
+        impactIfWrong: "May delay project",
+      },
       { statement: "Assumption 3", confidence: "medium" as const, confirmed: false },
     ],
     techDecisions: [
-      { area: "language", decision: "TypeScript", alternatives: ["JavaScript"], rationale: "Type safety" },
-      { area: "database", decision: "PostgreSQL", alternatives: ["MySQL"], rationale: "ACID compliance" },
+      {
+        area: "language",
+        decision: "TypeScript",
+        alternatives: ["JavaScript"],
+        rationale: "Type safety",
+      },
+      {
+        area: "database",
+        decision: "PostgreSQL",
+        alternatives: ["MySQL"],
+        rationale: "ACID compliance",
+      },
       { area: "infrastructure", decision: "AWS", alternatives: [], rationale: "Scalability" },
     ],
     openQuestions: [
-      { question: "What is the deadline?", context: "Planning", importance: "high" as const, asked: false, defaultAnswer: "Q4 2024" },
-      { question: "Who is the stakeholder?", context: "Team", importance: "medium" as const, asked: true },
+      {
+        question: "What is the deadline?",
+        context: "Planning",
+        importance: "high" as const,
+        asked: false,
+        defaultAnswer: "Q4 2024",
+      },
+      {
+        question: "Who is the stakeholder?",
+        context: "Team",
+        importance: "medium" as const,
+        asked: true,
+      },
     ],
     ...overrides,
   });
@@ -95,7 +121,9 @@ describe("SpecificationGenerator", () => {
           content: JSON.stringify({
             pattern: "Layered Architecture",
             rationale: "Good for APIs",
-            components: [{ name: "API Layer", responsibility: "Handle requests", technology: "Express" }],
+            components: [
+              { name: "API Layer", responsibility: "Handle requests", technology: "Express" },
+            ],
             dataFlow: "Request -> API -> Service -> DB",
             diagramMermaid: "graph TD; A-->B;",
           }),
@@ -203,7 +231,9 @@ describe("SpecificationGenerator", () => {
 
       const incompleteSession = createValidSession({ status: "in_progress" });
 
-      await expect(generator.generate(incompleteSession)).rejects.toThrow("not ready for specification");
+      await expect(generator.generate(incompleteSession)).rejects.toThrow(
+        "not ready for specification",
+      );
     });
 
     it("should allow refining session status", async () => {
@@ -300,7 +330,13 @@ describe("SpecificationGenerator", () => {
       const enterpriseSession = createValidSession({
         requirements: [
           ...manyReqs,
-          { id: "int-1", title: "Integration", description: "API integration", category: "integration" as const, priority: "must_have" as const },
+          {
+            id: "int-1",
+            title: "Integration",
+            description: "API integration",
+            category: "integration" as const,
+            priority: "must_have" as const,
+          },
         ],
       });
 
@@ -329,7 +365,13 @@ describe("SpecificationGenerator", () => {
       const session = createValidSession({
         requirements: [
           ...createValidSession().requirements,
-          { id: "int-1", title: "Stripe Integration", description: "Payment processing", category: "integration" as const, priority: "must_have" as const },
+          {
+            id: "int-1",
+            title: "Stripe Integration",
+            description: "Payment processing",
+            category: "integration" as const,
+            priority: "must_have" as const,
+          },
         ],
       });
 
@@ -346,7 +388,13 @@ describe("SpecificationGenerator", () => {
       const session = createValidSession({
         requirements: [
           ...createValidSession().requirements,
-          { id: "oos-1", title: "Mobile App", description: "Not in scope", category: "functional" as const, priority: "wont_have" as const },
+          {
+            id: "oos-1",
+            title: "Mobile App",
+            description: "Not in scope",
+            category: "functional" as const,
+            priority: "wont_have" as const,
+          },
         ],
       });
 
@@ -483,36 +531,85 @@ describe("SpecificationGenerator", () => {
       },
       requirements: {
         functional: [
-          { id: "f1", title: "Feature 1", description: "Desc with |pipe|", category: "functional" as const, priority: "must_have" as const, acceptanceCriteria: ["AC1"] },
-          { id: "f2", title: "Feature 2", description: "Feature 2 desc", category: "functional" as const, priority: "should_have" as const },
+          {
+            id: "f1",
+            title: "Feature 1",
+            description: "Desc with |pipe|",
+            category: "functional" as const,
+            priority: "must_have" as const,
+            acceptanceCriteria: ["AC1"],
+          },
+          {
+            id: "f2",
+            title: "Feature 2",
+            description: "Feature 2 desc",
+            category: "functional" as const,
+            priority: "should_have" as const,
+          },
         ],
         nonFunctional: [
-          { id: "nf1", title: "Performance", description: "Fast", category: "non_functional" as const, priority: "should_have" as const },
+          {
+            id: "nf1",
+            title: "Performance",
+            description: "Fast",
+            category: "non_functional" as const,
+            priority: "should_have" as const,
+          },
         ],
         constraints: [
-          { id: "c1", title: "Constraint", description: "Must comply", category: "constraint" as const, priority: "must_have" as const },
+          {
+            id: "c1",
+            title: "Constraint",
+            description: "Must comply",
+            category: "constraint" as const,
+            priority: "must_have" as const,
+          },
         ],
       },
       technical: {
         stack: [
-          { area: "language", decision: "TypeScript", alternatives: ["JS", "Python"], rationale: "Type safety" },
+          {
+            area: "language",
+            decision: "TypeScript",
+            alternatives: ["JS", "Python"],
+            rationale: "Type safety",
+          },
         ],
         architecture: "Layered architecture",
         integrations: ["Stripe", "Auth0"],
         deployment: "Docker on AWS",
       },
       assumptions: {
-        confirmed: [{ statement: "Confirmed assumption", confidence: "high" as const, confirmed: true }],
+        confirmed: [
+          { statement: "Confirmed assumption", confidence: "high" as const, confirmed: true },
+        ],
         unconfirmed: [
-          { statement: "Unconfirmed assumption", confidence: "low" as const, confirmed: false, impactIfWrong: "Major delay" },
+          {
+            statement: "Unconfirmed assumption",
+            confidence: "low" as const,
+            confirmed: false,
+            impactIfWrong: "Major delay",
+          },
         ],
         risks: [
-          { id: "r1", description: "Risk 1", probability: "medium" as const, impact: "high" as const, mitigation: "Mitigate it" },
+          {
+            id: "r1",
+            description: "Risk 1",
+            probability: "medium" as const,
+            impact: "high" as const,
+            mitigation: "Mitigate it",
+          },
         ],
       },
       outOfScope: ["Mobile app", "Desktop app"],
       openQuestions: [
-        { question: "What deadline?", context: "Planning", importance: "high" as const, asked: false, defaultAnswer: "Q4" },
+        {
+          question: "What deadline?",
+          context: "Planning",
+          importance: "high" as const,
+          asked: false,
+          defaultAnswer: "Q4",
+        },
       ],
     });
 
@@ -671,7 +768,13 @@ describe("SpecificationGenerator", () => {
       const spec = {
         version: "1.0.0",
         generatedAt: new Date(),
-        overview: { name: "Test", description: "Desc", goals: [], targetUsers: [], successCriteria: [] },
+        overview: {
+          name: "Test",
+          description: "Desc",
+          goals: [],
+          targetUsers: [],
+          successCriteria: [],
+        },
         requirements: { functional: [], nonFunctional: [], constraints: [] },
         technical: { stack: [], architecture: "", integrations: [], deployment: "" },
         assumptions: { confirmed: [], unconfirmed: [], risks: [] },
@@ -745,7 +848,9 @@ describe("SpecificationGenerator", () => {
         requirements: { functional: [], nonFunctional: "not-array" },
       };
 
-      expect(() => validateSpecification(invalid as any)).toThrow("nonFunctional requirements array");
+      expect(() => validateSpecification(invalid as any)).toThrow(
+        "nonFunctional requirements array",
+      );
     });
 
     it("should reject null specification", async () => {

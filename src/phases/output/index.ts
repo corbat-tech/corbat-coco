@@ -31,11 +31,7 @@ export type {
 export { DEFAULT_OUTPUT_CONFIG } from "./types.js";
 
 // CI/CD Generator
-export {
-  CICDGenerator,
-  createCICDGenerator,
-  createDefaultCICDConfig,
-} from "./cicd.js";
+export { CICDGenerator, createCICDGenerator, createDefaultCICDConfig } from "./cicd.js";
 
 // Docker Generator
 export { DockerGenerator, createDockerGenerator } from "./docker.js";

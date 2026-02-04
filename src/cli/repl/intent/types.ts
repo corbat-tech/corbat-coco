@@ -8,16 +8,16 @@
  * Supported intent types
  */
 export type IntentType =
-  | 'plan'      // Architecture and planning
-  | 'build'     // Build/implementation
-  | 'task'      // Single task execution
-  | 'init'      // Project initialization
-  | 'output'    // Generate CI/CD and docs
-  | 'status'    // Check project status
-  | 'trust'     // Trust management
-  | 'help'      // Help request
-  | 'exit'      // Exit REPL
-  | 'chat';     // General chat (default)
+  | "plan" // Architecture and planning
+  | "build" // Build/implementation
+  | "task" // Single task execution
+  | "init" // Project initialization
+  | "output" // Generate CI/CD and docs
+  | "status" // Check project status
+  | "trust" // Trust management
+  | "help" // Help request
+  | "exit" // Exit REPL
+  | "chat"; // General chat (default)
 
 /**
  * Extracted entities from user input

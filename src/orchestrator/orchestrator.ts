@@ -18,7 +18,10 @@ import { createProvider } from "../providers/index.js";
 export function createOrchestrator(config: OrchestratorConfig): Orchestrator {
   // Internal state
   let state: ProjectState = createInitialState(config);
-  const listeners = new Map<keyof OrchestratorEvents, Set<OrchestratorEvents[keyof OrchestratorEvents]>>();
+  const listeners = new Map<
+    keyof OrchestratorEvents,
+    Set<OrchestratorEvents[keyof OrchestratorEvents]>
+  >();
 
   // Event emitter
   function emit<K extends keyof OrchestratorEvents>(
@@ -176,11 +179,7 @@ async function saveState(state: ProjectState): Promise<void> {
   const statePath = `${state.path}/.coco/state`;
 
   await fs.mkdir(statePath, { recursive: true });
-  await fs.writeFile(
-    `${statePath}/project.json`,
-    JSON.stringify(state, null, 2),
-    "utf-8"
-  );
+  await fs.writeFile(`${statePath}/project.json`, JSON.stringify(state, null, 2), "utf-8");
 }
 
 /**
@@ -206,7 +205,7 @@ function getPhaseExecutor(phase: Phase): PhaseExecutor | null {
  */
 async function createPhaseContext(
   config: OrchestratorConfig,
-  state: ProjectState
+  state: ProjectState,
 ): Promise<PhaseContext> {
   // Create LLM provider
   const provider = await createProvider(config.provider.type, {
@@ -236,16 +235,22 @@ async function createPhaseContext(
       const adaptedTools = tools.map((t) => ({
         name: t.name,
         description: t.description,
-        input_schema: t.parameters as { type: "object"; properties: Record<string, unknown>; required?: string[] },
+        input_schema: t.parameters as {
+          type: "object";
+          properties: Record<string, unknown>;
+          required?: string[];
+        },
       }));
       const response = await provider.chatWithTools(adaptedMessages, { tools: adaptedTools });
       return {
         content: response.content,
         usage: response.usage,
-        toolCalls: response.toolCalls?.map((tc: { name: string; input: Record<string, unknown> }) => ({
-          name: tc.name,
-          arguments: tc.input,
-        })),
+        toolCalls: response.toolCalls?.map(
+          (tc: { name: string; input: Record<string, unknown> }) => ({
+            name: tc.name,
+            arguments: tc.input,
+          }),
+        ),
       };
     },
   };
@@ -436,7 +441,7 @@ async function getCheckpointFiles(state: ProjectState, phase: string): Promise<s
 
     // Filter files matching the phase pattern and sort by timestamp (newest first)
     const phaseFiles = files
-      .filter(f => f.startsWith(`snapshot-pre-${phase}-`) && f.endsWith(".json"))
+      .filter((f) => f.startsWith(`snapshot-pre-${phase}-`) && f.endsWith(".json"))
       .sort((a, b) => {
         // Extract timestamp from filename: snapshot-pre-phase-TIMESTAMP.json
         const tsA = parseInt(a.split("-").pop()?.replace(".json", "") ?? "0", 10);
@@ -444,7 +449,7 @@ async function getCheckpointFiles(state: ProjectState, phase: string): Promise<s
         return tsB - tsA; // Newest first
       });
 
-    return phaseFiles.map(f => `${checkpointDir}/${f}`);
+    return phaseFiles.map((f) => `${checkpointDir}/${f}`);
   } catch {
     return [];
   }
@@ -461,7 +466,7 @@ async function cleanupOldCheckpoints(state: ProjectState, phase: string): Promis
     // Delete files beyond the max versions
     if (files.length > MAX_CHECKPOINT_VERSIONS) {
       const filesToDelete = files.slice(MAX_CHECKPOINT_VERSIONS);
-      await Promise.all(filesToDelete.map(f => fs.unlink(f).catch(() => {})));
+      await Promise.all(filesToDelete.map((f) => fs.unlink(f).catch(() => {})));
     }
   } catch {
     // Ignore cleanup errors
@@ -480,23 +485,25 @@ async function saveSnapshot(state: ProjectState, snapshotId: string): Promise<vo
     await fs.mkdir(snapshotDir, { recursive: true });
 
     // Handle both Date objects and ISO strings
-    const createdAt = state.createdAt instanceof Date
-      ? state.createdAt.toISOString()
-      : String(state.createdAt);
-    const updatedAt = state.updatedAt instanceof Date
-      ? state.updatedAt.toISOString()
-      : String(state.updatedAt);
+    const createdAt =
+      state.createdAt instanceof Date ? state.createdAt.toISOString() : String(state.createdAt);
+    const updatedAt =
+      state.updatedAt instanceof Date ? state.updatedAt.toISOString() : String(state.updatedAt);
 
     await fs.writeFile(
       snapshotPath,
-      JSON.stringify({
-        ...state,
-        createdAt,
-        updatedAt,
-        snapshotVersion: snapshotId,
-        snapshotTimestamp: new Date().toISOString(),
-      }, null, 2),
-      "utf-8"
+      JSON.stringify(
+        {
+          ...state,
+          createdAt,
+          updatedAt,
+          snapshotVersion: snapshotId,
+          snapshotTimestamp: new Date().toISOString(),
+        },
+        null,
+        2,
+      ),
+      "utf-8",
     );
 
     // Extract phase from snapshotId (format: pre-PHASE-TIMESTAMP)
@@ -515,7 +522,7 @@ async function saveSnapshot(state: ProjectState, snapshotId: string): Promise<vo
  */
 export async function listCheckpointVersions(
   projectPath: string,
-  phase: string
+  phase: string,
 ): Promise<Array<{ id: string; timestamp: Date; path: string }>> {
   try {
     const fs = await import("node:fs/promises");
@@ -549,7 +556,7 @@ export async function listCheckpointVersions(
  */
 export async function loadCheckpointVersion(
   projectPath: string,
-  snapshotId: string
+  snapshotId: string,
 ): Promise<ProjectState | null> {
   try {
     const fs = await import("node:fs/promises");
@@ -580,7 +587,7 @@ function restoreFromSnapshot(target: ProjectState, snapshot: ProjectState): void
 async function executePhase(
   phase: Phase,
   state: ProjectState,
-  config: OrchestratorConfig
+  config: OrchestratorConfig,
 ): Promise<PhaseResult> {
   const executor = getPhaseExecutor(phase);
 
@@ -653,9 +660,7 @@ function calculateProgress(state: ProjectState): Progress {
   const overallProgress = currentIndex >= 0 ? currentIndex / phaseOrder.length : 0;
 
   // Ensure startedAt is a Date object (may be string after JSON parsing)
-  const startedAt = state.createdAt instanceof Date
-    ? state.createdAt
-    : new Date(state.createdAt);
+  const startedAt = state.createdAt instanceof Date ? state.createdAt : new Date(state.createdAt);
 
   return {
     phase: state.currentPhase,
@@ -667,9 +672,10 @@ function calculateProgress(state: ProjectState): Progress {
           id: state.currentTask.id,
           title: state.currentTask.title,
           iteration: state.currentTask.iteration,
-          currentScore: state.currentTask.scores.length > 0
-            ? state.currentTask.scores[state.currentTask.scores.length - 1]?.overall ?? 0
-            : 0,
+          currentScore:
+            state.currentTask.scores.length > 0
+              ? (state.currentTask.scores[state.currentTask.scores.length - 1]?.overall ?? 0)
+              : 0,
         }
       : undefined,
   };

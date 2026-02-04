@@ -67,7 +67,9 @@ function getToolIcon(toolName: string, input?: Record<string, unknown>): string 
   // Special handling for write_file to distinguish create vs modify
   if (toolName === "write_file" && input) {
     const wouldCreate = input.wouldCreate === true;
-    return wouldCreate ? TOOL_ICONS.write_file_create ?? "📝+" : TOOL_ICONS.write_file_modify ?? "✏️";
+    return wouldCreate
+      ? (TOOL_ICONS.write_file_create ?? "📝+")
+      : (TOOL_ICONS.write_file_modify ?? "✏️");
   }
   return TOOL_ICONS[toolName] ?? "🔧";
 }
@@ -103,7 +105,7 @@ export function renderStreamChunk(chunk: StreamChunk): void {
 export function renderToolStart(
   toolName: string,
   input: Record<string, unknown>,
-  metadata?: { isCreate?: boolean }
+  metadata?: { isCreate?: boolean },
 ): void {
   const icon = getToolIcon(toolName, { ...input, wouldCreate: metadata?.isCreate });
   const summary = formatToolSummary(toolName, input);
@@ -125,9 +127,7 @@ export function renderToolStart(
  * Render tool execution result
  */
 export function renderToolEnd(result: ExecutedToolCall): void {
-  const status = result.result.success
-    ? chalk.green("✓")
-    : chalk.red("✗");
+  const status = result.result.success ? chalk.green("✓") : chalk.red("✗");
 
   const duration = chalk.dim(`${result.duration.toFixed(0)}ms`);
 
@@ -144,10 +144,7 @@ export function renderToolEnd(result: ExecutedToolCall): void {
 /**
  * Format a smart summary based on tool type
  */
-function formatToolSummary(
-  toolName: string,
-  input: Record<string, unknown>
-): string {
+function formatToolSummary(toolName: string, input: Record<string, unknown>): string {
   switch (toolName) {
     case "read_file":
       return String(input.path || "");
@@ -199,9 +196,7 @@ function formatResultPreview(result: ExecutedToolCall): string {
 
       case "list_directory":
         if (Array.isArray(data.entries)) {
-          const dirs = data.entries.filter(
-            (e: { type: string }) => e.type === "directory"
-          ).length;
+          const dirs = data.entries.filter((e: { type: string }) => e.type === "directory").length;
           const files = data.entries.length - dirs;
           return chalk.dim(`(${files} files, ${dirs} dirs)`);
         }
@@ -264,7 +259,7 @@ function formatToolInput(input: Record<string, unknown>): string {
 export function renderUsageStats(
   inputTokens: number,
   outputTokens: number,
-  toolCallCount: number
+  toolCallCount: number,
 ): void {
   const totalTokens = inputTokens + outputTokens;
   const toolsStr = toolCallCount > 0 ? ` · ${toolCallCount} tools` : "";

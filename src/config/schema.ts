@@ -93,17 +93,19 @@ export type IntegrationsConfig = z.infer<typeof IntegrationsConfigSchema>;
  */
 export const MCPServerConfigEntrySchema = z.object({
   name: z.string(),
-  transport: z.enum(['stdio', 'http']),
+  transport: z.enum(["stdio", "http"]),
   command: z.string().optional(),
   args: z.array(z.string()).optional(),
   url: z.string().optional(),
   env: z.record(z.string()).optional(),
-  auth: z.object({
-    type: z.enum(['oauth', 'bearer', 'apikey']),
-    token: z.string().optional(),
-    tokenEnv: z.string().optional(),
-    headerName: z.string().optional(),
-  }).optional(),
+  auth: z
+    .object({
+      type: z.enum(["oauth", "bearer", "apikey"]),
+      token: z.string().optional(),
+      tokenEnv: z.string().optional(),
+      headerName: z.string().optional(),
+    })
+    .optional(),
   enabled: z.boolean().default(true),
   description: z.string().optional(),
 });
@@ -156,7 +158,7 @@ export function validateConfig(config: unknown): {
  */
 export function createDefaultConfigObject(
   projectName: string,
-  language: "typescript" | "python" | "go" | "rust" | "java" = "typescript"
+  language: "typescript" | "python" | "go" | "rust" | "java" = "typescript",
 ): CocoConfig {
   return {
     project: {

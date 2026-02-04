@@ -14,7 +14,7 @@ import type { ProviderType } from "../../../providers/index.js";
  */
 async function selectModelInteractively(
   models: Array<{ id: string; name?: string; recommended?: boolean; contextWindow?: number }>,
-  currentModelId: string
+  currentModelId: string,
 ): Promise<string | null> {
   return new Promise((resolve) => {
     let selectedIndex = models.findIndex((m) => m.id === currentModelId);
@@ -41,7 +41,9 @@ async function selectModelInteractively(
         }
 
         const star = model.recommended ? chalk.magenta(" ⭐") : "";
-        const ctx = model.contextWindow ? chalk.dim(` ${Math.round(model.contextWindow / 1000)}K`) : "";
+        const ctx = model.contextWindow
+          ? chalk.dim(` ${Math.round(model.contextWindow / 1000)}K`)
+          : "";
         line += star + ctx;
 
         console.log(line);
@@ -138,7 +140,7 @@ export const modelCommand: SlashCommand = {
 
       const selectedModel = await selectModelInteractively(
         providerDef.models,
-        session.config.provider.model
+        session.config.provider.model,
       );
 
       if (!selectedModel) {

@@ -7,13 +7,7 @@
  */
 
 import { execa, type Options as ExecaOptions } from "execa";
-import type {
-  HookDefinition,
-  HookEvent,
-  HookContext,
-  HookResult,
-  HookAction,
-} from "./types.js";
+import type { HookDefinition, HookEvent, HookContext, HookResult, HookAction } from "./types.js";
 
 /**
  * Options for configuring the HookExecutor
@@ -101,9 +95,7 @@ export class HookExecutor {
    */
   constructor(options?: HookExecutorOptions) {
     this.defaultTimeout = options?.defaultTimeout ?? DEFAULT_TIMEOUT_MS;
-    this.shell =
-      options?.shell ??
-      (process.platform === "win32" ? "cmd.exe" : "/bin/bash");
+    this.shell = options?.shell ?? (process.platform === "win32" ? "cmd.exe" : "/bin/bash");
     this.cwd = options?.cwd ?? process.cwd();
   }
 
@@ -126,20 +118,16 @@ export class HookExecutor {
    */
   async executeHooks(
     registry: HookRegistryInterface,
-    context: HookContext
+    context: HookContext,
   ): Promise<HookExecutionResult> {
     const startTime = performance.now();
     const hooks = registry.getHooksForEvent(context.event);
 
     // Filter hooks by matcher if applicable
-    const matchingHooks = hooks.filter((hook) =>
-      this.matchesContext(hook, context)
-    );
+    const matchingHooks = hooks.filter((hook) => this.matchesContext(hook, context));
 
     // Filter out disabled hooks
-    const enabledHooks = matchingHooks.filter(
-      (hook) => hook.enabled !== false
-    );
+    const enabledHooks = matchingHooks.filter((hook) => hook.enabled !== false);
 
     if (enabledHooks.length === 0) {
       return {
@@ -198,11 +186,7 @@ export class HookExecutor {
 
       // For command hooks, non-zero exit code might indicate denial
       // (convention: exit code 1 = deny, exit code 2 = error)
-      if (
-        hook.type === "command" &&
-        result.exitCode === 1 &&
-        context.event === "PreToolUse"
-      ) {
+      if (hook.type === "command" && result.exitCode === 1 && context.event === "PreToolUse") {
         shouldContinue = false;
       }
     }
@@ -230,7 +214,7 @@ export class HookExecutor {
    */
   private async executeCommandHook(
     hook: HookDefinition,
-    context: HookContext
+    context: HookContext,
   ): Promise<HookResult> {
     const startTime = performance.now();
 
@@ -259,13 +243,9 @@ export class HookExecutor {
       const result = await execa(hook.command, options);
 
       const stdout =
-        typeof result.stdout === "string"
-          ? result.stdout
-          : String(result.stdout ?? "");
+        typeof result.stdout === "string" ? result.stdout : String(result.stdout ?? "");
       const stderr =
-        typeof result.stderr === "string"
-          ? result.stderr
-          : String(result.stderr ?? "");
+        typeof result.stderr === "string" ? result.stderr : String(result.stderr ?? "");
 
       const exitCode = result.exitCode ?? 0;
       const success = exitCode === 0;
@@ -319,10 +299,7 @@ export class HookExecutor {
    * 3. Parse the response for action (allow/deny/modify)
    * 4. Extract any modified input if action is "modify"
    */
-  private async executePromptHook(
-    hook: HookDefinition,
-    context: HookContext
-  ): Promise<HookResult> {
+  private async executePromptHook(hook: HookDefinition, context: HookContext): Promise<HookResult> {
     const startTime = performance.now();
 
     if (!hook.prompt) {
@@ -399,8 +376,7 @@ export class HookExecutor {
       for (const [key, value] of Object.entries(context.metadata)) {
         const envKey = `COCO_META_${key.toUpperCase().replace(/[^A-Z0-9_]/g, "_")}`;
         try {
-          env[envKey] =
-            typeof value === "string" ? value : JSON.stringify(value);
+          env[envKey] = typeof value === "string" ? value : JSON.stringify(value);
         } catch {
           env[envKey] = String(value);
         }
@@ -485,10 +461,7 @@ export class HookExecutor {
 
     // Replace template variables
     formatted = formatted.replace(/\{\{event\}\}/g, context.event);
-    formatted = formatted.replace(
-      /\{\{toolName\}\}/g,
-      context.toolName ?? "N/A"
-    );
+    formatted = formatted.replace(/\{\{toolName\}\}/g, context.toolName ?? "N/A");
     formatted = formatted.replace(/\{\{sessionId\}\}/g, context.sessionId);
     formatted = formatted.replace(/\{\{projectPath\}\}/g, context.projectPath);
 
@@ -496,13 +469,10 @@ export class HookExecutor {
       try {
         formatted = formatted.replace(
           /\{\{toolInput\}\}/g,
-          JSON.stringify(context.toolInput, null, 2)
+          JSON.stringify(context.toolInput, null, 2),
         );
       } catch {
-        formatted = formatted.replace(
-          /\{\{toolInput\}\}/g,
-          String(context.toolInput)
-        );
+        formatted = formatted.replace(/\{\{toolInput\}\}/g, String(context.toolInput));
       }
     } else {
       formatted = formatted.replace(/\{\{toolInput\}\}/g, "N/A");
@@ -512,13 +482,10 @@ export class HookExecutor {
       try {
         formatted = formatted.replace(
           /\{\{toolResult\}\}/g,
-          JSON.stringify(context.toolResult, null, 2)
+          JSON.stringify(context.toolResult, null, 2),
         );
       } catch {
-        formatted = formatted.replace(
-          /\{\{toolResult\}\}/g,
-          String(context.toolResult)
-        );
+        formatted = formatted.replace(/\{\{toolResult\}\}/g, String(context.toolResult));
       }
     } else {
       formatted = formatted.replace(/\{\{toolResult\}\}/g, "N/A");
@@ -541,8 +508,6 @@ export class HookExecutor {
  * const executor = createHookExecutor({ defaultTimeout: 5000 });
  * ```
  */
-export function createHookExecutor(
-  options?: HookExecutorOptions
-): HookExecutor {
+export function createHookExecutor(options?: HookExecutorOptions): HookExecutor {
   return new HookExecutor(options);
 }

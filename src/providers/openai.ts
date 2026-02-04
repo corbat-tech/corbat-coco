@@ -36,7 +36,7 @@ const CONTEXT_WINDOWS: Record<string, number> = {
   "gpt-4-turbo": 128000,
   "gpt-4": 8192,
   "gpt-3.5-turbo": 16385,
-  "o1": 200000,
+  o1: 200000,
   "o1-mini": 128000,
   "o3-mini": 200000,
   // Kimi/Moonshot models
@@ -66,11 +66,7 @@ const MODELS_WITHOUT_TEMPERATURE: string[] = [
  * Kimi K2.5 has interleaved reasoning that requires reasoning_content to be passed back
  * Disabling thinking mode avoids this complexity with tool calling
  */
-const MODELS_WITH_THINKING_MODE: string[] = [
-  "kimi-k2.5",
-  "kimi-k2-0324",
-  "kimi-latest",
-];
+const MODELS_WITH_THINKING_MODE: string[] = ["kimi-k2.5", "kimi-k2-0324", "kimi-latest"];
 
 /**
  * OpenAI provider implementation
@@ -121,9 +117,7 @@ export class OpenAIProvider implements LLMProvider {
    * Check if a model supports temperature parameter
    */
   private supportsTemperature(model: string): boolean {
-    return !MODELS_WITHOUT_TEMPERATURE.some(
-      (m) => model.toLowerCase().includes(m.toLowerCase())
-    );
+    return !MODELS_WITHOUT_TEMPERATURE.some((m) => model.toLowerCase().includes(m.toLowerCase()));
   }
 
   /**
@@ -132,9 +126,7 @@ export class OpenAIProvider implements LLMProvider {
    * reasoning_content in multi-turn conversations with tools
    */
   private needsThinkingDisabled(model: string): boolean {
-    return MODELS_WITH_THINKING_MODE.some(
-      (m) => model.toLowerCase().includes(m.toLowerCase())
-    );
+    return MODELS_WITH_THINKING_MODE.some((m) => model.toLowerCase().includes(m.toLowerCase()));
   }
 
   /**
@@ -162,38 +154,37 @@ export class OpenAIProvider implements LLMProvider {
   async chat(messages: Message[], options?: ChatOptions): Promise<ChatResponse> {
     this.ensureInitialized();
 
-    return withRetry(
-      async () => {
-        try {
-          const model = options?.model ?? this.config.model ?? DEFAULT_MODEL;
-          const supportsTemp = this.supportsTemperature(model);
+    return withRetry(async () => {
+      try {
+        const model = options?.model ?? this.config.model ?? DEFAULT_MODEL;
+        const supportsTemp = this.supportsTemperature(model);
 
-          const response = await this.client!.chat.completions.create({
-            model,
-            max_tokens: options?.maxTokens ?? this.config.maxTokens ?? 8192,
-            messages: this.convertMessages(messages, options?.system),
-            stop: options?.stopSequences,
-            ...(supportsTemp && { temperature: options?.temperature ?? this.config.temperature ?? 0 }),
-          });
+        const response = await this.client!.chat.completions.create({
+          model,
+          max_tokens: options?.maxTokens ?? this.config.maxTokens ?? 8192,
+          messages: this.convertMessages(messages, options?.system),
+          stop: options?.stopSequences,
+          ...(supportsTemp && {
+            temperature: options?.temperature ?? this.config.temperature ?? 0,
+          }),
+        });
 
-          const choice = response.choices[0];
+        const choice = response.choices[0];
 
-          return {
-            id: response.id,
-            content: choice?.message?.content ?? "",
-            stopReason: this.mapFinishReason(choice?.finish_reason),
-            usage: {
-              inputTokens: response.usage?.prompt_tokens ?? 0,
-              outputTokens: response.usage?.completion_tokens ?? 0,
-            },
-            model: response.model,
-          };
-        } catch (error) {
-          throw this.handleError(error);
-        }
-      },
-      this.retryConfig
-    );
+        return {
+          id: response.id,
+          content: choice?.message?.content ?? "",
+          stopReason: this.mapFinishReason(choice?.finish_reason),
+          usage: {
+            inputTokens: response.usage?.prompt_tokens ?? 0,
+            outputTokens: response.usage?.completion_tokens ?? 0,
+          },
+          model: response.model,
+        };
+      } catch (error) {
+        throw this.handleError(error);
+      }
+    }, this.retryConfig);
   }
 
   /**
@@ -201,68 +192,62 @@ export class OpenAIProvider implements LLMProvider {
    */
   async chatWithTools(
     messages: Message[],
-    options: ChatWithToolsOptions
+    options: ChatWithToolsOptions,
   ): Promise<ChatWithToolsResponse> {
     this.ensureInitialized();
 
-    return withRetry(
-      async () => {
-        try {
-          const model = options?.model ?? this.config.model ?? DEFAULT_MODEL;
-          const supportsTemp = this.supportsTemperature(model);
-          const extraBody = this.getExtraBody(model);
+    return withRetry(async () => {
+      try {
+        const model = options?.model ?? this.config.model ?? DEFAULT_MODEL;
+        const supportsTemp = this.supportsTemperature(model);
+        const extraBody = this.getExtraBody(model);
 
-          // Build request params
-          const requestParams: Record<string, unknown> = {
-            model,
-            max_tokens: options?.maxTokens ?? this.config.maxTokens ?? 8192,
-            messages: this.convertMessages(messages, options?.system),
-            tools: this.convertTools(options.tools),
-            tool_choice: this.convertToolChoice(options.toolChoice),
-          };
+        // Build request params
+        const requestParams: Record<string, unknown> = {
+          model,
+          max_tokens: options?.maxTokens ?? this.config.maxTokens ?? 8192,
+          messages: this.convertMessages(messages, options?.system),
+          tools: this.convertTools(options.tools),
+          tool_choice: this.convertToolChoice(options.toolChoice),
+        };
 
-          if (supportsTemp) {
-            requestParams.temperature = options?.temperature ?? this.config.temperature ?? 0;
-          }
-
-          // For Kimi models, add chat_template_kwargs directly to disable thinking
-          if (extraBody) {
-            Object.assign(requestParams, extraBody);
-          }
-
-          const response = await this.client!.chat.completions.create(
-            requestParams as unknown as OpenAI.ChatCompletionCreateParamsNonStreaming
-          );
-
-          const choice = response.choices[0];
-          const toolCalls = this.extractToolCalls(choice?.message?.tool_calls);
-
-          return {
-            id: response.id,
-            content: choice?.message?.content ?? "",
-            stopReason: this.mapFinishReason(choice?.finish_reason),
-            usage: {
-              inputTokens: response.usage?.prompt_tokens ?? 0,
-              outputTokens: response.usage?.completion_tokens ?? 0,
-            },
-            model: response.model,
-            toolCalls,
-          };
-        } catch (error) {
-          throw this.handleError(error);
+        if (supportsTemp) {
+          requestParams.temperature = options?.temperature ?? this.config.temperature ?? 0;
         }
-      },
-      this.retryConfig
-    );
+
+        // For Kimi models, add chat_template_kwargs directly to disable thinking
+        if (extraBody) {
+          Object.assign(requestParams, extraBody);
+        }
+
+        const response = await this.client!.chat.completions.create(
+          requestParams as unknown as OpenAI.ChatCompletionCreateParamsNonStreaming,
+        );
+
+        const choice = response.choices[0];
+        const toolCalls = this.extractToolCalls(choice?.message?.tool_calls);
+
+        return {
+          id: response.id,
+          content: choice?.message?.content ?? "",
+          stopReason: this.mapFinishReason(choice?.finish_reason),
+          usage: {
+            inputTokens: response.usage?.prompt_tokens ?? 0,
+            outputTokens: response.usage?.completion_tokens ?? 0,
+          },
+          model: response.model,
+          toolCalls,
+        };
+      } catch (error) {
+        throw this.handleError(error);
+      }
+    }, this.retryConfig);
   }
 
   /**
    * Stream a chat response
    */
-  async *stream(
-    messages: Message[],
-    options?: ChatOptions
-  ): AsyncIterable<StreamChunk> {
+  async *stream(messages: Message[], options?: ChatOptions): AsyncIterable<StreamChunk> {
     this.ensureInitialized();
 
     try {
@@ -295,7 +280,7 @@ export class OpenAIProvider implements LLMProvider {
    */
   async *streamWithTools(
     messages: Message[],
-    options: ChatWithToolsOptions
+    options: ChatWithToolsOptions,
   ): AsyncIterable<StreamChunk> {
     this.ensureInitialized();
 
@@ -324,14 +309,12 @@ export class OpenAIProvider implements LLMProvider {
       }
 
       const stream = await this.client!.chat.completions.create(
-        requestParams as unknown as OpenAI.ChatCompletionCreateParamsStreaming
+        requestParams as unknown as OpenAI.ChatCompletionCreateParamsStreaming,
       );
 
       // Track tool calls being built (OpenAI can stream multiple tool calls)
-      const toolCallBuilders: Map<
-        number,
-        { id: string; name: string; arguments: string }
-      > = new Map();
+      const toolCallBuilders: Map<number, { id: string; name: string; arguments: string }> =
+        new Map();
 
       for await (const chunk of stream) {
         const delta = chunk.choices[0]?.delta;
@@ -515,7 +498,7 @@ export class OpenAIProvider implements LLMProvider {
    */
   private convertMessages(
     messages: Message[],
-    systemPrompt?: string
+    systemPrompt?: string,
   ): OpenAI.ChatCompletionMessageParam[] {
     const result: OpenAI.ChatCompletionMessageParam[] = [];
 
@@ -618,7 +601,7 @@ export class OpenAIProvider implements LLMProvider {
    * Convert tool choice to OpenAI format
    */
   private convertToolChoice(
-    choice: ChatWithToolsOptions["toolChoice"]
+    choice: ChatWithToolsOptions["toolChoice"],
   ): OpenAI.ChatCompletionToolChoiceOption | undefined {
     if (!choice) return undefined;
     if (choice === "auto") return "auto";
@@ -632,14 +615,13 @@ export class OpenAIProvider implements LLMProvider {
   /**
    * Extract tool calls from response
    */
-  private extractToolCalls(
-    toolCalls?: OpenAI.ChatCompletionMessageToolCall[]
-  ): ToolCall[] {
+  private extractToolCalls(toolCalls?: OpenAI.ChatCompletionMessageToolCall[]): ToolCall[] {
     if (!toolCalls) return [];
 
     return toolCalls
-      .filter((tc): tc is OpenAI.ChatCompletionMessageToolCall & { type: "function" } =>
-        tc.type === "function"
+      .filter(
+        (tc): tc is OpenAI.ChatCompletionMessageToolCall & { type: "function" } =>
+          tc.type === "function",
       )
       .map((tc) => ({
         id: tc.id,
@@ -651,9 +633,7 @@ export class OpenAIProvider implements LLMProvider {
   /**
    * Map finish reason to our format
    */
-  private mapFinishReason(
-    reason?: string | null
-  ): ChatResponse["stopReason"] {
+  private mapFinishReason(reason?: string | null): ChatResponse["stopReason"] {
     switch (reason) {
       case "stop":
         return "end_turn";
@@ -680,13 +660,10 @@ export class OpenAIProvider implements LLMProvider {
       });
     }
 
-    throw new ProviderError(
-      error instanceof Error ? error.message : String(error),
-      {
-        provider: this.id,
-        cause: error instanceof Error ? error : undefined,
-      }
-    );
+    throw new ProviderError(error instanceof Error ? error.message : String(error), {
+      provider: this.id,
+      cause: error instanceof Error ? error : undefined,
+    });
   }
 }
 

@@ -496,7 +496,7 @@ describe("Provider Integration Tests", () => {
           maxRetries: 3,
           initialDelayMs: 10,
           maxDelayMs: 50,
-        })
+        }),
       ).rejects.toThrow("Bad request");
 
       expect(attempts).toBe(1); // No retries

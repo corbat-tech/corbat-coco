@@ -9,11 +9,7 @@
 import * as p from "@clack/prompts";
 import chalk from "chalk";
 import type { SlashCommand, ReplSession } from "../types.js";
-import type {
-  Checkpoint,
-  RewindOptions,
-  RewindResult,
-} from "../checkpoints/types.js";
+import type { Checkpoint, RewindOptions, RewindResult } from "../checkpoints/types.js";
 
 // =============================================================================
 // Time Formatting Utilities
@@ -110,7 +106,7 @@ function getCheckpointStore(session: ReplSession): CheckpointStore {
  */
 async function getCheckpoint(
   session: ReplSession,
-  checkpointId: string
+  checkpointId: string,
 ): Promise<Checkpoint | null> {
   const store = getCheckpointStore(session);
   return store.checkpoints.find((cp) => cp.id === checkpointId) ?? null;
@@ -121,7 +117,7 @@ async function getCheckpoint(
  */
 async function restoreFiles(
   checkpoint: Checkpoint,
-  excludeFiles?: string[]
+  excludeFiles?: string[],
 ): Promise<{ restored: string[]; failed: Array<{ path: string; error: string }> }> {
   const fs = await import("node:fs/promises");
   const restored: string[] = [];
@@ -149,7 +145,7 @@ async function restoreFiles(
  */
 function restoreConversation(
   session: ReplSession,
-  checkpoint: Checkpoint
+  checkpoint: Checkpoint,
 ): { success: boolean; messageCount: number } {
   if (!checkpoint.conversation) {
     return { success: false, messageCount: session.messages.length };
@@ -164,10 +160,7 @@ function restoreConversation(
 /**
  * Perform a rewind operation
  */
-async function performRewind(
-  session: ReplSession,
-  options: RewindOptions
-): Promise<RewindResult> {
+async function performRewind(session: ReplSession, options: RewindOptions): Promise<RewindResult> {
   const checkpoint = await getCheckpoint(session, options.checkpointId);
 
   if (!checkpoint) {
@@ -206,17 +199,14 @@ async function performRewind(
 /**
  * Display a single checkpoint entry
  */
-function displayCheckpointEntry(
-  index: number,
-  checkpoint: Checkpoint
-): void {
+function displayCheckpointEntry(index: number, checkpoint: Checkpoint): void {
   const timeAgo = formatRelativeTime(checkpoint.createdAt);
   const typeLabel = formatCheckpointType(checkpoint);
   const label = getCheckpointLabel(checkpoint);
 
   console.log();
   console.log(
-    `${chalk.yellow(`${index}.`)} ${chalk.dim(`[${timeAgo}]`)} ${typeLabel}: ${chalk.bold(label)}`
+    `${chalk.yellow(`${index}.`)} ${chalk.dim(`[${timeAgo}]`)} ${typeLabel}: ${chalk.bold(label)}`,
   );
 
   const parts: string[] = [];
@@ -238,7 +228,7 @@ function displayCheckpointEntry(
  * Display the list of available checkpoints
  */
 function displayCheckpointList(checkpoints: Checkpoint[]): void {
-  console.log(chalk.cyan.bold("\n" + String.fromCodePoint(0x1F4F8) + " Available Checkpoints\n"));
+  console.log(chalk.cyan.bold("\n" + String.fromCodePoint(0x1f4f8) + " Available Checkpoints\n"));
 
   if (checkpoints.length === 0) {
     console.log(chalk.yellow("  No checkpoints available."));
@@ -279,7 +269,7 @@ function displayRewindResult(result: RewindResult): void {
   // Show conversation status
   if (result.conversationRestored) {
     console.log(
-      `${chalk.green(String.fromCodePoint(0x2713))} Conversation restored (${result.messagesAfterRestore} messages)`
+      `${chalk.green(String.fromCodePoint(0x2713))} Conversation restored (${result.messagesAfterRestore} messages)`,
     );
   }
 
@@ -290,8 +280,8 @@ function displayRewindResult(result: RewindResult): void {
   } else {
     console.log(
       chalk.yellow(
-        `Partially restored. ${result.filesFailed.length} file(s) could not be restored.`
-      )
+        `Partially restored. ${result.filesFailed.length} file(s) could not be restored.`,
+      ),
     );
   }
 }
@@ -381,7 +371,7 @@ async function runInteractiveMode(session: ReplSession): Promise<boolean> {
   }
   if (restoreConversationFlag && selectedCheckpoint.conversation) {
     console.log(
-      `  ${chalk.dim("-")} Conversation (${selectedCheckpoint.conversation.messageCount} messages)`
+      `  ${chalk.dim("-")} Conversation (${selectedCheckpoint.conversation.messageCount} messages)`,
     );
   }
   console.log();
@@ -417,10 +407,7 @@ async function runInteractiveMode(session: ReplSession): Promise<boolean> {
 /**
  * Run direct checkpoint restoration by ID
  */
-async function runDirectMode(
-  session: ReplSession,
-  checkpointId: string
-): Promise<boolean> {
+async function runDirectMode(session: ReplSession, checkpointId: string): Promise<boolean> {
   const checkpoint = await getCheckpoint(session, checkpointId);
 
   if (!checkpoint) {
@@ -453,9 +440,7 @@ async function runDirectMode(
   }
 
   if (hasConversation) {
-    console.log(
-      `${chalk.dim("Conversation:")} ${checkpoint.conversation?.messageCount} messages`
-    );
+    console.log(`${chalk.dim("Conversation:")} ${checkpoint.conversation?.messageCount} messages`);
   }
 
   console.log();

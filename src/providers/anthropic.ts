@@ -82,34 +82,31 @@ export class AnthropicProvider implements LLMProvider {
   async chat(messages: Message[], options?: ChatOptions): Promise<ChatResponse> {
     this.ensureInitialized();
 
-    return withRetry(
-      async () => {
-        try {
-          const response = await this.client!.messages.create({
-            model: options?.model ?? this.config.model ?? DEFAULT_MODEL,
-            max_tokens: options?.maxTokens ?? this.config.maxTokens ?? 8192,
-            temperature: options?.temperature ?? this.config.temperature ?? 0,
-            system: options?.system,
-            messages: this.convertMessages(messages),
-            stop_sequences: options?.stopSequences,
-          });
+    return withRetry(async () => {
+      try {
+        const response = await this.client!.messages.create({
+          model: options?.model ?? this.config.model ?? DEFAULT_MODEL,
+          max_tokens: options?.maxTokens ?? this.config.maxTokens ?? 8192,
+          temperature: options?.temperature ?? this.config.temperature ?? 0,
+          system: options?.system,
+          messages: this.convertMessages(messages),
+          stop_sequences: options?.stopSequences,
+        });
 
-          return {
-            id: response.id,
-            content: this.extractTextContent(response.content),
-            stopReason: this.mapStopReason(response.stop_reason),
-            usage: {
-              inputTokens: response.usage.input_tokens,
-              outputTokens: response.usage.output_tokens,
-            },
-            model: response.model,
-          };
-        } catch (error) {
-          throw this.handleError(error);
-        }
-      },
-      this.retryConfig
-    );
+        return {
+          id: response.id,
+          content: this.extractTextContent(response.content),
+          stopReason: this.mapStopReason(response.stop_reason),
+          usage: {
+            inputTokens: response.usage.input_tokens,
+            outputTokens: response.usage.output_tokens,
+          },
+          model: response.model,
+        };
+      } catch (error) {
+        throw this.handleError(error);
+      }
+    }, this.retryConfig);
   }
 
   /**
@@ -117,53 +114,45 @@ export class AnthropicProvider implements LLMProvider {
    */
   async chatWithTools(
     messages: Message[],
-    options: ChatWithToolsOptions
+    options: ChatWithToolsOptions,
   ): Promise<ChatWithToolsResponse> {
     this.ensureInitialized();
 
-    return withRetry(
-      async () => {
-        try {
-          const response = await this.client!.messages.create({
-            model: options?.model ?? this.config.model ?? DEFAULT_MODEL,
-            max_tokens: options?.maxTokens ?? this.config.maxTokens ?? 8192,
-            temperature: options?.temperature ?? this.config.temperature ?? 0,
-            system: options?.system,
-            messages: this.convertMessages(messages),
-            tools: this.convertTools(options.tools),
-            tool_choice: options.toolChoice
-              ? this.convertToolChoice(options.toolChoice)
-              : undefined,
-          });
+    return withRetry(async () => {
+      try {
+        const response = await this.client!.messages.create({
+          model: options?.model ?? this.config.model ?? DEFAULT_MODEL,
+          max_tokens: options?.maxTokens ?? this.config.maxTokens ?? 8192,
+          temperature: options?.temperature ?? this.config.temperature ?? 0,
+          system: options?.system,
+          messages: this.convertMessages(messages),
+          tools: this.convertTools(options.tools),
+          tool_choice: options.toolChoice ? this.convertToolChoice(options.toolChoice) : undefined,
+        });
 
-          const toolCalls = this.extractToolCalls(response.content);
+        const toolCalls = this.extractToolCalls(response.content);
 
-          return {
-            id: response.id,
-            content: this.extractTextContent(response.content),
-            stopReason: this.mapStopReason(response.stop_reason),
-            usage: {
-              inputTokens: response.usage.input_tokens,
-              outputTokens: response.usage.output_tokens,
-            },
-            model: response.model,
-            toolCalls,
-          };
-        } catch (error) {
-          throw this.handleError(error);
-        }
-      },
-      this.retryConfig
-    );
+        return {
+          id: response.id,
+          content: this.extractTextContent(response.content),
+          stopReason: this.mapStopReason(response.stop_reason),
+          usage: {
+            inputTokens: response.usage.input_tokens,
+            outputTokens: response.usage.output_tokens,
+          },
+          model: response.model,
+          toolCalls,
+        };
+      } catch (error) {
+        throw this.handleError(error);
+      }
+    }, this.retryConfig);
   }
 
   /**
    * Stream a chat response
    */
-  async *stream(
-    messages: Message[],
-    options?: ChatOptions
-  ): AsyncIterable<StreamChunk> {
+  async *stream(messages: Message[], options?: ChatOptions): AsyncIterable<StreamChunk> {
     this.ensureInitialized();
 
     try {
@@ -195,7 +184,7 @@ export class AnthropicProvider implements LLMProvider {
    */
   async *streamWithTools(
     messages: Message[],
-    options: ChatWithToolsOptions
+    options: ChatWithToolsOptions,
   ): AsyncIterable<StreamChunk> {
     this.ensureInitialized();
 
@@ -207,9 +196,7 @@ export class AnthropicProvider implements LLMProvider {
         system: options?.system,
         messages: this.convertMessages(messages),
         tools: this.convertTools(options.tools),
-        tool_choice: options.toolChoice
-          ? this.convertToolChoice(options.toolChoice)
-          : undefined,
+        tool_choice: options.toolChoice ? this.convertToolChoice(options.toolChoice) : undefined,
       });
 
       // Track current tool call being built
@@ -256,9 +243,7 @@ export class AnthropicProvider implements LLMProvider {
           if (currentToolCall) {
             // Parse the accumulated JSON input
             try {
-              currentToolCall.input = currentToolInputJson
-                ? JSON.parse(currentToolInputJson)
-                : {};
+              currentToolCall.input = currentToolInputJson ? JSON.parse(currentToolInputJson) : {};
             } catch {
               currentToolCall.input = {};
             }
@@ -376,9 +361,7 @@ export class AnthropicProvider implements LLMProvider {
   /**
    * Convert message content to Anthropic format
    */
-  private convertContent(
-    content: MessageContent
-  ): string | Anthropic.ContentBlockParam[] {
+  private convertContent(content: MessageContent): string | Anthropic.ContentBlockParam[] {
     if (typeof content === "string") {
       return content;
     }
@@ -424,7 +407,7 @@ export class AnthropicProvider implements LLMProvider {
    * Convert tool choice to Anthropic format
    */
   private convertToolChoice(
-    choice: ChatWithToolsOptions["toolChoice"]
+    choice: ChatWithToolsOptions["toolChoice"],
   ): Anthropic.MessageCreateParams["tool_choice"] {
     if (choice === "auto") return { type: "auto" };
     if (choice === "any") return { type: "any" };
@@ -460,9 +443,7 @@ export class AnthropicProvider implements LLMProvider {
   /**
    * Map stop reason to our format
    */
-  private mapStopReason(
-    reason: string | null
-  ): ChatResponse["stopReason"] {
+  private mapStopReason(reason: string | null): ChatResponse["stopReason"] {
     switch (reason) {
       case "end_turn":
         return "end_turn";
@@ -491,13 +472,10 @@ export class AnthropicProvider implements LLMProvider {
       });
     }
 
-    throw new ProviderError(
-      error instanceof Error ? error.message : String(error),
-      {
-        provider: this.id,
-        cause: error instanceof Error ? error : undefined,
-      }
-    );
+    throw new ProviderError(error instanceof Error ? error.message : String(error), {
+      provider: this.id,
+      cause: error instanceof Error ? error : undefined,
+    });
   }
 }
 

@@ -4,10 +4,7 @@
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { tasksCommand } from "./tasks.js";
-import {
-  BackgroundTaskManager,
-  resetBackgroundTaskManager,
-} from "../background/index.js";
+import { BackgroundTaskManager, resetBackgroundTaskManager } from "../background/index.js";
 import type { ReplSession } from "../types.js";
 
 // Mock console.log to capture output
@@ -61,7 +58,7 @@ describe("tasksCommand", () => {
 
     // Find a call that contains "No background tasks"
     const hasNoTasksMessage = mockLog.mock.calls.some((call) =>
-      call.some((arg) => String(arg).includes("No background tasks"))
+      call.some((arg) => String(arg).includes("No background tasks")),
     );
     expect(hasNoTasksMessage).toBe(true);
   });
@@ -75,7 +72,7 @@ describe("tasksCommand", () => {
     await tasksCommand.execute(["cancel"], mockSession);
 
     const hasErrorMessage = mockLog.mock.calls.some((call) =>
-      call.some((arg) => String(arg).includes("Please provide a task ID"))
+      call.some((arg) => String(arg).includes("Please provide a task ID")),
     );
     expect(hasErrorMessage).toBe(true);
   });
@@ -84,7 +81,7 @@ describe("tasksCommand", () => {
     await tasksCommand.execute(["cancel", "nonexistent"], mockSession);
 
     const hasErrorMessage = mockLog.mock.calls.some((call) =>
-      call.some((arg) => String(arg).includes("Task not found"))
+      call.some((arg) => String(arg).includes("Task not found")),
     );
     expect(hasErrorMessage).toBe(true);
   });
@@ -93,7 +90,7 @@ describe("tasksCommand", () => {
     await tasksCommand.execute(["clear"], mockSession);
 
     const hasClearedMessage = mockLog.mock.calls.some((call) =>
-      call.some((arg) => String(arg).includes("Cleared"))
+      call.some((arg) => String(arg).includes("Cleared")),
     );
     expect(hasClearedMessage).toBe(true);
   });
@@ -102,7 +99,7 @@ describe("tasksCommand", () => {
     await tasksCommand.execute(["unknown"], mockSession);
 
     const hasErrorMessage = mockLog.mock.calls.some((call) =>
-      call.some((arg) => String(arg).includes("Unknown subcommand"))
+      call.some((arg) => String(arg).includes("Unknown subcommand")),
     );
     expect(hasErrorMessage).toBe(true);
   });

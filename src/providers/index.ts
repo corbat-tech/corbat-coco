@@ -89,7 +89,7 @@ export type ProviderType = "anthropic" | "openai" | "gemini" | "kimi";
  */
 export async function createProvider(
   type: ProviderType,
-  config: ProviderConfig = {}
+  config: ProviderConfig = {},
 ): Promise<LLMProvider> {
   let provider: LLMProvider;
 
@@ -134,9 +134,7 @@ export async function createProvider(
 /**
  * Get default provider (from environment or Anthropic)
  */
-export async function getDefaultProvider(
-  config: ProviderConfig = {}
-): Promise<LLMProvider> {
+export async function getDefaultProvider(config: ProviderConfig = {}): Promise<LLMProvider> {
   const { getDefaultProvider: getEnvProvider } = await import("../config/env.js");
   const providerType = getEnvProvider();
   return createProvider(providerType, config);

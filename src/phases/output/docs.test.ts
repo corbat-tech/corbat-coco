@@ -3,10 +3,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import {
-  DocsGenerator,
-  createDocsGenerator,
-} from "./docs.js";
+import { DocsGenerator, createDocsGenerator } from "./docs.js";
 import type { ProjectMetadata } from "./types.js";
 
 // Helper to create mock metadata

@@ -55,9 +55,7 @@ export function registerPlanCommand(program: Command): void {
           process.exit(1);
         }
       } catch (error) {
-        p.log.error(
-          error instanceof Error ? error.message : "An error occurred"
-        );
+        p.log.error(error instanceof Error ? error.message : "An error occurred");
         process.exit(1);
       }
     });
@@ -68,7 +66,7 @@ export function registerPlanCommand(program: Command): void {
  */
 async function createCliPhaseContext(
   projectPath: string,
-  _onUserInput?: (prompt: string, options?: string[]) => Promise<string>
+  _onUserInput?: (prompt: string, options?: string[]) => Promise<string>,
 ): Promise<PhaseContext> {
   // Create provider - will fail gracefully if no API key
   let llm: PhaseContext["llm"];
@@ -98,16 +96,22 @@ async function createCliPhaseContext(
         const adaptedTools = tools.map((t) => ({
           name: t.name,
           description: t.description,
-          input_schema: t.parameters as { type: "object"; properties: Record<string, unknown>; required?: string[] },
+          input_schema: t.parameters as {
+            type: "object";
+            properties: Record<string, unknown>;
+            required?: string[];
+          },
         }));
         const response = await provider.chatWithTools(adapted, { tools: adaptedTools });
         return {
           content: response.content,
           usage: response.usage,
-          toolCalls: response.toolCalls?.map((tc: { name: string; input: Record<string, unknown> }) => ({
-            name: tc.name,
-            arguments: tc.input,
-          })),
+          toolCalls: response.toolCalls?.map(
+            (tc: { name: string; input: Record<string, unknown> }) => ({
+              name: tc.name,
+              arguments: tc.input,
+            }),
+          ),
         };
       },
     };
@@ -327,17 +331,13 @@ export async function runPlan(options: PlanOptions = {}): Promise<PlanResult> {
   if (!options.auto) {
     // Show summary
     console.log("\n" + chalk.bold("Planning Summary:"));
-    console.log(
-      chalk.dim("  Artifacts generated: ") + orchestrateResult.artifacts.length
-    );
+    console.log(chalk.dim("  Artifacts generated: ") + orchestrateResult.artifacts.length);
 
     for (const artifact of orchestrateResult.artifacts) {
       console.log(chalk.dim(`    - ${artifact.type}: ${artifact.description}`));
     }
 
-    p.outro(
-      chalk.green("Planning complete! Run 'coco build' to start development.")
-    );
+    p.outro(chalk.green("Planning complete! Run 'coco build' to start development."));
   }
 
   return {
@@ -359,7 +359,7 @@ export async function loadExistingSpecification(cwd: string): Promise<Specificat
     return JSON.parse(content) as Specification;
   } catch {
     throw new Error(
-      'No existing specification found. Run "coco plan" without --skip-discovery first.'
+      'No existing specification found. Run "coco plan" without --skip-discovery first.',
     );
   }
 }

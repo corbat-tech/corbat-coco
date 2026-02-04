@@ -105,15 +105,13 @@ describe("commitCommand", () => {
 
       expect(execSync).toHaveBeenCalledWith(
         expect.stringContaining('git commit -m "fix: bug"'),
-        expect.any(Object)
+        expect.any(Object),
       );
     });
 
     it("should show files to be committed", async () => {
       const { execSync } = await import("node:child_process");
-      vi.mocked(execSync)
-        .mockReturnValueOnce("file1.ts\nfile2.ts")
-        .mockReturnValueOnce("");
+      vi.mocked(execSync).mockReturnValueOnce("file1.ts\nfile2.ts").mockReturnValueOnce("");
 
       await commitCommand.execute(["test message"], mockSession);
 
@@ -124,9 +122,7 @@ describe("commitCommand", () => {
 
     it("should show success message", async () => {
       const { execSync } = await import("node:child_process");
-      vi.mocked(execSync)
-        .mockReturnValueOnce("file.ts")
-        .mockReturnValueOnce("");
+      vi.mocked(execSync).mockReturnValueOnce("file.ts").mockReturnValueOnce("");
 
       await commitCommand.execute(["my message"], mockSession);
 
@@ -139,16 +135,14 @@ describe("commitCommand", () => {
   describe("execute with staged changes and no message (prompt)", () => {
     it("should prompt for message when none provided", async () => {
       const { execSync } = await import("node:child_process");
-      vi.mocked(execSync)
-        .mockReturnValueOnce("file.ts")
-        .mockReturnValueOnce("");
+      vi.mocked(execSync).mockReturnValueOnce("file.ts").mockReturnValueOnce("");
 
       await commitCommand.execute([], mockSession);
 
       // Should have called git commit with prompted message
       expect(execSync).toHaveBeenCalledWith(
         expect.stringContaining("test commit message"),
-        expect.any(Object)
+        expect.any(Object),
       );
     });
 
@@ -188,15 +182,13 @@ describe("commitCommand", () => {
 
     it("should escape quotes in commit message", async () => {
       const { execSync } = await import("node:child_process");
-      vi.mocked(execSync)
-        .mockReturnValueOnce("file.ts")
-        .mockReturnValueOnce("");
+      vi.mocked(execSync).mockReturnValueOnce("file.ts").mockReturnValueOnce("");
 
       await commitCommand.execute(['fix: handle "quotes"'], mockSession);
 
       expect(execSync).toHaveBeenCalledWith(
         expect.stringContaining('\\"quotes\\"'),
-        expect.any(Object)
+        expect.any(Object),
       );
     });
 

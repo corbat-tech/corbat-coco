@@ -22,8 +22,8 @@ describe("generateSchemaDocs", () => {
 
     expect(docs.title).toBe("User Config");
     expect(docs.fields).toHaveLength(2);
-    expect(docs.fields.find(f => f.name === "name")?.type).toBe("string");
-    expect(docs.fields.find(f => f.name === "age")?.type).toBe("number");
+    expect(docs.fields.find((f) => f.name === "name")?.type).toBe("string");
+    expect(docs.fields.find((f) => f.name === "age")?.type).toBe("number");
   });
 
   it("should handle optional fields", () => {
@@ -34,8 +34,8 @@ describe("generateSchemaDocs", () => {
 
     const docs = generateSchemaDocs(schema, "Test");
 
-    expect(docs.fields.find(f => f.name === "required")?.required).toBe(true);
-    expect(docs.fields.find(f => f.name === "optional")?.required).toBe(false);
+    expect(docs.fields.find((f) => f.name === "required")?.required).toBe(true);
+    expect(docs.fields.find((f) => f.name === "optional")?.required).toBe(false);
   });
 
   it("should handle default values", () => {
@@ -45,8 +45,8 @@ describe("generateSchemaDocs", () => {
 
     const docs = generateSchemaDocs(schema, "Test");
 
-    expect(docs.fields.find(f => f.name === "withDefault")?.default).toBe('"hello"');
-    expect(docs.fields.find(f => f.name === "withDefault")?.required).toBe(false);
+    expect(docs.fields.find((f) => f.name === "withDefault")?.default).toBe('"hello"');
+    expect(docs.fields.find((f) => f.name === "withDefault")?.required).toBe(false);
   });
 
   it("should handle enum fields", () => {
@@ -56,7 +56,7 @@ describe("generateSchemaDocs", () => {
 
     const docs = generateSchemaDocs(schema, "Test");
 
-    const statusField = docs.fields.find(f => f.name === "status");
+    const statusField = docs.fields.find((f) => f.name === "status");
     expect(statusField?.type).toBe("enum");
     expect(statusField?.enum).toEqual(["active", "inactive", "pending"]);
   });
@@ -70,7 +70,7 @@ describe("generateSchemaDocs", () => {
 
     const docs = generateSchemaDocs(schema, "Test");
 
-    const nestedField = docs.fields.find(f => f.name === "nested");
+    const nestedField = docs.fields.find((f) => f.name === "nested");
     expect(nestedField?.type).toBe("object");
     expect(nestedField?.nested).toHaveLength(1);
     expect(nestedField?.nested?.[0].name).toBe("inner");
@@ -83,7 +83,7 @@ describe("generateSchemaDocs", () => {
 
     const docs = generateSchemaDocs(schema, "Test");
 
-    expect(docs.fields.find(f => f.name === "items")?.type).toBe("string[]");
+    expect(docs.fields.find((f) => f.name === "items")?.type).toBe("string[]");
   });
 
   it("should respect maxDepth option", () => {
@@ -98,9 +98,9 @@ describe("generateSchemaDocs", () => {
     // With maxDepth: 1, we should see level1's nested (level2) but level2 should not have nested (level3)
     const docs = generateSchemaDocs(schema, "Test", { maxDepth: 1 });
 
-    const level1 = docs.fields.find(f => f.name === "level1");
+    const level1 = docs.fields.find((f) => f.name === "level1");
     expect(level1?.nested).toBeDefined();
-    const level2 = level1?.nested?.find(f => f.name === "level2");
+    const level2 = level1?.nested?.find((f) => f.name === "level2");
     expect(level2?.nested).toBeUndefined();
   });
 
@@ -111,7 +111,7 @@ describe("generateSchemaDocs", () => {
 
     const docs = generateSchemaDocs(schema, "Test", { showDefaults: false });
 
-    expect(docs.fields.find(f => f.name === "withDefault")?.default).toBeUndefined();
+    expect(docs.fields.find((f) => f.name === "withDefault")?.default).toBeUndefined();
   });
 
   it("should handle boolean fields", () => {
@@ -121,7 +121,7 @@ describe("generateSchemaDocs", () => {
 
     const docs = generateSchemaDocs(schema, "Test");
 
-    expect(docs.fields.find(f => f.name === "enabled")?.type).toBe("boolean");
+    expect(docs.fields.find((f) => f.name === "enabled")?.type).toBe("boolean");
   });
 
   it("should handle nullable fields", () => {
@@ -131,7 +131,7 @@ describe("generateSchemaDocs", () => {
 
     const docs = generateSchemaDocs(schema, "Test");
 
-    expect(docs.fields.find(f => f.name === "nullable")?.required).toBe(false);
+    expect(docs.fields.find((f) => f.name === "nullable")?.required).toBe(false);
   });
 
   it("should handle union types", () => {
@@ -141,7 +141,7 @@ describe("generateSchemaDocs", () => {
 
     const docs = generateSchemaDocs(schema, "Test");
 
-    expect(docs.fields.find(f => f.name === "value")?.type).toBe("string | number");
+    expect(docs.fields.find((f) => f.name === "value")?.type).toBe("string | number");
   });
 
   it("should handle record types", () => {
@@ -151,7 +151,7 @@ describe("generateSchemaDocs", () => {
 
     const docs = generateSchemaDocs(schema, "Test");
 
-    expect(docs.fields.find(f => f.name === "data")?.type).toBe("Record<string, string>");
+    expect(docs.fields.find((f) => f.name === "data")?.type).toBe("Record<string, string>");
   });
 });
 

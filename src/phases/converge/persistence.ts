@@ -61,10 +61,10 @@ export class SessionPersistence {
     try {
       await fs.mkdir(this.paths.baseDir, { recursive: true });
     } catch {
-      throw new FileSystemError(
-        `Failed to create persistence directory: ${this.paths.baseDir}`,
-        { path: this.paths.baseDir, operation: "write" }
-      );
+      throw new FileSystemError(`Failed to create persistence directory: ${this.paths.baseDir}`, {
+        path: this.paths.baseDir,
+        operation: "write",
+      });
     }
   }
 
@@ -78,10 +78,10 @@ export class SessionPersistence {
       const data = JSON.stringify(session, null, 2);
       await fs.writeFile(this.paths.sessionFile, data, "utf-8");
     } catch {
-      throw new FileSystemError(
-        "Failed to save discovery session",
-        { path: this.paths.sessionFile, operation: "write" }
-      );
+      throw new FileSystemError("Failed to save discovery session", {
+        path: this.paths.sessionFile,
+        operation: "write",
+      });
     }
   }
 
@@ -110,10 +110,10 @@ export class SessionPersistence {
       if ((error as NodeJS.ErrnoException).code === "ENOENT") {
         return null;
       }
-      throw new FileSystemError(
-        "Failed to load discovery session",
-        { path: this.paths.sessionFile, operation: "read" }
-      );
+      throw new FileSystemError("Failed to load discovery session", {
+        path: this.paths.sessionFile,
+        operation: "read",
+      });
     }
   }
 
@@ -137,10 +137,10 @@ export class SessionPersistence {
       await fs.unlink(this.paths.sessionFile);
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
-        throw new FileSystemError(
-          "Failed to delete discovery session",
-          { path: this.paths.sessionFile, operation: "delete" }
-        );
+        throw new FileSystemError("Failed to delete discovery session", {
+          path: this.paths.sessionFile,
+          operation: "delete",
+        });
       }
     }
   }
@@ -154,10 +154,10 @@ export class SessionPersistence {
     try {
       await fs.writeFile(this.paths.specFile, content, "utf-8");
     } catch {
-      throw new FileSystemError(
-        "Failed to save specification",
-        { path: this.paths.specFile, operation: "write" }
-      );
+      throw new FileSystemError("Failed to save specification", {
+        path: this.paths.specFile,
+        operation: "write",
+      });
     }
   }
 
@@ -175,10 +175,7 @@ export class SessionPersistence {
   /**
    * Append a message to the conversation log
    */
-  async appendConversation(
-    role: "user" | "assistant",
-    content: string
-  ): Promise<void> {
+  async appendConversation(role: "user" | "assistant", content: string): Promise<void> {
     await this.ensureDir();
 
     const entry = {
@@ -188,16 +185,12 @@ export class SessionPersistence {
     };
 
     try {
-      await fs.appendFile(
-        this.paths.conversationLog,
-        JSON.stringify(entry) + "\n",
-        "utf-8"
-      );
+      await fs.appendFile(this.paths.conversationLog, JSON.stringify(entry) + "\n", "utf-8");
     } catch {
-      throw new FileSystemError(
-        "Failed to append to conversation log",
-        { path: this.paths.conversationLog, operation: "write" }
-      );
+      throw new FileSystemError("Failed to append to conversation log", {
+        path: this.paths.conversationLog,
+        operation: "write",
+      });
     }
   }
 
@@ -228,10 +221,10 @@ export class SessionPersistence {
       const data = JSON.stringify(checkpoint, null, 2);
       await fs.writeFile(this.paths.checkpointFile, data, "utf-8");
     } catch {
-      throw new FileSystemError(
-        "Failed to save checkpoint",
-        { path: this.paths.checkpointFile, operation: "write" }
-      );
+      throw new FileSystemError("Failed to save checkpoint", {
+        path: this.paths.checkpointFile,
+        operation: "write",
+      });
     }
   }
 
@@ -257,10 +250,10 @@ export class SessionPersistence {
       await fs.rm(this.paths.baseDir, { recursive: true, force: true });
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
-        throw new FileSystemError(
-          "Failed to clear persistence data",
-          { path: this.paths.baseDir, operation: "delete" }
-        );
+        throw new FileSystemError("Failed to clear persistence data", {
+          path: this.paths.baseDir,
+          operation: "delete",
+        });
       }
     }
   }
@@ -318,7 +311,7 @@ export function createCheckpoint(
   step: ConvergeStep,
   progress: number,
   specGenerated: boolean = false,
-  metadata: Record<string, unknown> = {}
+  metadata: Record<string, unknown> = {},
 ): ConvergeCheckpoint {
   return {
     id: `converge-${Date.now()}`,
@@ -354,7 +347,7 @@ export class SessionManager {
   async saveWithCheckpoint(
     session: DiscoverySession,
     step: ConvergeStep,
-    progress: number
+    progress: number,
   ): Promise<void> {
     await this.persistence.saveSession(session);
 
@@ -362,7 +355,7 @@ export class SessionManager {
       session.id,
       step,
       progress,
-      session.status === "spec_generated"
+      session.status === "spec_generated",
     );
     await this.persistence.saveCheckpoint(checkpoint);
   }
@@ -421,12 +414,7 @@ export class SessionManager {
     await this.persistence.saveSession(session);
     await this.persistence.saveSpecification(specMarkdown);
 
-    const checkpoint = createCheckpoint(
-      session.id,
-      "complete",
-      100,
-      true
-    );
+    const checkpoint = createCheckpoint(session.id, "complete", 100, true);
     await this.persistence.saveCheckpoint(checkpoint);
   }
 }

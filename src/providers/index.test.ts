@@ -172,7 +172,7 @@ describe("Providers module exports", () => {
     it("should throw for unknown provider type", async () => {
       // @ts-expect-error Testing invalid provider type
       await expect(ProviderExports.createProvider("unknown")).rejects.toThrow(
-        "Unknown provider type"
+        "Unknown provider type",
       );
     });
   });
@@ -202,24 +202,14 @@ describe("Providers module exports", () => {
     it("should return list of providers", () => {
       const providers = ProviderExports.listProviders();
       expect(providers).toHaveLength(4);
-      expect(providers.map((p) => p.id)).toEqual([
-        "anthropic",
-        "openai",
-        "gemini",
-        "kimi",
-      ]);
+      expect(providers.map((p) => p.id)).toEqual(["anthropic", "openai", "gemini", "kimi"]);
     });
   });
 
   describe("ProviderType", () => {
     it("should define valid provider types", () => {
       // Test that the type constraints work by using valid values
-      const validTypes: ProviderExports.ProviderType[] = [
-        "anthropic",
-        "openai",
-        "gemini",
-        "kimi",
-      ];
+      const validTypes: ProviderExports.ProviderType[] = ["anthropic", "openai", "gemini", "kimi"];
       expect(validTypes).toHaveLength(4);
     });
   });

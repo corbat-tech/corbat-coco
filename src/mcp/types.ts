@@ -9,7 +9,7 @@
  * JSON-RPC 2.0 Request
  */
 export interface JSONRPCRequest {
-  jsonrpc: '2.0';
+  jsonrpc: "2.0";
   id: string | number;
   method: string;
   params?: Record<string, unknown>;
@@ -19,7 +19,7 @@ export interface JSONRPCRequest {
  * JSON-RPC 2.0 Response
  */
 export interface JSONRPCResponse {
-  jsonrpc: '2.0';
+  jsonrpc: "2.0";
   id: string | number;
   result?: unknown;
   error?: JSONRPCError;
@@ -66,7 +66,7 @@ export interface MCPTool {
   name: string;
   description?: string;
   inputSchema: {
-    type: 'object';
+    type: "object";
     properties?: Record<string, unknown>;
     required?: string[];
   };
@@ -128,7 +128,7 @@ export interface MCPCallToolParams {
  */
 export interface MCPCallToolResult {
   content: Array<{
-    type: 'text' | 'image' | 'resource';
+    type: "text" | "image" | "resource";
     text?: string;
     data?: string;
     mimeType?: string;
@@ -250,7 +250,7 @@ export interface MCPServerConfig {
   /** Server description */
   description?: string;
   /** Transport type */
-  transport: 'stdio' | 'http';
+  transport: "stdio" | "http";
   /** Stdio transport configuration */
   stdio?: StdioTransportConfig;
   /** HTTP transport configuration */
@@ -259,7 +259,7 @@ export interface MCPServerConfig {
     url: string;
     /** Authentication type */
     auth?: {
-      type: 'oauth' | 'bearer' | 'apikey';
+      type: "oauth" | "bearer" | "apikey";
       /** Token or API key (optional, can be loaded from env) */
       token?: string;
       /** Environment variable name containing the token */
@@ -325,7 +325,7 @@ export interface MCPToolWrapperOptions {
   /** Prefix for tool names (default: "mcp") */
   namePrefix?: string;
   /** Tool category for COCO registry (default: "deploy") */
-  category?: 'file' | 'bash' | 'git' | 'test' | 'quality' | 'build' | 'deploy';
+  category?: "file" | "bash" | "git" | "test" | "quality" | "build" | "deploy";
   /** Request timeout in milliseconds */
   requestTimeout?: number;
 }

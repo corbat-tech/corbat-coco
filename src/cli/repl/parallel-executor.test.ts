@@ -210,12 +210,12 @@ describe("ParallelToolExecutor", () => {
       expect(onToolStart).toHaveBeenCalledWith(
         expect.objectContaining({ id: "call-1", name: "tool_a" }),
         1, // 1-based index
-        2 // total
+        2, // total
       );
       expect(onToolStart).toHaveBeenCalledWith(
         expect.objectContaining({ id: "call-2", name: "tool_b" }),
         2,
-        2
+        2,
       );
 
       // Check onToolEnd was called with ExecutedToolCall
@@ -224,7 +224,7 @@ describe("ParallelToolExecutor", () => {
           id: "call-1",
           name: "tool_a",
           result: expect.objectContaining({ success: true }),
-        })
+        }),
       );
     });
 
@@ -238,9 +238,7 @@ describe("ParallelToolExecutor", () => {
           tool_b: 10, // Fastest
           tool_c: 30,
         };
-        await new Promise((resolve) =>
-          setTimeout(resolve, delays[name] || 10)
-        );
+        await new Promise((resolve) => setTimeout(resolve, delays[name] || 10));
         return {
           success: true,
           data: { tool: name },
@@ -317,9 +315,7 @@ describe("ParallelToolExecutor", () => {
       });
 
       const executor = new ParallelToolExecutor();
-      const toolCalls: ToolCall[] = [
-        { id: "call-1", name: "tool_a", input: {} },
-      ];
+      const toolCalls: ToolCall[] = [{ id: "call-1", name: "tool_a", input: {} }];
 
       const result = await executor.executeParallel(toolCalls, mockRegistry);
 
@@ -330,9 +326,7 @@ describe("ParallelToolExecutor", () => {
 
 describe("createParallelExecutor", () => {
   it("should create a new executor instance", async () => {
-    const { createParallelExecutor, ParallelToolExecutor } = await import(
-      "./parallel-executor.js"
-    );
+    const { createParallelExecutor, ParallelToolExecutor } = await import("./parallel-executor.js");
 
     const executor = createParallelExecutor();
 

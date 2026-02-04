@@ -5,13 +5,7 @@
  * Supports skill registration, alias resolution, and execution.
  */
 
-import type {
-  Skill,
-  SkillContext,
-  SkillResult,
-  SkillInfo,
-  SkillCategory,
-} from "./types.js";
+import type { Skill, SkillContext, SkillResult, SkillInfo, SkillCategory } from "./types.js";
 
 /**
  * Registry for managing skills (slash commands)
@@ -58,9 +52,7 @@ export class SkillRegistry {
       throw new Error(`Skill '${skill.name}' is already registered`);
     }
     if (this.aliases.has(skill.name)) {
-      throw new Error(
-        `Skill name '${skill.name}' conflicts with existing alias`
-      );
+      throw new Error(`Skill name '${skill.name}' conflicts with existing alias`);
     }
 
     // Register the skill
@@ -71,13 +63,13 @@ export class SkillRegistry {
       for (const alias of skill.aliases) {
         if (this.skills.has(alias)) {
           throw new Error(
-            `Alias '${alias}' for skill '${skill.name}' conflicts with existing skill`
+            `Alias '${alias}' for skill '${skill.name}' conflicts with existing skill`,
           );
         }
         if (this.aliases.has(alias)) {
           const existingSkill = this.aliases.get(alias);
           throw new Error(
-            `Alias '${alias}' for skill '${skill.name}' conflicts with alias for skill '${existingSkill}'`
+            `Alias '${alias}' for skill '${skill.name}' conflicts with alias for skill '${existingSkill}'`,
           );
         }
         this.aliases.set(alias, skill.name);
@@ -200,11 +192,7 @@ export class SkillRegistry {
    * }
    * ```
    */
-  async execute(
-    nameOrAlias: string,
-    args: string,
-    context: SkillContext
-  ): Promise<SkillResult> {
+  async execute(nameOrAlias: string, args: string, context: SkillContext): Promise<SkillResult> {
     const skill = this.get(nameOrAlias);
 
     if (!skill) {
@@ -217,8 +205,7 @@ export class SkillRegistry {
     try {
       return await skill.execute(args, context);
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : String(error);
+      const message = error instanceof Error ? error.message : String(error);
       return {
         success: false,
         error: `Error executing /${skill.name}: ${message}`,

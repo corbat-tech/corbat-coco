@@ -180,11 +180,7 @@ export class SessionStore implements SessionStorage {
       for (const entry of entries) {
         if (!entry.isDirectory()) continue;
 
-        const metadataPath = join(
-          this.config.storageDir,
-          entry.name,
-          "metadata.json"
-        );
+        const metadataPath = join(this.config.storageDir, entry.name, "metadata.json");
 
         try {
           const content = await readFile(metadataPath, "utf-8");
@@ -204,10 +200,7 @@ export class SessionStore implements SessionStorage {
       return [];
     }
 
-    sessions.sort(
-      (a, b) =>
-        new Date(b.lastSavedAt).getTime() - new Date(a.lastSavedAt).getTime()
-    );
+    sessions.sort((a, b) => new Date(b.lastSavedAt).getTime() - new Date(a.lastSavedAt).getTime());
 
     return sessions;
   }
@@ -263,11 +256,7 @@ export class SessionStore implements SessionStorage {
       // File doesn't exist, start fresh
     }
 
-    await writeFile(
-      files.conversation,
-      existingContent + newLines.join("\n"),
-      "utf-8"
-    );
+    await writeFile(files.conversation, existingContent + newLines.join("\n"), "utf-8");
   }
 
   /**
@@ -324,10 +313,7 @@ export class SessionStore implements SessionStorage {
     let output = 0;
 
     for (const msg of session.messages) {
-      const content =
-        typeof msg.content === "string"
-          ? msg.content
-          : JSON.stringify(msg.content);
+      const content = typeof msg.content === "string" ? msg.content : JSON.stringify(msg.content);
       const tokens = Math.ceil(content.length / 4);
 
       if (msg.role === "user") {
@@ -346,9 +332,7 @@ export class SessionStore implements SessionStorage {
         const content = msg.content.trim();
         if (content.length > 10) {
           const firstLine = content.split("\n")[0] ?? content;
-          return firstLine.length > 50
-            ? firstLine.slice(0, 47) + "..."
-            : firstLine;
+          return firstLine.length > 50 ? firstLine.slice(0, 47) + "..." : firstLine;
         }
       }
     }
@@ -365,8 +349,6 @@ export function getSessionStore(): SessionStore {
   return defaultStore;
 }
 
-export function createSessionStore(
-  config: Partial<SessionPersistenceConfig>
-): SessionStore {
+export function createSessionStore(config: Partial<SessionPersistenceConfig>): SessionStore {
   return new SessionStore(config);
 }

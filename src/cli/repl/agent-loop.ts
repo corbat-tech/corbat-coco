@@ -60,7 +60,7 @@ export async function executeAgentTurn(
   userMessage: string,
   provider: LLMProvider,
   toolRegistry: ToolRegistry,
-  options: AgentTurnOptions = {}
+  options: AgentTurnOptions = {},
 ): Promise<AgentTurnResult> {
   // Reset line buffer at start of each turn
   resetLineBuffer();
@@ -110,7 +110,10 @@ export async function executeAgentTurn(
     let thinkingEnded = false;
 
     // Track tool call builders for streaming
-    const toolCallBuilders: Map<string, { id: string; name: string; input: Record<string, unknown> }> = new Map();
+    const toolCallBuilders: Map<
+      string,
+      { id: string; name: string; input: Record<string, unknown> }
+    > = new Map();
 
     for await (const chunk of provider.streamWithTools(messages, {
       tools,
@@ -190,11 +193,13 @@ export async function executeAgentTurn(
 
     // Estimate token usage (streaming doesn't provide exact counts)
     // Use provider's token counting method for estimation
-    const inputText = messages.map(m =>
-      typeof m.content === "string" ? m.content : JSON.stringify(m.content)
-    ).join("\n");
+    const inputText = messages
+      .map((m) => (typeof m.content === "string" ? m.content : JSON.stringify(m.content)))
+      .join("\n");
     const estimatedInputTokens = provider.countTokens(inputText);
-    const estimatedOutputTokens = provider.countTokens(responseContent + JSON.stringify(collectedToolCalls));
+    const estimatedOutputTokens = provider.countTokens(
+      responseContent + JSON.stringify(collectedToolCalls),
+    );
 
     totalInputTokens += estimatedInputTokens;
     totalOutputTokens += estimatedOutputTokens;
@@ -277,21 +282,17 @@ export async function executeAgentTurn(
     // Phase 2: Execute confirmed tools in parallel
     if (!turnAborted && confirmedTools.length > 0) {
       const executor = new ParallelToolExecutor();
-      const parallelResult = await executor.executeParallel(
-        confirmedTools,
-        toolRegistry,
-        {
-          maxConcurrency: 5,
-          onToolStart: (toolCall, _index, _total) => {
-            // Adjust index to account for declined tools for accurate progress
-            const originalIndex = response.toolCalls.findIndex(tc => tc.id === toolCall.id) + 1;
-            options.onToolStart?.(toolCall, originalIndex, totalTools);
-          },
-          onToolEnd: options.onToolEnd,
-          onToolSkipped: options.onToolSkipped,
-          signal: options.signal,
-        }
-      );
+      const parallelResult = await executor.executeParallel(confirmedTools, toolRegistry, {
+        maxConcurrency: 5,
+        onToolStart: (toolCall, _index, _total) => {
+          // Adjust index to account for declined tools for accurate progress
+          const originalIndex = response.toolCalls.findIndex((tc) => tc.id === toolCall.id) + 1;
+          options.onToolStart?.(toolCall, originalIndex, totalTools);
+        },
+        onToolEnd: options.onToolEnd,
+        onToolSkipped: options.onToolSkipped,
+        signal: options.signal,
+      });
 
       // Collect executed tools
       for (const executed of parallelResult.executed) {
@@ -396,14 +397,14 @@ export function formatAbortSummary(executedTools: ExecutedToolCall[]): string | 
   const uniqueTools = [...new Set(toolNames)];
 
   let summary = chalk.yellow(
-    `Completed ${successful.length} tool${successful.length !== 1 ? "s" : ""} before cancellation`
+    `Completed ${successful.length} tool${successful.length !== 1 ? "s" : ""} before cancellation`,
   );
 
   if (uniqueTools.length <= 5) {
     summary += chalk.dim(`: [${uniqueTools.join(", ")}]`);
   } else {
     summary += chalk.dim(
-      `: [${uniqueTools.slice(0, 4).join(", ")}, +${uniqueTools.length - 4} more]`
+      `: [${uniqueTools.slice(0, 4).join(", ")}, +${uniqueTools.length - 4} more]`,
     );
   }
 

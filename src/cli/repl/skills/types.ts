@@ -65,13 +65,7 @@ export interface Skill {
 /**
  * Skill categories for organization
  */
-export type SkillCategory =
-  | "general"
-  | "git"
-  | "model"
-  | "coco"
-  | "debug"
-  | "custom";
+export type SkillCategory = "general" | "git" | "model" | "coco" | "debug" | "custom";
 
 /**
  * Skill metadata for display purposes

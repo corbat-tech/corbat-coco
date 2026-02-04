@@ -11,8 +11,21 @@ vi.mock("execa", () => ({
       {
         filePath: "/test/src/file.ts",
         messages: [
-          { line: 10, column: 5, severity: 2, message: "Unused variable", ruleId: "no-unused-vars" },
-          { line: 20, column: 1, severity: 1, message: "Missing semicolon", ruleId: "semi", fix: {} },
+          {
+            line: 10,
+            column: 5,
+            severity: 2,
+            message: "Unused variable",
+            ruleId: "no-unused-vars",
+          },
+          {
+            line: 20,
+            column: 1,
+            severity: 1,
+            message: "Missing semicolon",
+            ruleId: "semi",
+            fix: {},
+          },
         ],
       },
     ]),
@@ -97,7 +110,10 @@ describe("runLinterTool", () => {
   it("should lint specific files when provided", async () => {
     const { runLinterTool } = await import("./quality.js");
 
-    const result = await runLinterTool.execute({ cwd: "/test", files: ["src/user.ts", "src/api.ts"] });
+    const result = await runLinterTool.execute({
+      cwd: "/test",
+      files: ["src/user.ts", "src/api.ts"],
+    });
 
     expect(result).toBeDefined();
   });
@@ -225,9 +241,9 @@ describe("calculateQualityTool error handling", () => {
 
     const { calculateQualityTool } = await import("./quality.js");
 
-    await expect(
-      calculateQualityTool.execute({ cwd: "/nonexistent" })
-    ).rejects.toThrow(/Quality calculation failed/);
+    await expect(calculateQualityTool.execute({ cwd: "/nonexistent" })).rejects.toThrow(
+      /Quality calculation failed/,
+    );
   });
 });
 
@@ -254,7 +270,7 @@ describe("runLinterTool eslint and biome support", () => {
     expect(execa).toHaveBeenCalledWith(
       "npx",
       expect.arrayContaining(["eslint"]),
-      expect.any(Object)
+      expect.any(Object),
     );
   });
 
@@ -276,7 +292,7 @@ describe("runLinterTool eslint and biome support", () => {
     expect(execa).toHaveBeenCalledWith(
       "npx",
       expect.arrayContaining(["biome", "lint"]),
-      expect.any(Object)
+      expect.any(Object),
     );
   });
 
@@ -284,7 +300,7 @@ describe("runLinterTool eslint and biome support", () => {
     const { runLinterTool } = await import("./quality.js");
 
     await expect(
-      runLinterTool.execute({ cwd: "/test", linter: "unsupported-linter" })
+      runLinterTool.execute({ cwd: "/test", linter: "unsupported-linter" }),
     ).rejects.toThrow(/Unsupported linter/);
   });
 
@@ -303,9 +319,7 @@ describe("runLinterTool eslint and biome support", () => {
 
     const { runLinterTool } = await import("./quality.js");
 
-    await expect(
-      runLinterTool.execute({ cwd: "/test" })
-    ).rejects.toThrow(/Linting failed/);
+    await expect(runLinterTool.execute({ cwd: "/test" })).rejects.toThrow(/Linting failed/);
   });
 });
 

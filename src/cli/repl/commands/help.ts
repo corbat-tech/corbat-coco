@@ -78,10 +78,20 @@ export const helpCommand: SlashCommand = {
     }
 
     console.log(chalk.bold("Tips:"));
-    console.log(chalk.dim("  - Press ") + chalk.cyan("Tab") + chalk.dim(" to autocomplete commands (e.g., /h → /help)"));
+    console.log(
+      chalk.dim("  - Press ") +
+        chalk.cyan("Tab") +
+        chalk.dim(" to autocomplete commands (e.g., /h → /help)"),
+    );
     console.log(chalk.dim("  - Type naturally to interact with the agent"));
-    console.log(chalk.dim("  - The agent can read/write files, run bash commands, search and more"));
-    console.log(chalk.dim("  - Type ") + chalk.yellow("/help tools") + chalk.dim(" to see all available tools"));
+    console.log(
+      chalk.dim("  - The agent can read/write files, run bash commands, search and more"),
+    );
+    console.log(
+      chalk.dim("  - Type ") +
+        chalk.yellow("/help tools") +
+        chalk.dim(" to see all available tools"),
+    );
     console.log(chalk.dim("  - Use Ctrl+D or /exit to quit\n"));
 
     return false;

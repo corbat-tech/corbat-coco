@@ -4,16 +4,16 @@
  * Manages MCP server configurations with persistence.
  */
 
-import { readFile, writeFile, access, mkdir } from 'node:fs/promises';
-import { dirname } from 'node:path';
-import { MCPErrorCode, type MCPRegistry, type MCPServerConfig } from './types.js';
+import { readFile, writeFile, access, mkdir } from "node:fs/promises";
+import { dirname } from "node:path";
+import { MCPErrorCode, type MCPRegistry, type MCPServerConfig } from "./types.js";
 import {
   validateServerConfig,
   parseRegistry,
   serializeRegistry,
   getDefaultRegistryPath,
-} from './config.js';
-import { MCPError } from './errors.js';
+} from "./config.js";
+import { MCPError } from "./errors.js";
 
 /**
  * MCP Registry implementation
@@ -97,11 +97,11 @@ export class MCPRegistryImpl implements MCPRegistry {
     try {
       await this.ensureDir(this.registryPath);
       const data = serializeRegistry(this.listServers());
-      await writeFile(this.registryPath, data, 'utf-8');
+      await writeFile(this.registryPath, data, "utf-8");
     } catch (error) {
       throw new MCPError(
         MCPErrorCode.TRANSPORT_ERROR,
-        `Failed to save registry: ${error instanceof Error ? error.message : 'Unknown error'}`
+        `Failed to save registry: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
     }
   }
@@ -112,7 +112,7 @@ export class MCPRegistryImpl implements MCPRegistry {
   async load(): Promise<void> {
     try {
       await access(this.registryPath);
-      const content = await readFile(this.registryPath, 'utf-8');
+      const content = await readFile(this.registryPath, "utf-8");
       const servers = parseRegistry(content);
 
       this.servers.clear();

@@ -259,10 +259,7 @@ export class HookRegistry {
    * @param updates - Partial hook definition with updates
    * @returns true if hook was updated, false if not found
    */
-  updateHook(
-    hookId: string,
-    updates: Partial<Omit<HookDefinition, "id">>
-  ): boolean {
+  updateHook(hookId: string, updates: Partial<Omit<HookDefinition, "id">>): boolean {
     const existing = this.hooksById.get(hookId);
     if (!existing) {
       return false;
@@ -376,7 +373,7 @@ export class HookRegistry {
     // Validate event is a known type
     if (!isHookEvent(h.event)) {
       throw new Error(
-        `Invalid hook event type: ${h.event}. Valid events: ${HOOK_EVENTS.join(", ")}`
+        `Invalid hook event type: ${h.event}. Valid events: ${HOOK_EVENTS.join(", ")}`,
       );
     }
 
@@ -386,9 +383,7 @@ export class HookRegistry {
 
     // Validate type is valid
     if (!isHookType(h.type)) {
-      throw new Error(
-        `Invalid hook type: ${h.type}. Valid types: command, prompt`
-      );
+      throw new Error(`Invalid hook type: ${h.type}. Valid types: command, prompt`);
     }
 
     // Validate type-specific fields

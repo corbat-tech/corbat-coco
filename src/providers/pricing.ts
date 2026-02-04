@@ -26,7 +26,11 @@ export const MODEL_PRICING: Record<string, ModelPricing> = {
   "claude-3-5-haiku-20241022": { inputPerMillion: 0.8, outputPerMillion: 4, contextWindow: 200000 },
   "claude-3-opus-20240229": { inputPerMillion: 15, outputPerMillion: 75, contextWindow: 200000 },
   "claude-3-sonnet-20240229": { inputPerMillion: 3, outputPerMillion: 15, contextWindow: 200000 },
-  "claude-3-haiku-20240307": { inputPerMillion: 0.25, outputPerMillion: 1.25, contextWindow: 200000 },
+  "claude-3-haiku-20240307": {
+    inputPerMillion: 0.25,
+    outputPerMillion: 1.25,
+    contextWindow: 200000,
+  },
 
   // OpenAI models
   "gpt-4o": { inputPerMillion: 2.5, outputPerMillion: 10, contextWindow: 128000 },
@@ -34,7 +38,7 @@ export const MODEL_PRICING: Record<string, ModelPricing> = {
   "gpt-4-turbo": { inputPerMillion: 10, outputPerMillion: 30, contextWindow: 128000 },
   "gpt-4": { inputPerMillion: 30, outputPerMillion: 60, contextWindow: 8192 },
   "gpt-3.5-turbo": { inputPerMillion: 0.5, outputPerMillion: 1.5, contextWindow: 16384 },
-  "o1": { inputPerMillion: 15, outputPerMillion: 60, contextWindow: 200000 },
+  o1: { inputPerMillion: 15, outputPerMillion: 60, contextWindow: 200000 },
   "o1-mini": { inputPerMillion: 3, outputPerMillion: 12, contextWindow: 128000 },
 
   // Google Gemini models
@@ -78,9 +82,10 @@ export function estimateCost(
   model: string,
   inputTokens: number,
   outputTokens: number,
-  provider?: ProviderType
+  provider?: ProviderType,
 ): CostEstimate {
-  const pricing = MODEL_PRICING[model] ?? (provider ? DEFAULT_PRICING[provider] : DEFAULT_PRICING.anthropic);
+  const pricing =
+    MODEL_PRICING[model] ?? (provider ? DEFAULT_PRICING[provider] : DEFAULT_PRICING.anthropic);
 
   const inputCost = (inputTokens / 1_000_000) * pricing.inputPerMillion;
   const outputCost = (outputTokens / 1_000_000) * pricing.outputPerMillion;

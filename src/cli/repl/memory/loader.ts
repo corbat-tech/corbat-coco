@@ -174,7 +174,7 @@ export class MemoryLoader {
       const { content, imports } = await this.resolveImports(
         rawContent,
         path.dirname(resolvedPath),
-        0
+        0,
       );
 
       // Parse sections
@@ -250,7 +250,7 @@ export class MemoryLoader {
   async resolveImports(
     content: string,
     basePath: string,
-    depth: number
+    depth: number,
   ): Promise<ImportResolutionResult> {
     const imports: MemoryImport[] = [];
 
@@ -290,7 +290,7 @@ export class MemoryLoader {
             const nestedResult = await this.resolveImports(
               importedContent,
               path.dirname(resolvedPath),
-              depth + 1
+              depth + 1,
             );
 
             // Add the imported content (with a comment showing the source)

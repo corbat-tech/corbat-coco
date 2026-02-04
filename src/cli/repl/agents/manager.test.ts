@@ -10,10 +10,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import type { Mock } from "vitest";
-import type {
-  LLMProvider,
-  ChatWithToolsResponse,
-} from "../../../providers/types.js";
+import type { LLMProvider, ChatWithToolsResponse } from "../../../providers/types.js";
 import type { ToolRegistry } from "../../../tools/registry.js";
 import { AgentManager, createAgentManager } from "./manager.js";
 import type { SubAgent } from "./types.js";
@@ -295,7 +292,7 @@ describe("AgentManager", () => {
         (mockProvider.chatWithTools as Mock).mockReturnValueOnce(
           new Promise<ChatWithToolsResponse>((resolve) => {
             resolvers.push(resolve);
-          })
+          }),
         );
       }
 
@@ -460,9 +457,7 @@ describe("AgentManager", () => {
         stopReason: "tool_use",
         usage: { inputTokens: 50, outputTokens: 25 },
         model: "claude-sonnet-4-20250514",
-        toolCalls: [
-          { id: "tool-1", name: "read_file", input: { path: "/test.ts" } },
-        ],
+        toolCalls: [{ id: "tool-1", name: "read_file", input: { path: "/test.ts" } }],
       };
 
       let secondResolver: (value: ChatWithToolsResponse) => void;
@@ -530,9 +525,7 @@ describe("AgentManager", () => {
       });
 
       // Should have called with failed status
-      const failedCall = onStatusChange.mock.calls.find(
-        (call) => call[0].status === "failed"
-      );
+      const failedCall = onStatusChange.mock.calls.find((call) => call[0].status === "failed");
       expect(failedCall).toBeDefined();
     });
   });
@@ -545,9 +538,7 @@ describe("AgentManager", () => {
         stopReason: "tool_use",
         usage: { inputTokens: 100, outputTokens: 50 },
         model: "claude-sonnet-4-20250514",
-        toolCalls: [
-          { id: "tool-1", name: "glob", input: { pattern: "**/*.ts" } },
-        ],
+        toolCalls: [{ id: "tool-1", name: "glob", input: { pattern: "**/*.ts" } }],
       };
 
       const secondResponse: ChatWithToolsResponse = {
@@ -616,9 +607,7 @@ describe("AgentManager", () => {
         stopReason: "tool_use",
         usage: { inputTokens: 50, outputTokens: 25 },
         model: "claude-sonnet-4-20250514",
-        toolCalls: [
-          { id: "tool-1", name: "read_file", input: { path: "/file.ts" } },
-        ],
+        toolCalls: [{ id: "tool-1", name: "read_file", input: { path: "/file.ts" } }],
       };
 
       (mockProvider.chatWithTools as Mock).mockResolvedValue(toolResponse);
@@ -684,7 +673,7 @@ describe("AgentManager", () => {
 
       expect(onOutput).toHaveBeenCalledWith(
         expect.objectContaining({ type: "explore" }),
-        "Processing your request..."
+        "Processing your request...",
       );
     });
   });
@@ -744,9 +733,7 @@ describe("AgentManager", () => {
         stopReason: "tool_use",
         usage: { inputTokens: 100, outputTokens: 50 },
         model: "claude-sonnet-4-20250514",
-        toolCalls: [
-          { id: "tool-1", name: "read_file", input: { path: "/test.ts" } },
-        ],
+        toolCalls: [{ id: "tool-1", name: "read_file", input: { path: "/test.ts" } }],
       };
 
       const secondResponse: ChatWithToolsResponse = {
@@ -818,9 +805,7 @@ describe("AgentManager", () => {
         stopReason: "tool_use",
         usage: { inputTokens: 50, outputTokens: 25 },
         model: "claude-sonnet-4-20250514",
-        toolCalls: [
-          { id: "tool-1", name: "read_file", input: { path: "/test.ts" } },
-        ],
+        toolCalls: [{ id: "tool-1", name: "read_file", input: { path: "/test.ts" } }],
       };
 
       const secondResponse: ChatWithToolsResponse = {

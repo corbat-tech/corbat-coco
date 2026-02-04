@@ -4,12 +4,8 @@
  * Handles communication with MCP servers via HTTP/HTTPS with OAuth support.
  */
 
-import type {
-  MCPTransport,
-  JSONRPCRequest,
-  JSONRPCResponse,
-} from '../types.js';
-import { MCPConnectionError, MCPTransportError } from '../errors.js';
+import type { MCPTransport, JSONRPCRequest, JSONRPCResponse } from "../types.js";
+import { MCPConnectionError, MCPTransportError } from "../errors.js";
 
 /**
  * HTTP transport configuration
@@ -19,7 +15,7 @@ export interface HTTPTransportConfig {
   url: string;
   /** Authentication configuration */
   auth?: {
-    type: 'oauth' | 'bearer' | 'apikey';
+    type: "oauth" | "bearer" | "apikey";
     /** Token value (or loaded from tokenEnv) */
     token?: string;
     /** Environment variable containing token */
@@ -79,22 +75,22 @@ export class HTTPTransport implements MCPTransport {
    */
   private buildHeaders(): Record<string, string> {
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      "Content-Type": "application/json",
+      Accept: "application/json",
       ...this.config.headers,
     };
 
     const token = this.getAuthToken();
     if (token && this.config.auth) {
       switch (this.config.auth.type) {
-        case 'bearer':
-          headers['Authorization'] = `Bearer ${token}`;
+        case "bearer":
+          headers["Authorization"] = `Bearer ${token}`;
           break;
-        case 'apikey':
-          headers[this.config.auth.headerName || 'X-API-Key'] = token;
+        case "apikey":
+          headers[this.config.auth.headerName || "X-API-Key"] = token;
           break;
-        case 'oauth':
-          headers['Authorization'] = `Bearer ${token}`;
+        case "oauth":
+          headers["Authorization"] = `Bearer ${token}`;
           break;
       }
     }
@@ -107,7 +103,7 @@ export class HTTPTransport implements MCPTransport {
    */
   async connect(): Promise<void> {
     if (this.connected) {
-      throw new MCPConnectionError('Transport already connected');
+      throw new MCPConnectionError("Transport already connected");
     }
 
     // Validate URL
@@ -121,9 +117,9 @@ export class HTTPTransport implements MCPTransport {
     // Test connection with a simple request
     try {
       this.abortController = new AbortController();
-      
+
       const response = await fetch(this.config.url, {
-        method: 'GET',
+        method: "GET",
         headers: this.buildHeaders(),
         signal: this.abortController.signal,
       });
@@ -140,7 +136,7 @@ export class HTTPTransport implements MCPTransport {
         throw error;
       }
       const connError = new MCPConnectionError(
-        `Failed to connect: ${error instanceof Error ? error.message : 'Unknown error'}`
+        `Failed to connect: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
       this.reportError(connError);
       throw connError;
@@ -152,7 +148,7 @@ export class HTTPTransport implements MCPTransport {
    */
   async send(message: JSONRPCRequest): Promise<void> {
     if (!this.connected) {
-      throw new MCPTransportError('Transport not connected');
+      throw new MCPTransportError("Transport not connected");
     }
 
     const abortController = new AbortController();
@@ -167,7 +163,7 @@ export class HTTPTransport implements MCPTransport {
         }, this.config.timeout);
 
         const response = await fetch(this.config.url, {
-          method: 'POST',
+          method: "POST",
           headers: this.buildHeaders(),
           body: JSON.stringify(message),
           signal: abortController.signal,
@@ -176,9 +172,7 @@ export class HTTPTransport implements MCPTransport {
         clearTimeout(timeoutId);
 
         if (!response.ok) {
-          throw new MCPTransportError(
-            `HTTP error ${response.status}: ${response.statusText}`
-          );
+          throw new MCPTransportError(`HTTP error ${response.status}: ${response.statusText}`);
         }
 
         const data = (await response.json()) as JSONRPCResponse;
@@ -186,7 +180,7 @@ export class HTTPTransport implements MCPTransport {
         return;
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
-        
+
         if (error instanceof MCPTransportError) {
           this.reportError(error);
           throw error; // Don't retry transport errors
@@ -201,7 +195,7 @@ export class HTTPTransport implements MCPTransport {
 
     this.pendingRequests.delete(message.id);
     throw new MCPTransportError(
-      `Request failed after ${this.config.retries} attempts: ${lastError?.message}`
+      `Request failed after ${this.config.retries} attempts: ${lastError?.message}`,
     );
   }
 
@@ -264,4 +258,4 @@ export class HTTPTransport implements MCPTransport {
 }
 
 // Import for type checking
-import { MCPError } from '../errors.js';
+import { MCPError } from "../errors.js";

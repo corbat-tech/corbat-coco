@@ -174,9 +174,9 @@ describe("GeminiProvider", () => {
 
       const provider = new GeminiProvider();
 
-      await expect(
-        provider.chat([{ role: "user", content: "Hello" }])
-      ).rejects.toThrow(/not initialized/);
+      await expect(provider.chat([{ role: "user", content: "Hello" }])).rejects.toThrow(
+        /not initialized/,
+      );
     });
 
     it("should send chat message and return response", async () => {
@@ -241,18 +241,15 @@ describe("GeminiProvider", () => {
       const provider = new GeminiProvider();
       await provider.initialize({ apiKey: "test" });
 
-      const response = await provider.chatWithTools(
-        [{ role: "user", content: "Read test.txt" }],
-        {
-          tools: [
-            {
-              name: "read_file",
-              description: "Read a file",
-              input_schema: { type: "object", properties: { path: { type: "string" } } },
-            },
-          ],
-        }
-      );
+      const response = await provider.chatWithTools([{ role: "user", content: "Read test.txt" }], {
+        tools: [
+          {
+            name: "read_file",
+            description: "Read a file",
+            input_schema: { type: "object", properties: { path: { type: "string" } } },
+          },
+        ],
+      });
 
       expect(response.toolCalls.length).toBe(1);
       expect(response.toolCalls[0]?.name).toBe("read_file");
@@ -270,9 +267,7 @@ describe("GeminiProvider", () => {
       const provider = new GeminiProvider();
       await provider.initialize({ apiKey: "test" });
 
-      await expect(
-        provider.chat([{ role: "user", content: "Hi" }])
-      ).rejects.toThrow(/Rate limit/);
+      await expect(provider.chat([{ role: "user", content: "Hi" }])).rejects.toThrow(/Rate limit/);
     });
   });
 });
@@ -356,9 +351,7 @@ describe("message conversion", () => {
     const provider = new GeminiProvider();
     await provider.initialize({ apiKey: "test" });
 
-    await provider.chat([
-      { role: "user", content: [{ type: "text", text: "Hello" }] },
-    ]);
+    await provider.chat([{ role: "user", content: [{ type: "text", text: "Hello" }] }]);
 
     expect(mockSendMessage).toHaveBeenCalled();
   });
@@ -379,9 +372,7 @@ describe("message conversion", () => {
     await provider.chat([
       {
         role: "assistant",
-        content: [
-          { type: "tool_use", id: "t1", name: "read_file", input: { path: "/test" } },
-        ],
+        content: [{ type: "tool_use", id: "t1", name: "read_file", input: { path: "/test" } }],
       },
     ]);
 
@@ -405,13 +396,13 @@ describe("message conversion", () => {
       { role: "user", content: "Read file" },
       {
         role: "assistant",
-        content: [{ type: "tool_use", id: "read_file", name: "read_file", input: { path: "/test" } }],
+        content: [
+          { type: "tool_use", id: "read_file", name: "read_file", input: { path: "/test" } },
+        ],
       },
       {
         role: "user",
-        content: [
-          { type: "tool_result", tool_use_id: "read_file", content: "file contents" },
-        ],
+        content: [{ type: "tool_result", tool_use_id: "read_file", content: "file contents" }],
       },
     ]);
 
@@ -425,7 +416,7 @@ describe("message conversion", () => {
             ]),
           }),
         ]),
-      })
+      }),
     );
   });
 
@@ -442,9 +433,7 @@ describe("message conversion", () => {
     const provider = new GeminiProvider();
     await provider.initialize({ apiKey: "test" });
 
-    await provider.chat([
-      { role: "user", content: [] },
-    ]);
+    await provider.chat([{ role: "user", content: [] }]);
 
     expect(mockSendMessage).toHaveBeenCalled();
   });
@@ -464,17 +453,14 @@ describe("tool choice conversion", () => {
     const provider = new GeminiProvider();
     await provider.initialize({ apiKey: "test" });
 
-    await provider.chatWithTools(
-      [{ role: "user", content: "Hello" }],
-      { tools: [] }
-    );
+    await provider.chatWithTools([{ role: "user", content: "Hello" }], { tools: [] });
 
     expect(mockGetGenerativeModel).toHaveBeenCalledWith(
       expect.objectContaining({
         toolConfig: expect.objectContaining({
           functionCallingConfig: { mode: "AUTO" },
         }),
-      })
+      }),
     );
   });
 
@@ -491,17 +477,17 @@ describe("tool choice conversion", () => {
     const provider = new GeminiProvider();
     await provider.initialize({ apiKey: "test" });
 
-    await provider.chatWithTools(
-      [{ role: "user", content: "Hello" }],
-      { tools: [], toolChoice: "any" }
-    );
+    await provider.chatWithTools([{ role: "user", content: "Hello" }], {
+      tools: [],
+      toolChoice: "any",
+    });
 
     expect(mockGetGenerativeModel).toHaveBeenCalledWith(
       expect.objectContaining({
         toolConfig: expect.objectContaining({
           functionCallingConfig: { mode: "ANY" },
         }),
-      })
+      }),
     );
   });
 
@@ -519,17 +505,17 @@ describe("tool choice conversion", () => {
     await provider.initialize({ apiKey: "test" });
 
     // Gemini doesn't support specific tool choice, so it falls back to AUTO
-    await provider.chatWithTools(
-      [{ role: "user", content: "Hello" }],
-      { tools: [], toolChoice: { type: "tool", name: "specificTool" } }
-    );
+    await provider.chatWithTools([{ role: "user", content: "Hello" }], {
+      tools: [],
+      toolChoice: { type: "tool", name: "specificTool" },
+    });
 
     expect(mockGetGenerativeModel).toHaveBeenCalledWith(
       expect.objectContaining({
         toolConfig: expect.objectContaining({
           functionCallingConfig: { mode: "AUTO" },
         }),
-      })
+      }),
     );
   });
 });
@@ -655,10 +641,15 @@ describe("chatWithTools response parsing", () => {
     const provider = new GeminiProvider();
     await provider.initialize({ apiKey: "test" });
 
-    const response = await provider.chatWithTools(
-      [{ role: "user", content: "Read file" }],
-      { tools: [{ name: "read_file", description: "Read", input_schema: { type: "object", properties: {} } }] }
-    );
+    const response = await provider.chatWithTools([{ role: "user", content: "Read file" }], {
+      tools: [
+        {
+          name: "read_file",
+          description: "Read",
+          input_schema: { type: "object", properties: {} },
+        },
+      ],
+    });
 
     expect(response.content).toBe("I'll read the file");
     expect(response.toolCalls.length).toBe(1);
@@ -678,10 +669,9 @@ describe("chatWithTools response parsing", () => {
     const provider = new GeminiProvider();
     await provider.initialize({ apiKey: "test" });
 
-    const response = await provider.chatWithTools(
-      [{ role: "user", content: "Hello" }],
-      { tools: [] }
-    );
+    const response = await provider.chatWithTools([{ role: "user", content: "Hello" }], {
+      tools: [],
+    });
 
     expect(response.content).toBe("");
     expect(response.toolCalls).toEqual([]);
@@ -714,10 +704,9 @@ describe("chatWithTools response parsing", () => {
     const provider = new GeminiProvider();
     await provider.initialize({ apiKey: "test" });
 
-    const response = await provider.chatWithTools(
-      [{ role: "user", content: "What time?" }],
-      { tools: [] }
-    );
+    const response = await provider.chatWithTools([{ role: "user", content: "What time?" }], {
+      tools: [],
+    });
 
     expect(response.toolCalls[0]?.input).toEqual({});
   });
@@ -745,9 +734,7 @@ describe("error handling", () => {
     const provider = new GeminiProvider();
     await provider.initialize({ apiKey: "test" });
 
-    await expect(
-      provider.chat([{ role: "user", content: "Hello" }])
-    ).rejects.toThrow();
+    await expect(provider.chat([{ role: "user", content: "Hello" }])).rejects.toThrow();
   });
 
   it("should handle chatWithTools errors", async () => {
@@ -758,10 +745,7 @@ describe("error handling", () => {
     await provider.initialize({ apiKey: "test" });
 
     await expect(
-      provider.chatWithTools(
-        [{ role: "user", content: "Hello" }],
-        { tools: [] }
-      )
+      provider.chatWithTools([{ role: "user", content: "Hello" }], { tools: [] }),
     ).rejects.toThrow(/Server error/);
   });
 });

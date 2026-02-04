@@ -218,8 +218,9 @@ describe("BacklogGenerator", () => {
       const generator = new BacklogGenerator(mockLLM, mockConfig);
 
       // @ts-expect-error - using minimal mocks for testing
-      await expect(generator.generate(mockArchitecture, mockSpecification))
-        .rejects.toThrow("Failed to generate backlog");
+      await expect(generator.generate(mockArchitecture, mockSpecification)).rejects.toThrow(
+        "Failed to generate backlog",
+      );
     });
 
     it("should provide default values for missing fields", async () => {
@@ -246,12 +247,7 @@ describe("BacklogGenerator", () => {
     it("should calculate estimated sprints from velocity", async () => {
       const mockResponse = JSON.stringify({
         epics: [],
-        stories: [
-          { points: 8 },
-          { points: 8 },
-          { points: 5 },
-          { points: 5 },
-        ],
+        stories: [{ points: 8 }, { points: 8 }, { points: 5 }, { points: 5 }],
         tasks: [],
       });
 

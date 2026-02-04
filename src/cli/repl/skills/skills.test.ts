@@ -62,9 +62,7 @@ describe("SkillRegistry", () => {
       };
 
       registry.register(skill1);
-      expect(() => registry.register(skill2)).toThrow(
-        "Skill 'test' is already registered"
-      );
+      expect(() => registry.register(skill2)).toThrow("Skill 'test' is already registered");
     });
 
     it("should throw on alias conflict with skill name", () => {
@@ -82,7 +80,7 @@ describe("SkillRegistry", () => {
 
       registry.register(skill1);
       expect(() => registry.register(skill2)).toThrow(
-        "Alias 'test' for skill 'other' conflicts with existing skill"
+        "Alias 'test' for skill 'other' conflicts with existing skill",
       );
     });
   });

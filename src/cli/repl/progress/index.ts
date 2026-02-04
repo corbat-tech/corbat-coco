@@ -5,10 +5,10 @@
  */
 
 // Types
-export type { TodoStatus, TodoItem, ProgressState, ProgressStats } from './types.js';
+export type { TodoStatus, TodoItem, ProgressState, ProgressStats } from "./types.js";
 
 // Tracker
-export { ProgressTracker, createProgressTracker } from './tracker.js';
+export { ProgressTracker, createProgressTracker } from "./tracker.js";
 
 // Display
 export {
@@ -19,4 +19,4 @@ export {
   renderProgressStats,
   renderCompactProgress,
   renderFullProgress,
-} from './display.js';
+} from "./display.js";

@@ -16,7 +16,7 @@ export interface ProjectInfo {
  */
 export async function createProjectStructure(
   projectPath: string,
-  info: ProjectInfo
+  info: ProjectInfo,
 ): Promise<void> {
   const cocoPath = path.join(projectPath, ".coco");
 
@@ -53,10 +53,7 @@ export async function createProjectStructure(
 /**
  * Create initial configuration file
  */
-async function createInitialConfig(
-  cocoPath: string,
-  info: ProjectInfo
-): Promise<void> {
+async function createInitialConfig(cocoPath: string, info: ProjectInfo): Promise<void> {
   const config = {
     project: {
       name: info.name,
@@ -83,20 +80,13 @@ async function createInitialConfig(
     },
   };
 
-  await fs.writeFile(
-    path.join(cocoPath, "config.json"),
-    JSON.stringify(config, null, 2),
-    "utf-8"
-  );
+  await fs.writeFile(path.join(cocoPath, "config.json"), JSON.stringify(config, null, 2), "utf-8");
 }
 
 /**
  * Create initial project state
  */
-async function createProjectState(
-  cocoPath: string,
-  info: ProjectInfo
-): Promise<void> {
+async function createProjectState(cocoPath: string, info: ProjectInfo): Promise<void> {
   const state = {
     id: `proj_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 9)}`,
     name: info.name,
@@ -115,7 +105,7 @@ async function createProjectState(
   await fs.writeFile(
     path.join(cocoPath, "state", "project.json"),
     JSON.stringify(state, null, 2),
-    "utf-8"
+    "utf-8",
   );
 }
 
@@ -145,10 +135,7 @@ state/lock.json
 /**
  * Create README for coco directory
  */
-async function createReadme(
-  cocoPath: string,
-  info: ProjectInfo
-): Promise<void> {
+async function createReadme(cocoPath: string, info: ProjectInfo): Promise<void> {
   const content = `# Corbat-Coco Project: ${info.name}
 
 This directory contains the Corbat-Coco project metadata and state.

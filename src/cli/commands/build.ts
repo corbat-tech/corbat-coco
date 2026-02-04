@@ -120,7 +120,9 @@ async function executeTask(_task: Task, options: ExecuteOptions): Promise<void> 
   } while (iteration <= options.maxIterations);
 
   if (score < options.minQuality) {
-    p.log.warn(`Task completed with score ${score.toFixed(0)} (below threshold ${options.minQuality})`);
+    p.log.warn(
+      `Task completed with score ${score.toFixed(0)} (below threshold ${options.minQuality})`,
+    );
   }
 }
 
@@ -128,8 +130,16 @@ async function loadTasks(_options: BuildOptions): Promise<Task[]> {
   // TODO: Load from .coco/planning/backlog.json
   // Placeholder tasks for demonstration
   return [
-    { id: "task-001", title: "Create user entity", description: "Create the User entity with validation" },
-    { id: "task-002", title: "Implement registration", description: "Create registration endpoint" },
+    {
+      id: "task-001",
+      title: "Create user entity",
+      description: "Create the User entity with validation",
+    },
+    {
+      id: "task-002",
+      title: "Implement registration",
+      description: "Create registration endpoint",
+    },
     { id: "task-003", title: "Add authentication", description: "Implement JWT authentication" },
   ];
 }

@@ -183,7 +183,7 @@ Examples:
     } catch (error) {
       throw new ToolError(
         `Linting failed: ${error instanceof Error ? error.message : String(error)}`,
-        { tool: "run_linter", cause: error instanceof Error ? error : undefined }
+        { tool: "run_linter", cause: error instanceof Error ? error : undefined },
       );
     }
   },
@@ -314,7 +314,7 @@ Examples:
     } catch (error) {
       throw new ToolError(
         `Complexity analysis failed: ${error instanceof Error ? error.message : String(error)}`,
-        { tool: "analyze_complexity", cause: error instanceof Error ? error : undefined }
+        { tool: "analyze_complexity", cause: error instanceof Error ? error : undefined },
       );
     }
   },
@@ -349,7 +349,9 @@ function analyzeFileComplexity(content: string, file: string): FileComplexity {
     const line = lines[i] ?? "";
 
     // Detect function start (simplified)
-    const funcMatch = line.match(/(?:function|async function)\s+(\w+)|(\w+)\s*(?:=|:)\s*(?:async\s*)?\(?.*\)?\s*=>/);
+    const funcMatch = line.match(
+      /(?:function|async function)\s+(\w+)|(\w+)\s*(?:=|:)\s*(?:async\s*)?\(?.*\)?\s*=>/,
+    );
     if (funcMatch && braceDepth === 0) {
       if (currentFunction) {
         functions.push({
@@ -462,7 +464,7 @@ Examples:
     } catch (error) {
       throw new ToolError(
         `Quality calculation failed: ${error instanceof Error ? error.message : String(error)}`,
-        { tool: "calculate_quality", cause: error instanceof Error ? error : undefined }
+        { tool: "calculate_quality", cause: error instanceof Error ? error : undefined },
       );
     }
   },

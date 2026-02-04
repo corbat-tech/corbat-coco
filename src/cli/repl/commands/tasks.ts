@@ -6,11 +6,7 @@
 
 import chalk from "chalk";
 import type { SlashCommand, ReplSession } from "../types.js";
-import {
-  getBackgroundTaskManager,
-  renderTaskList,
-  renderTaskStatus,
-} from "../background/index.js";
+import { getBackgroundTaskManager, renderTaskList, renderTaskStatus } from "../background/index.js";
 
 /**
  * Tasks command
@@ -45,9 +41,7 @@ export const tasksCommand: SlashCommand = {
 
         // Allow partial ID matching
         const allTasks = manager.getAllTasks();
-        const matchingTask = allTasks.find(
-          (t) => t.id === taskId || t.id.endsWith(taskId)
-        );
+        const matchingTask = allTasks.find((t) => t.id === taskId || t.id.endsWith(taskId));
 
         if (!matchingTask) {
           console.log(chalk.red(`Error: Task not found: ${taskId}`));
@@ -60,8 +54,8 @@ export const tasksCommand: SlashCommand = {
         } else {
           console.log(
             chalk.yellow(
-              `Task "${matchingTask.name}" could not be cancelled (status: ${matchingTask.status})`
-            )
+              `Task "${matchingTask.name}" could not be cancelled (status: ${matchingTask.status})`,
+            ),
           );
         }
         return false;
@@ -76,9 +70,7 @@ export const tasksCommand: SlashCommand = {
 
       // Show details for a specific task
       const allTasks = manager.getAllTasks();
-      const matchingTask = allTasks.find(
-        (t) => t.id === subcommand || t.id.endsWith(subcommand)
-      );
+      const matchingTask = allTasks.find((t) => t.id === subcommand || t.id.endsWith(subcommand));
 
       if (matchingTask) {
         console.log("");

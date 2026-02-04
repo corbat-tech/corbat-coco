@@ -69,14 +69,17 @@ describe("diffCommand", () => {
     it("should show unstaged diff", async () => {
       const { execSync } = await import("node:child_process");
       vi.mocked(execSync).mockReturnValue(
-        "diff --git a/file.ts b/file.ts\nindex abc..def 100644\n--- a/file.ts\n+++ b/file.ts\n@@ -1,3 +1,4 @@\n+added line\n existing line\n-removed line"
+        "diff --git a/file.ts b/file.ts\nindex abc..def 100644\n--- a/file.ts\n+++ b/file.ts\n@@ -1,3 +1,4 @@\n+added line\n existing line\n-removed line",
       );
 
       await diffCommand.execute([], mockSession);
 
-      expect(execSync).toHaveBeenCalledWith("git diff", expect.objectContaining({
-        cwd: "/test/project",
-      }));
+      expect(execSync).toHaveBeenCalledWith(
+        "git diff",
+        expect.objectContaining({
+          cwd: "/test/project",
+        }),
+      );
       const allOutput = consoleLogSpy.mock.calls.map((call) => call[0]).join("\n");
       expect(allOutput).toContain("Unstaged");
     });
@@ -103,9 +106,7 @@ describe("diffCommand", () => {
   describe("execute with --staged flag", () => {
     it("should show staged diff", async () => {
       const { execSync } = await import("node:child_process");
-      vi.mocked(execSync).mockReturnValue(
-        "diff --git a/file.ts b/file.ts\n+staged line"
-      );
+      vi.mocked(execSync).mockReturnValue("diff --git a/file.ts b/file.ts\n+staged line");
 
       await diffCommand.execute(["--staged"], mockSession);
 

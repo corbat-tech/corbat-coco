@@ -4,59 +4,59 @@
  * CLI commands for managing MCP servers.
  */
 
-import { Command } from 'commander';
-import * as p from '@clack/prompts';
-import { createMCPRegistry } from '../../mcp/registry.js';
-import { validateServerConfig } from '../../mcp/config.js';
-import type { MCPServerConfig } from '../../mcp/types.js';
+import { Command } from "commander";
+import * as p from "@clack/prompts";
+import { createMCPRegistry } from "../../mcp/registry.js";
+import { validateServerConfig } from "../../mcp/config.js";
+import type { MCPServerConfig } from "../../mcp/types.js";
 
 /**
  * Register MCP command
  */
 export function registerMCPCommand(program: Command): void {
   const mcpCommand = program
-    .command('mcp')
-    .description('Manage MCP (Model Context Protocol) servers');
+    .command("mcp")
+    .description("Manage MCP (Model Context Protocol) servers");
 
   // Add subcommand
   mcpCommand
-    .command('add')
-    .description('Add a new MCP server')
-    .argument('<name>', 'Server name (unique identifier)')
-    .option('-c, --command <cmd>', 'Command for stdio transport')
-    .option('-a, --args <args>', 'Arguments for command (comma-separated)')
-    .option('-u, --url <url>', 'URL for HTTP transport')
-    .option('-t, --transport <type>', 'Transport type (stdio or http)', 'stdio')
-    .option('-e, --env <env>', 'Environment variables (KEY=value,...)')
-    .option('-d, --description <desc>', 'Server description')
+    .command("add")
+    .description("Add a new MCP server")
+    .argument("<name>", "Server name (unique identifier)")
+    .option("-c, --command <cmd>", "Command for stdio transport")
+    .option("-a, --args <args>", "Arguments for command (comma-separated)")
+    .option("-u, --url <url>", "URL for HTTP transport")
+    .option("-t, --transport <type>", "Transport type (stdio or http)", "stdio")
+    .option("-e, --env <env>", "Environment variables (KEY=value,...)")
+    .option("-d, --description <desc>", "Server description")
     .action(runAddServer);
 
   // Remove subcommand
   mcpCommand
-    .command('remove')
-    .description('Remove an MCP server')
-    .argument('<name>', 'Server name to remove')
-    .option('-y, --yes', 'Skip confirmation')
+    .command("remove")
+    .description("Remove an MCP server")
+    .argument("<name>", "Server name to remove")
+    .option("-y, --yes", "Skip confirmation")
     .action(runRemoveServer);
 
   // List subcommand
   mcpCommand
-    .command('list')
-    .description('List registered MCP servers')
-    .option('-a, --all', 'Show all servers including disabled')
+    .command("list")
+    .description("List registered MCP servers")
+    .option("-a, --all", "Show all servers including disabled")
     .action(runListServers);
 
   // Enable/disable subcommands
   mcpCommand
-    .command('enable')
-    .description('Enable an MCP server')
-    .argument('<name>', 'Server name to enable')
+    .command("enable")
+    .description("Enable an MCP server")
+    .argument("<name>", "Server name to enable")
     .action(runEnableServer);
 
   mcpCommand
-    .command('disable')
-    .description('Disable an MCP server')
-    .argument('<name>', 'Server name to disable')
+    .command("disable")
+    .description("Disable an MCP server")
+    .argument("<name>", "Server name to disable")
     .action(runDisableServer);
 }
 
@@ -72,9 +72,9 @@ async function runAddServer(
     transport: string;
     env?: string;
     description?: string;
-  }
+  },
 ): Promise<void> {
-  p.intro('Add MCP Server');
+  p.intro("Add MCP Server");
 
   const registry = createMCPRegistry();
   await registry.load();
@@ -87,14 +87,14 @@ async function runAddServer(
     });
 
     if (p.isCancel(overwrite) || !overwrite) {
-      p.outro('Cancelled');
+      p.outro("Cancelled");
       return;
     }
   }
 
   // Validate transport
-  const transport = options.transport as 'stdio' | 'http';
-  if (transport !== 'stdio' && transport !== 'http') {
+  const transport = options.transport as "stdio" | "http";
+  if (transport !== "stdio" && transport !== "http") {
     p.log.error(`Invalid transport type: ${transport}. Must be 'stdio' or 'http'`);
     process.exit(1);
   }
@@ -102,34 +102,34 @@ async function runAddServer(
   // Build config based on transport
   let config: MCPServerConfig;
 
-  if (transport === 'stdio') {
+  if (transport === "stdio") {
     // Get command
     let command = options.command;
     if (!command) {
       const input = await p.text({
-        message: 'Command to execute',
-        placeholder: 'npx -y @modelcontextprotocol/server-filesystem',
+        message: "Command to execute",
+        placeholder: "npx -y @modelcontextprotocol/server-filesystem",
         validate: (value) => {
-          if (!value || value.length === 0) return 'Command is required';
+          if (!value || value.length === 0) return "Command is required";
           return;
         },
       });
 
       if (p.isCancel(input)) {
-        p.outro('Cancelled');
+        p.outro("Cancelled");
         return;
       }
       command = input;
     }
 
     // Parse args
-    const args = options.args ? options.args.split(',').map((a) => a.trim()) : [];
+    const args = options.args ? options.args.split(",").map((a) => a.trim()) : [];
 
     // Parse env
     const env: Record<string, string> = {};
     if (options.env) {
-      for (const pair of options.env.split(',')) {
-        const [key, value] = pair.split('=');
+      for (const pair of options.env.split(",")) {
+        const [key, value] = pair.split("=");
         if (key && value) {
           env[key.trim()] = value.trim();
         }
@@ -139,7 +139,7 @@ async function runAddServer(
     config = {
       name,
       description: options.description,
-      transport: 'stdio',
+      transport: "stdio",
       stdio: {
         command,
         args: args.length > 0 ? args : undefined,
@@ -152,21 +152,21 @@ async function runAddServer(
     let url = options.url;
     if (!url) {
       const input = await p.text({
-        message: 'Server URL',
-        placeholder: 'https://api.example.com/mcp',
+        message: "Server URL",
+        placeholder: "https://api.example.com/mcp",
         validate: (value) => {
-          if (!value || value.length === 0) return 'URL is required';
+          if (!value || value.length === 0) return "URL is required";
           try {
             new URL(value);
             return;
           } catch {
-            return 'Invalid URL';
+            return "Invalid URL";
           }
         },
       });
 
       if (p.isCancel(input)) {
-        p.outro('Cancelled');
+        p.outro("Cancelled");
         return;
       }
       url = input;
@@ -175,7 +175,7 @@ async function runAddServer(
     config = {
       name,
       description: options.description,
-      transport: 'http',
+      transport: "http",
       http: {
         url: url!,
       },
@@ -187,36 +187,33 @@ async function runAddServer(
   try {
     validateServerConfig(config);
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Invalid configuration';
+    const message = error instanceof Error ? error.message : "Invalid configuration";
     p.log.error(`Validation error: ${message}`);
     process.exit(1);
   }
 
   // Add server
   const spinner = p.spinner();
-  spinner.start('Adding server...');
+  spinner.start("Adding server...");
 
   try {
     await registry.addServer(config);
     spinner.stop(`Server '${name}' added successfully`);
   } catch (error) {
-    spinner.stop('Failed to add server');
-    const message = error instanceof Error ? error.message : 'Unknown error';
+    spinner.stop("Failed to add server");
+    const message = error instanceof Error ? error.message : "Unknown error";
     p.log.error(message);
     process.exit(1);
   }
 
-  p.outro('Done');
+  p.outro("Done");
 }
 
 /**
  * Run remove server command
  */
-async function runRemoveServer(
-  name: string,
-  options: { yes?: boolean }
-): Promise<void> {
-  p.intro('Remove MCP Server');
+async function runRemoveServer(name: string, options: { yes?: boolean }): Promise<void> {
+  p.intro("Remove MCP Server");
 
   const registry = createMCPRegistry();
   await registry.load();
@@ -234,25 +231,25 @@ async function runRemoveServer(
     });
 
     if (p.isCancel(confirm) || !confirm) {
-      p.outro('Cancelled');
+      p.outro("Cancelled");
       return;
     }
   }
 
   const spinner = p.spinner();
-  spinner.start('Removing server...');
+  spinner.start("Removing server...");
 
   try {
     await registry.removeServer(name);
     spinner.stop(`Server '${name}' removed`);
   } catch (error) {
-    spinner.stop('Failed to remove server');
-    const message = error instanceof Error ? error.message : 'Unknown error';
+    spinner.stop("Failed to remove server");
+    const message = error instanceof Error ? error.message : "Unknown error";
     p.log.error(message);
     process.exit(1);
   }
 
-  p.outro('Done');
+  p.outro("Done");
 }
 
 /**
@@ -266,21 +263,22 @@ async function runListServers(options: { all?: boolean }): Promise<void> {
 
   if (servers.length === 0) {
     if (options.all) {
-      p.outro('No MCP servers registered');
+      p.outro("No MCP servers registered");
     } else {
-      p.outro('No enabled MCP servers. Use --all to see disabled servers.');
+      p.outro("No enabled MCP servers. Use --all to see disabled servers.");
     }
     return;
   }
 
-  p.log.message('\nRegistered MCP Servers:');
-  p.log.message('');
+  p.log.message("\nRegistered MCP Servers:");
+  p.log.message("");
 
   for (const server of servers) {
-    const status = server.enabled === false ? '🔴 disabled' : '🟢 enabled';
-    const transport = server.transport === 'stdio' 
-      ? `stdio: ${server.stdio?.command}` 
-      : `http: ${server.http?.url}`;
+    const status = server.enabled === false ? "🔴 disabled" : "🟢 enabled";
+    const transport =
+      server.transport === "stdio"
+        ? `stdio: ${server.stdio?.command}`
+        : `http: ${server.http?.url}`;
 
     p.log.message(`  ${server.name}`);
     p.log.message(`    Status: ${status}`);
@@ -288,10 +286,10 @@ async function runListServers(options: { all?: boolean }): Promise<void> {
     if (server.description) {
       p.log.message(`    Description: ${server.description}`);
     }
-    p.log.message('');
+    p.log.message("");
   }
 
-  p.outro(`Total: ${servers.length} server${servers.length === 1 ? '' : 's'}`);
+  p.outro(`Total: ${servers.length} server${servers.length === 1 ? "" : "s"}`);
 }
 
 /**
@@ -313,19 +311,19 @@ async function runEnableServer(name: string): Promise<void> {
   }
 
   const spinner = p.spinner();
-  spinner.start('Enabling server...');
+  spinner.start("Enabling server...");
 
   try {
     await registry.addServer({ ...server, enabled: true });
     spinner.stop(`Server '${name}' enabled`);
   } catch (error) {
-    spinner.stop('Failed to enable server');
-    const message = error instanceof Error ? error.message : 'Unknown error';
+    spinner.stop("Failed to enable server");
+    const message = error instanceof Error ? error.message : "Unknown error";
     p.log.error(message);
     process.exit(1);
   }
 
-  p.outro('Done');
+  p.outro("Done");
 }
 
 /**
@@ -347,17 +345,17 @@ async function runDisableServer(name: string): Promise<void> {
   }
 
   const spinner = p.spinner();
-  spinner.start('Disabling server...');
+  spinner.start("Disabling server...");
 
   try {
     await registry.addServer({ ...server, enabled: false });
     spinner.stop(`Server '${name}' disabled`);
   } catch (error) {
-    spinner.stop('Failed to disable server');
-    const message = error instanceof Error ? error.message : 'Unknown error';
+    spinner.stop("Failed to disable server");
+    const message = error instanceof Error ? error.message : "Unknown error";
     p.log.error(message);
     process.exit(1);
   }
 
-  p.outro('Done');
+  p.outro("Done");
 }

@@ -4,12 +4,12 @@
  * Types for tracking project state and progress in the REPL.
  */
 
-import type { Backlog } from '../../../types/task.js';
+import type { Backlog } from "../../../types/task.js";
 
 /**
  * COCO Phase types
  */
-export type CocoPhase = 'none' | 'converge' | 'orchestrate' | 'complete' | 'output';
+export type CocoPhase = "none" | "converge" | "orchestrate" | "complete" | "output";
 
 /**
  * Project specification summary
@@ -75,17 +75,17 @@ export interface StateStore {
    * Load state for a project
    */
   load(projectPath: string): Promise<ProjectState>;
-  
+
   /**
    * Save state for a project
    */
   save(state: ProjectState): Promise<void>;
-  
+
   /**
    * Clear state for a project
    */
   clear(projectPath: string): Promise<void>;
-  
+
   /**
    * Check if state exists
    */
@@ -100,17 +100,17 @@ export interface StateManager extends StateStore {
    * Update current phase
    */
   updatePhase(projectPath: string, phase: CocoPhase): Promise<void>;
-  
+
   /**
    * Mark phase as completed
    */
   completePhase(projectPath: string, phase: CocoPhase): Promise<void>;
-  
+
   /**
    * Get next suggested phase
    */
   getNextPhase(projectPath: string): Promise<CocoPhase>;
-  
+
   /**
    * Get contextual suggestion
    */
@@ -141,38 +141,38 @@ export interface PhaseMetadata {
  */
 export const PHASE_METADATA: Record<CocoPhase, PhaseMetadata> = {
   none: {
-    name: 'None',
-    description: 'No phases completed yet',
-    emoji: '🆕',
-    command: '/init',
-    nextPhase: 'converge',
+    name: "None",
+    description: "No phases completed yet",
+    emoji: "🆕",
+    command: "/init",
+    nextPhase: "converge",
   },
   converge: {
-    name: 'Converge',
-    description: 'Project specification created',
-    emoji: '📝',
-    command: '/plan',
-    nextPhase: 'orchestrate',
+    name: "Converge",
+    description: "Project specification created",
+    emoji: "📝",
+    command: "/plan",
+    nextPhase: "orchestrate",
   },
   orchestrate: {
-    name: 'Orchestrate',
-    description: 'Architecture designed',
-    emoji: '📐',
-    command: '/build',
-    nextPhase: 'complete',
+    name: "Orchestrate",
+    description: "Architecture designed",
+    emoji: "📐",
+    command: "/build",
+    nextPhase: "complete",
   },
   complete: {
-    name: 'Complete',
-    description: 'Implementation in progress',
-    emoji: '🔨',
-    command: '/build',
-    nextPhase: 'output',
+    name: "Complete",
+    description: "Implementation in progress",
+    emoji: "🔨",
+    command: "/build",
+    nextPhase: "output",
   },
   output: {
-    name: 'Output',
-    description: 'Project ready for deployment',
-    emoji: '🚀',
-    command: '/output',
-    nextPhase: 'none',
+    name: "Output",
+    description: "Project ready for deployment",
+    emoji: "🚀",
+    command: "/output",
+    nextPhase: "none",
   },
 };

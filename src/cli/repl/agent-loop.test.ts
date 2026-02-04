@@ -32,14 +32,15 @@ function toAsyncIterable<T>(gen: Generator<T>): AsyncIterable<T> {
  * Create a streaming mock for a simple text response (no tools)
  */
 function createTextStreamMock(content: string): () => AsyncIterable<StreamChunk> {
-  return () => toAsyncIterable(
-    (function* (): Generator<StreamChunk> {
-      if (content) {
-        yield { type: "text", text: content };
-      }
-      yield { type: "done" };
-    })()
-  );
+  return () =>
+    toAsyncIterable(
+      (function* (): Generator<StreamChunk> {
+        if (content) {
+          yield { type: "text", text: content };
+        }
+        yield { type: "done" };
+      })(),
+    );
 }
 
 /**
@@ -47,20 +48,21 @@ function createTextStreamMock(content: string): () => AsyncIterable<StreamChunk>
  */
 function createToolStreamMock(
   content: string,
-  toolCalls: ToolCall[]
+  toolCalls: ToolCall[],
 ): () => AsyncIterable<StreamChunk> {
-  return () => toAsyncIterable(
-    (function* (): Generator<StreamChunk> {
-      if (content) {
-        yield { type: "text", text: content };
-      }
-      for (const tc of toolCalls) {
-        yield { type: "tool_use_start", toolCall: { id: tc.id, name: tc.name } };
-        yield { type: "tool_use_end", toolCall: tc };
-      }
-      yield { type: "done" };
-    })()
-  );
+  return () =>
+    toAsyncIterable(
+      (function* (): Generator<StreamChunk> {
+        if (content) {
+          yield { type: "text", text: content };
+        }
+        for (const tc of toolCalls) {
+          yield { type: "tool_use_start", toolCall: { id: tc.id, name: tc.name } };
+          yield { type: "tool_use_end", toolCall: tc };
+        }
+        yield { type: "done" };
+      })(),
+    );
 }
 import type { ToolRegistry, ToolResult } from "../../tools/registry.js";
 import type { ReplSession, ExecutedToolCall } from "./types.js";
@@ -170,15 +172,10 @@ describe("executeAgentTurn", () => {
     const { addMessage } = await import("./session.js");
 
     (mockProvider.streamWithTools as Mock).mockImplementation(
-      createTextStreamMock("Hello! How can I help you?")
+      createTextStreamMock("Hello! How can I help you?"),
     );
 
-    const result = await executeAgentTurn(
-      mockSession,
-      "Hello",
-      mockProvider,
-      mockToolRegistry
-    );
+    const result = await executeAgentTurn(mockSession, "Hello", mockProvider, mockToolRegistry);
 
     expect(result.content).toBe("Hello! How can I help you?");
     expect(result.toolCalls).toEqual([]);
@@ -193,7 +190,11 @@ describe("executeAgentTurn", () => {
     const { executeAgentTurn } = await import("./agent-loop.js");
     const { addMessage } = await import("./session.js");
 
-    const toolCall: ToolCall = { id: "tool-1", name: "read_file", input: { path: "/test/file.ts" } };
+    const toolCall: ToolCall = {
+      id: "tool-1",
+      name: "read_file",
+      input: { path: "/test/file.ts" },
+    };
 
     let callCount = 0;
     (mockProvider.streamWithTools as Mock).mockImplementation(() => {
@@ -215,7 +216,7 @@ describe("executeAgentTurn", () => {
       mockSession,
       "Read file.ts",
       mockProvider,
-      mockToolRegistry
+      mockToolRegistry,
     );
 
     expect(result.content).toBe("Let me read that file for you.The file contains your code.");
@@ -225,7 +226,11 @@ describe("executeAgentTurn", () => {
     // Token usage is estimated now
     expect(result.usage.inputTokens).toBeGreaterThan(0);
     expect(result.usage.outputTokens).toBeGreaterThan(0);
-    expect(mockToolRegistry.execute).toHaveBeenCalledWith("read_file", { path: "/test/file.ts" }, expect.anything());
+    expect(mockToolRegistry.execute).toHaveBeenCalledWith(
+      "read_file",
+      { path: "/test/file.ts" },
+      expect.anything(),
+    );
     expect(addMessage).toHaveBeenCalled();
   });
 
@@ -254,7 +259,7 @@ describe("executeAgentTurn", () => {
       mockSession,
       "Read nonexistent file",
       mockProvider,
-      mockToolRegistry
+      mockToolRegistry,
     );
 
     expect(result.toolCalls.length).toBe(1);
@@ -265,19 +270,11 @@ describe("executeAgentTurn", () => {
   it("should call onStream callback when content is received", async () => {
     const { executeAgentTurn } = await import("./agent-loop.js");
 
-    (mockProvider.streamWithTools as Mock).mockImplementation(
-      createTextStreamMock("Hello!")
-    );
+    (mockProvider.streamWithTools as Mock).mockImplementation(createTextStreamMock("Hello!"));
 
     const onStream = vi.fn();
 
-    await executeAgentTurn(
-      mockSession,
-      "Hello",
-      mockProvider,
-      mockToolRegistry,
-      { onStream }
-    );
+    await executeAgentTurn(mockSession, "Hello", mockProvider, mockToolRegistry, { onStream });
 
     expect(onStream).toHaveBeenCalledWith({ type: "text", text: "Hello!" });
     expect(onStream).toHaveBeenCalledWith({ type: "done" });
@@ -306,42 +303,34 @@ describe("executeAgentTurn", () => {
     const onToolStart = vi.fn();
     const onToolEnd = vi.fn();
 
-    await executeAgentTurn(
-      mockSession,
-      "Read file",
-      mockProvider,
-      mockToolRegistry,
-      { onToolStart, onToolEnd }
-    );
+    await executeAgentTurn(mockSession, "Read file", mockProvider, mockToolRegistry, {
+      onToolStart,
+      onToolEnd,
+    });
 
     // onToolStart now receives (toolCall, index, total)
     expect(onToolStart).toHaveBeenCalledWith(
       expect.objectContaining({ id: "tool-1", name: "read_file" }),
       1, // index
-      1  // total
+      1, // total
     );
     expect(onToolEnd).toHaveBeenCalledWith(
-      expect.objectContaining({ id: "tool-1", name: "read_file", result: expect.any(Object) })
+      expect.objectContaining({ id: "tool-1", name: "read_file", result: expect.any(Object) }),
     );
   });
 
   it("should call onThinkingStart and onThinkingEnd callbacks", async () => {
     const { executeAgentTurn } = await import("./agent-loop.js");
 
-    (mockProvider.streamWithTools as Mock).mockImplementation(
-      createTextStreamMock("Response")
-    );
+    (mockProvider.streamWithTools as Mock).mockImplementation(createTextStreamMock("Response"));
 
     const onThinkingStart = vi.fn();
     const onThinkingEnd = vi.fn();
 
-    await executeAgentTurn(
-      mockSession,
-      "Think",
-      mockProvider,
-      mockToolRegistry,
-      { onThinkingStart, onThinkingEnd }
-    );
+    await executeAgentTurn(mockSession, "Think", mockProvider, mockToolRegistry, {
+      onThinkingStart,
+      onThinkingEnd,
+    });
 
     expect(onThinkingStart).toHaveBeenCalled();
     expect(onThinkingEnd).toHaveBeenCalled();
@@ -353,13 +342,9 @@ describe("executeAgentTurn", () => {
     const abortController = new AbortController();
     abortController.abort();
 
-    const result = await executeAgentTurn(
-      mockSession,
-      "Hello",
-      mockProvider,
-      mockToolRegistry,
-      { signal: abortController.signal }
-    );
+    const result = await executeAgentTurn(mockSession, "Hello", mockProvider, mockToolRegistry, {
+      signal: abortController.signal,
+    });
 
     expect(result.aborted).toBe(true);
     expect(mockProvider.streamWithTools).not.toHaveBeenCalled();
@@ -373,9 +358,7 @@ describe("executeAgentTurn", () => {
       { id: "tool-2", name: "read_file", input: { path: "/file2.ts" } },
     ];
 
-    (mockProvider.streamWithTools as Mock).mockImplementation(
-      createToolStreamMock("", toolCalls)
-    );
+    (mockProvider.streamWithTools as Mock).mockImplementation(createToolStreamMock("", toolCalls));
 
     const abortController = new AbortController();
 
@@ -390,7 +373,7 @@ describe("executeAgentTurn", () => {
       "Read files",
       mockProvider,
       mockToolRegistry,
-      { signal: abortController.signal }
+      { signal: abortController.signal },
     );
 
     // Should have executed only 1 tool before abort was detected
@@ -403,9 +386,7 @@ describe("executeAgentTurn", () => {
     // Always return tool calls to force loop
     const toolCall: ToolCall = { id: "tool-1", name: "read_file", input: { path: "/file.ts" } };
 
-    (mockProvider.streamWithTools as Mock).mockImplementation(
-      createToolStreamMock("", [toolCall])
-    );
+    (mockProvider.streamWithTools as Mock).mockImplementation(createToolStreamMock("", [toolCall]));
     (mockToolRegistry.execute as Mock).mockResolvedValue({
       success: true,
       data: "content",
@@ -419,7 +400,7 @@ describe("executeAgentTurn", () => {
       mockSession,
       "Keep going",
       mockProvider,
-      mockToolRegistry
+      mockToolRegistry,
     );
 
     // Should stop after 3 iterations
@@ -455,7 +436,7 @@ describe("executeAgentTurn", () => {
       mockSession,
       "Read all files",
       mockProvider,
-      mockToolRegistry
+      mockToolRegistry,
     );
 
     expect(result.toolCalls.length).toBe(3);
@@ -472,7 +453,11 @@ describe("executeAgentTurn", () => {
       // Trust the write_file tool
       mockSession.trustedTools.add("write_file");
 
-      const toolCall: ToolCall = { id: "tool-1", name: "write_file", input: { path: "/test.ts", content: "code" } };
+      const toolCall: ToolCall = {
+        id: "tool-1",
+        name: "write_file",
+        input: { path: "/test.ts", content: "code" },
+      };
 
       let callCount = 0;
       (mockProvider.streamWithTools as Mock).mockImplementation(() => {
@@ -489,12 +474,7 @@ describe("executeAgentTurn", () => {
         duration: 10,
       });
 
-      await executeAgentTurn(
-        mockSession,
-        "Write file",
-        mockProvider,
-        mockToolRegistry
-      );
+      await executeAgentTurn(mockSession, "Write file", mockProvider, mockToolRegistry);
 
       // Should not prompt for confirmation
       expect(confirmToolExecution).not.toHaveBeenCalled();
@@ -506,7 +486,11 @@ describe("executeAgentTurn", () => {
 
       (requiresConfirmation as Mock).mockReturnValue(true);
 
-      const toolCall: ToolCall = { id: "tool-1", name: "write_file", input: { path: "/test.ts", content: "code" } };
+      const toolCall: ToolCall = {
+        id: "tool-1",
+        name: "write_file",
+        input: { path: "/test.ts", content: "code" },
+      };
 
       let callCount = 0;
       (mockProvider.streamWithTools as Mock).mockImplementation(() => {
@@ -523,13 +507,9 @@ describe("executeAgentTurn", () => {
         duration: 10,
       });
 
-      await executeAgentTurn(
-        mockSession,
-        "Write file",
-        mockProvider,
-        mockToolRegistry,
-        { skipConfirmation: true }
-      );
+      await executeAgentTurn(mockSession, "Write file", mockProvider, mockToolRegistry, {
+        skipConfirmation: true,
+      });
 
       expect(confirmToolExecution).not.toHaveBeenCalled();
     });
@@ -541,7 +521,11 @@ describe("executeAgentTurn", () => {
       (requiresConfirmation as Mock).mockReturnValue(true);
       (confirmToolExecution as Mock).mockResolvedValue("yes");
 
-      const toolCall: ToolCall = { id: "tool-1", name: "write_file", input: { path: "/test.ts", content: "code" } };
+      const toolCall: ToolCall = {
+        id: "tool-1",
+        name: "write_file",
+        input: { path: "/test.ts", content: "code" },
+      };
 
       let callCount = 0;
       (mockProvider.streamWithTools as Mock).mockImplementation(() => {
@@ -558,12 +542,7 @@ describe("executeAgentTurn", () => {
         duration: 10,
       });
 
-      await executeAgentTurn(
-        mockSession,
-        "Write file",
-        mockProvider,
-        mockToolRegistry
-      );
+      await executeAgentTurn(mockSession, "Write file", mockProvider, mockToolRegistry);
 
       expect(confirmToolExecution).toHaveBeenCalled();
       expect(mockToolRegistry.execute).toHaveBeenCalled();
@@ -576,7 +555,11 @@ describe("executeAgentTurn", () => {
       (requiresConfirmation as Mock).mockReturnValue(true);
       (confirmToolExecution as Mock).mockResolvedValue("no");
 
-      const toolCall: ToolCall = { id: "tool-1", name: "write_file", input: { path: "/test.ts", content: "code" } };
+      const toolCall: ToolCall = {
+        id: "tool-1",
+        name: "write_file",
+        input: { path: "/test.ts", content: "code" },
+      };
 
       let callCount = 0;
       (mockProvider.streamWithTools as Mock).mockImplementation(() => {
@@ -589,17 +572,13 @@ describe("executeAgentTurn", () => {
 
       const onToolSkipped = vi.fn();
 
-      await executeAgentTurn(
-        mockSession,
-        "Write file",
-        mockProvider,
-        mockToolRegistry,
-        { onToolSkipped }
-      );
+      await executeAgentTurn(mockSession, "Write file", mockProvider, mockToolRegistry, {
+        onToolSkipped,
+      });
 
       expect(onToolSkipped).toHaveBeenCalledWith(
         expect.objectContaining({ name: "write_file" }),
-        "User declined"
+        "User declined",
       );
       expect(mockToolRegistry.execute).not.toHaveBeenCalled();
     });
@@ -611,17 +590,21 @@ describe("executeAgentTurn", () => {
       (requiresConfirmation as Mock).mockReturnValue(true);
       (confirmToolExecution as Mock).mockResolvedValue("abort");
 
-      const toolCall: ToolCall = { id: "tool-1", name: "write_file", input: { path: "/test.ts", content: "code" } };
+      const toolCall: ToolCall = {
+        id: "tool-1",
+        name: "write_file",
+        input: { path: "/test.ts", content: "code" },
+      };
 
       (mockProvider.streamWithTools as Mock).mockImplementation(
-        createToolStreamMock("Starting...", [toolCall])
+        createToolStreamMock("Starting...", [toolCall]),
       );
 
       const result = await executeAgentTurn(
         mockSession,
         "Write file",
         mockProvider,
-        mockToolRegistry
+        mockToolRegistry,
       );
 
       expect(result.aborted).toBe(true);
@@ -630,7 +613,8 @@ describe("executeAgentTurn", () => {
 
     it("should allow all subsequent tools when user chooses yes_all", async () => {
       const { executeAgentTurn } = await import("./agent-loop.js");
-      const { requiresConfirmation, confirmToolExecution, createConfirmationState } = await import("./confirmation.js");
+      const { requiresConfirmation, confirmToolExecution, createConfirmationState } =
+        await import("./confirmation.js");
 
       (requiresConfirmation as Mock).mockReturnValue(true);
       (confirmToolExecution as Mock).mockResolvedValue("yes_all");
@@ -658,12 +642,7 @@ describe("executeAgentTurn", () => {
         duration: 10,
       });
 
-      await executeAgentTurn(
-        mockSession,
-        "Write files",
-        mockProvider,
-        mockToolRegistry
-      );
+      await executeAgentTurn(mockSession, "Write files", mockProvider, mockToolRegistry);
 
       // Should only prompt once (for first tool), then allow all
       expect(confirmToolExecution).toHaveBeenCalledTimes(1);
@@ -694,12 +673,7 @@ describe("executeAgentTurn", () => {
         duration: 10,
       });
 
-      await executeAgentTurn(
-        mockSession,
-        "Run command",
-        mockProvider,
-        mockToolRegistry
-      );
+      await executeAgentTurn(mockSession, "Run command", mockProvider, mockToolRegistry);
 
       expect(mockSession.trustedTools.has("bash_exec")).toBe(true);
     });

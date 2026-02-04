@@ -26,12 +26,15 @@ export interface AggregatedMetrics {
   successCount: number;
   failureCount: number;
   averageDurationMs: number;
-  phaseBreakdown: Record<Phase, {
-    count: number;
-    totalDurationMs: number;
-    averageDurationMs: number;
-    successRate: number;
-  }>;
+  phaseBreakdown: Record<
+    Phase,
+    {
+      count: number;
+      totalDurationMs: number;
+      averageDurationMs: number;
+      successRate: number;
+    }
+  >;
 }
 
 /**
@@ -56,7 +59,11 @@ export class MetricsCollector {
   /**
    * Complete current phase
    */
-  completePhase(success: boolean, error?: string, additionalDetails?: Record<string, unknown>): void {
+  completePhase(
+    success: boolean,
+    error?: string,
+    additionalDetails?: Record<string, unknown>,
+  ): void {
     if (!this.currentPhase) return;
 
     this.currentPhase.endTime = new Date();
@@ -79,7 +86,12 @@ export class MetricsCollector {
   /**
    * Add custom metric
    */
-  addMetric(phase: Phase, durationMs: number, success: boolean, details?: Record<string, unknown>): void {
+  addMetric(
+    phase: Phase,
+    durationMs: number,
+    success: boolean,
+    details?: Record<string, unknown>,
+  ): void {
     const endTime = new Date();
     const startTime = new Date(endTime.getTime() - durationMs);
 
@@ -159,10 +171,14 @@ export class MetricsCollector {
    * Export metrics as JSON
    */
   toJSON(): string {
-    return JSON.stringify({
-      metrics: this.metrics,
-      aggregated: this.getAggregatedMetrics(),
-    }, null, 2);
+    return JSON.stringify(
+      {
+        metrics: this.metrics,
+        aggregated: this.getAggregatedMetrics(),
+      },
+      null,
+      2,
+    );
   }
 }
 

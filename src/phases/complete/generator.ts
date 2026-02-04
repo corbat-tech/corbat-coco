@@ -4,11 +4,7 @@
  * Generates code based on task requirements
  */
 
-import type {
-  CodeGenerationRequest,
-  CodeGenerationResponse,
-  GeneratedFile,
-} from "./types.js";
+import type { CodeGenerationRequest, CodeGenerationResponse, GeneratedFile } from "./types.js";
 import type { LLMProvider } from "../../providers/types.js";
 import {
   CODE_GENERATION_SYSTEM_PROMPT,
@@ -63,7 +59,7 @@ export class CodeGenerator {
     currentCode: string,
     issues: Array<{ severity: string; message: string; suggestion?: string }>,
     suggestions: Array<{ description: string; priority: string }>,
-    request: CodeGenerationRequest
+    request: CodeGenerationRequest,
   ): Promise<CodeGenerationResponse> {
     const prompt = fillPrompt(IMPROVE_CODE_PROMPT, {
       taskTitle: request.task.title,
@@ -90,7 +86,7 @@ export class CodeGenerator {
   async generateTests(
     codeToTest: string,
     targetCoverage: number,
-    currentCoverage: { lines: number; branches: number; functions: number }
+    currentCoverage: { lines: number; branches: number; functions: number },
   ): Promise<GeneratedFile[]> {
     const prompt = fillPrompt(GENERATE_TESTS_PROMPT, {
       codeToTest,
@@ -190,9 +186,7 @@ export class CodeGenerator {
           content: f.content || "",
           action: (f.action as GeneratedFile["action"]) || "modify",
         })),
-        explanation:
-          parsed.explanation ||
-          (parsed.changesApplied || []).join(", "),
+        explanation: parsed.explanation || (parsed.changesApplied || []).join(", "),
         confidence: parsed.confidence || 50,
       };
     } catch {

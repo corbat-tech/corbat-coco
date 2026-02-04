@@ -36,10 +36,7 @@ export class OutputExecutor implements PhaseExecutor {
   /**
    * Deep merge configuration
    */
-  private mergeConfig(
-    defaults: OutputConfig,
-    overrides: Partial<OutputConfig>
-  ): OutputConfig {
+  private mergeConfig(defaults: OutputConfig, overrides: Partial<OutputConfig>): OutputConfig {
     return {
       cicd: {
         ...defaults.cicd,
@@ -263,10 +260,7 @@ export class OutputExecutor implements PhaseExecutor {
   /**
    * Restore from checkpoint
    */
-  async restore(
-    _checkpoint: PhaseCheckpoint,
-    _context: PhaseContext
-  ): Promise<void> {
+  async restore(_checkpoint: PhaseCheckpoint, _context: PhaseContext): Promise<void> {
     // OUTPUT is fast enough to re-run
   }
 
@@ -353,8 +347,6 @@ export class OutputExecutor implements PhaseExecutor {
 /**
  * Create an OUTPUT phase executor
  */
-export function createOutputExecutor(
-  config?: Partial<OutputConfig>
-): OutputExecutor {
+export function createOutputExecutor(config?: Partial<OutputConfig>): OutputExecutor {
   return new OutputExecutor(config);
 }

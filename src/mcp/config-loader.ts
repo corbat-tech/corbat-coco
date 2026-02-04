@@ -4,11 +4,11 @@
  * Loads MCP configuration from external files.
  */
 
-import { readFile, access } from 'node:fs/promises';
-import type { MCPServerConfig } from './types.js';
-import { validateServerConfig } from './config.js';
-import { MCPErrorCode } from './types.js';
-import { MCPError } from './errors.js';
+import { readFile, access } from "node:fs/promises";
+import type { MCPServerConfig } from "./types.js";
+import { validateServerConfig } from "./config.js";
+import { MCPErrorCode } from "./types.js";
+import { MCPError } from "./errors.js";
 
 /**
  * MCP config file format
@@ -20,7 +20,7 @@ export interface MCPConfigFile {
   servers: Array<{
     name: string;
     description?: string;
-    transport: 'stdio' | 'http';
+    transport: "stdio" | "http";
     stdio?: {
       command: string;
       args?: string[];
@@ -30,7 +30,7 @@ export interface MCPConfigFile {
     http?: {
       url: string;
       auth?: {
-        type: 'oauth' | 'bearer' | 'apikey';
+        type: "oauth" | "bearer" | "apikey";
         token?: string;
         tokenEnv?: string;
         headerName?: string;
@@ -49,19 +49,16 @@ export async function loadMCPConfigFile(configPath: string): Promise<MCPServerCo
   try {
     await access(configPath);
   } catch {
-    throw new MCPError(
-      MCPErrorCode.CONNECTION_ERROR,
-      `Config file not found: ${configPath}`
-    );
+    throw new MCPError(MCPErrorCode.CONNECTION_ERROR, `Config file not found: ${configPath}`);
   }
 
   let content: string;
   try {
-    content = await readFile(configPath, 'utf-8');
+    content = await readFile(configPath, "utf-8");
   } catch (error) {
     throw new MCPError(
       MCPErrorCode.CONNECTION_ERROR,
-      `Failed to read config file: ${error instanceof Error ? error.message : 'Unknown error'}`
+      `Failed to read config file: ${error instanceof Error ? error.message : "Unknown error"}`,
     );
   }
 
@@ -70,7 +67,7 @@ export async function loadMCPConfigFile(configPath: string): Promise<MCPServerCo
     parsed = JSON.parse(content);
   } catch {
     // Try JSON5 or YAML in the future
-    throw new MCPError(MCPErrorCode.PARSE_ERROR, 'Invalid JSON in config file');
+    throw new MCPError(MCPErrorCode.PARSE_ERROR, "Invalid JSON in config file");
   }
 
   const config = parsed as MCPConfigFile;
@@ -88,13 +85,13 @@ export async function loadMCPConfigFile(configPath: string): Promise<MCPServerCo
       validateServerConfig(converted);
       validServers.push(converted);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      errors.push(`Server '${server.name || 'unknown'}': ${message}`);
+      const message = error instanceof Error ? error.message : "Unknown error";
+      errors.push(`Server '${server.name || "unknown"}': ${message}`);
     }
   }
 
   if (errors.length > 0) {
-    console.warn('Some servers failed to load:', errors);
+    console.warn("Some servers failed to load:", errors);
   }
 
   return validServers;
@@ -103,7 +100,7 @@ export async function loadMCPConfigFile(configPath: string): Promise<MCPServerCo
 /**
  * Convert config file format to MCPServerConfig
  */
-function convertServerConfig(server: MCPConfigFile['servers'][0]): MCPServerConfig {
+function convertServerConfig(server: MCPConfigFile["servers"][0]): MCPServerConfig {
   const base: MCPServerConfig = {
     name: server.name,
     description: server.description,
@@ -112,7 +109,7 @@ function convertServerConfig(server: MCPConfigFile['servers'][0]): MCPServerConf
     metadata: server.metadata,
   };
 
-  if (server.transport === 'stdio' && server.stdio) {
+  if (server.transport === "stdio" && server.stdio) {
     return {
       ...base,
       stdio: {
@@ -124,7 +121,7 @@ function convertServerConfig(server: MCPConfigFile['servers'][0]): MCPServerConf
     };
   }
 
-  if (server.transport === 'http' && server.http) {
+  if (server.transport === "http" && server.http) {
     return {
       ...base,
       http: {
@@ -171,13 +168,13 @@ export function mergeMCPConfigs(
  * Load MCP servers from COCO config
  */
 export async function loadMCPServersFromCOCOConfig(
-  configPath?: string
+  configPath?: string,
 ): Promise<MCPServerConfig[]> {
-  const { loadConfig } = await import('../config/loader.js');
-  const { MCPServerConfigEntrySchema } = await import('../config/schema.js');
+  const { loadConfig } = await import("../config/loader.js");
+  const { MCPServerConfigEntrySchema } = await import("../config/schema.js");
 
   const config = await loadConfig(configPath);
-  
+
   if (!config.mcp?.servers || config.mcp.servers.length === 0) {
     return [];
   }
@@ -195,25 +192,27 @@ export async function loadMCPServersFromCOCOConfig(
         description: entry.description,
         transport: entry.transport,
         enabled: entry.enabled,
-        ...(entry.transport === 'stdio' && entry.command && {
-          stdio: {
-            command: entry.command,
-            args: entry.args,
-            env: entry.env,
-          },
-        }),
-        ...(entry.transport === 'http' && entry.url && {
-          http: {
-            url: entry.url,
-            auth: entry.auth,
-          },
-        }),
+        ...(entry.transport === "stdio" &&
+          entry.command && {
+            stdio: {
+              command: entry.command,
+              args: entry.args,
+              env: entry.env,
+            },
+          }),
+        ...(entry.transport === "http" &&
+          entry.url && {
+            http: {
+              url: entry.url,
+              auth: entry.auth,
+            },
+          }),
       };
 
       validateServerConfig(serverConfig);
       servers.push(serverConfig);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
+      const message = error instanceof Error ? error.message : "Unknown error";
       console.warn(`Failed to load MCP server '${entry.name}': ${message}`);
     }
   }

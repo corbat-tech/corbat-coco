@@ -7,7 +7,7 @@
 /**
  * Status of a todo item
  */
-export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'failed';
+export type TodoStatus = "pending" | "in_progress" | "completed" | "failed";
 
 /**
  * A single todo item for tracking progress

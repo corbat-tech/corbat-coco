@@ -58,9 +58,7 @@ describe("createProjectStructure", () => {
     });
 
     const writeFileCalls = vi.mocked(fs.default.writeFile).mock.calls;
-    const configCall = writeFileCalls.find((call) =>
-      String(call[0]).includes("config.json")
-    );
+    const configCall = writeFileCalls.find((call) => String(call[0]).includes("config.json"));
 
     expect(configCall).toBeDefined();
 
@@ -81,9 +79,7 @@ describe("createProjectStructure", () => {
     });
 
     const writeFileCalls = vi.mocked(fs.default.writeFile).mock.calls;
-    const stateCall = writeFileCalls.find((call) =>
-      String(call[0]).includes("project.json")
-    );
+    const stateCall = writeFileCalls.find((call) => String(call[0]).includes("project.json"));
 
     expect(stateCall).toBeDefined();
 
@@ -104,9 +100,7 @@ describe("createProjectStructure", () => {
     });
 
     const writeFileCalls = vi.mocked(fs.default.writeFile).mock.calls;
-    const gitignoreCall = writeFileCalls.find((call) =>
-      String(call[0]).includes(".gitignore")
-    );
+    const gitignoreCall = writeFileCalls.find((call) => String(call[0]).includes(".gitignore"));
 
     expect(gitignoreCall).toBeDefined();
 
@@ -127,9 +121,7 @@ describe("createProjectStructure", () => {
     });
 
     const writeFileCalls = vi.mocked(fs.default.writeFile).mock.calls;
-    const readmeCall = writeFileCalls.find((call) =>
-      String(call[0]).includes("README.md")
-    );
+    const readmeCall = writeFileCalls.find((call) => String(call[0]).includes("README.md"));
 
     expect(readmeCall).toBeDefined();
 
@@ -151,9 +143,7 @@ describe("createProjectStructure", () => {
     });
 
     const writeFileCalls = vi.mocked(fs.default.writeFile).mock.calls;
-    const configCall = writeFileCalls.find((call) =>
-      String(call[0]).includes("config.json")
-    );
+    const configCall = writeFileCalls.find((call) => String(call[0]).includes("config.json"));
 
     const configContent = JSON.parse(String(configCall![1]));
     expect(configContent.quality.minScore).toBe(85);
@@ -173,9 +163,7 @@ describe("createProjectStructure", () => {
     });
 
     const writeFileCalls = vi.mocked(fs.default.writeFile).mock.calls;
-    const configCall = writeFileCalls.find((call) =>
-      String(call[0]).includes("config.json")
-    );
+    const configCall = writeFileCalls.find((call) => String(call[0]).includes("config.json"));
 
     const configContent = JSON.parse(String(configCall![1]));
     expect(configContent.provider.type).toBe("anthropic");

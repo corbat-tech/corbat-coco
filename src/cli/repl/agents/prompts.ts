@@ -198,7 +198,7 @@ export function getAgentConfig(type: AgentType): AgentConfig {
  */
 export function createAgentConfig(
   type: AgentType,
-  overrides?: Partial<Omit<AgentConfig, "type">>
+  overrides?: Partial<Omit<AgentConfig, "type">>,
 ): AgentConfig {
   const defaults = getAgentConfig(type);
   return {

@@ -141,10 +141,7 @@ describe("retry", () => {
   it("should retry on failure", async () => {
     const { retry } = await import("./async.js");
 
-    const fn = vi
-      .fn()
-      .mockRejectedValueOnce(new Error("fail"))
-      .mockResolvedValue("success");
+    const fn = vi.fn().mockRejectedValueOnce(new Error("fail")).mockResolvedValue("success");
 
     const result = await retry(fn, { maxAttempts: 3, initialDelay: 10 });
 
@@ -157,9 +154,7 @@ describe("retry", () => {
 
     const fn = vi.fn().mockRejectedValue(new Error("always fails"));
 
-    await expect(
-      retry(fn, { maxAttempts: 3, initialDelay: 10 })
-    ).rejects.toThrow("always fails");
+    await expect(retry(fn, { maxAttempts: 3, initialDelay: 10 })).rejects.toThrow("always fails");
 
     expect(fn).toHaveBeenCalledTimes(3);
   });
@@ -167,10 +162,7 @@ describe("retry", () => {
   it("should call onRetry callback", async () => {
     const { retry } = await import("./async.js");
 
-    const fn = vi
-      .fn()
-      .mockRejectedValueOnce(new Error("fail"))
-      .mockResolvedValue("success");
+    const fn = vi.fn().mockRejectedValueOnce(new Error("fail")).mockResolvedValue("success");
 
     const onRetry = vi.fn();
 
@@ -271,7 +263,7 @@ describe("createMutex", () => {
     // Either A completes before B starts, or vice versa
     expect(
       order.indexOf("A-end") < order.indexOf("B-start") ||
-        order.indexOf("B-end") < order.indexOf("A-start")
+        order.indexOf("B-end") < order.indexOf("A-start"),
     ).toBe(true);
   });
 });

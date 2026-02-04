@@ -137,10 +137,7 @@ export class CircuitBreaker {
     if (this.state === "half-open") {
       // Any failure in half-open state opens the circuit again
       this.open();
-    } else if (
-      this.state === "closed" &&
-      this.failureCount >= this.config.failureThreshold
-    ) {
+    } else if (this.state === "closed" && this.failureCount >= this.config.failureThreshold) {
       this.open();
     }
   }
@@ -227,7 +224,7 @@ export class CircuitBreaker {
  */
 export function createCircuitBreaker(
   config?: Partial<CircuitBreakerConfig>,
-  providerId?: string
+  providerId?: string,
 ): CircuitBreaker {
   return new CircuitBreaker(config, providerId);
 }

@@ -45,33 +45,26 @@ export const compactSkill: Skill = {
         output: chalk.dim(
           `Context usage is ${usageStrBefore} (${usageBefore.toFixed(0)}%). ` +
             `No compaction needed.\n` +
-            `Use /compact --force to compact anyway.\n`
+            `Use /compact --force to compact anyway.\n`,
         ),
       };
     }
 
     // Perform compaction
     try {
-      const result = await checkAndCompactContext(
-        context.session,
-        context.provider
-      );
+      const result = await checkAndCompactContext(context.session, context.provider);
 
       if (!result || !result.wasCompacted) {
         return {
           success: true,
-          output: chalk.dim(
-            `Context is already optimized. No compaction performed.\n`
-          ),
+          output: chalk.dim(`Context is already optimized. No compaction performed.\n`),
         };
       }
 
       const usageStrAfter = getContextUsageFormatted(context.session);
       const savedTokens = result.originalTokens - result.compactedTokens;
       const savedPercent =
-        ((result.originalTokens - result.compactedTokens) /
-          result.originalTokens) *
-        100;
+        ((result.originalTokens - result.compactedTokens) / result.originalTokens) * 100;
 
       const lines: string[] = [
         chalk.green("Context compacted successfully!\n"),
@@ -79,12 +72,8 @@ export const compactSkill: Skill = {
         chalk.dim("Before: ") + usageStrBefore,
         chalk.dim("After:  ") + usageStrAfter,
         "",
-        chalk.dim(
-          `Saved ${savedTokens.toLocaleString()} tokens (${savedPercent.toFixed(0)}%)`
-        ),
-        chalk.dim(
-          `Messages: ${result.messages.length} in compacted context`
-        ),
+        chalk.dim(`Saved ${savedTokens.toLocaleString()} tokens (${savedPercent.toFixed(0)}%)`),
+        chalk.dim(`Messages: ${result.messages.length} in compacted context`),
         "",
       ];
 

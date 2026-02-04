@@ -13,7 +13,12 @@ export { VERSION } from "./version.js";
 
 // Orchestrator
 export { createOrchestrator } from "./orchestrator/index.js";
-export type { Orchestrator, OrchestratorConfig, ProjectState, Progress } from "./orchestrator/types.js";
+export type {
+  Orchestrator,
+  OrchestratorConfig,
+  ProjectState,
+  Progress,
+} from "./orchestrator/types.js";
 
 // Configuration
 export { loadConfig, saveConfig, createDefaultConfig, configExists } from "./config/index.js";
@@ -81,7 +86,12 @@ export { AnthropicProvider, createAnthropicProvider, createProvider } from "./pr
 export type { LLMProvider, Message, ChatResponse, ChatOptions } from "./providers/types.js";
 
 // Tools
-export { ToolRegistry, createToolRegistry, registerAllTools, createFullToolRegistry } from "./tools/index.js";
+export {
+  ToolRegistry,
+  createToolRegistry,
+  registerAllTools,
+  createFullToolRegistry,
+} from "./tools/index.js";
 
 // Utilities
 export { CocoError, ConfigError, PhaseError, TaskError } from "./utils/errors.js";

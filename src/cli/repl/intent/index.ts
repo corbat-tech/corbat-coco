@@ -12,7 +12,7 @@ export type {
   IntentConfig,
   IntentRecognizer,
   IntentResolution,
-} from './types.js';
+} from "./types.js";
 
 export {
   INTENT_PATTERNS,
@@ -20,7 +20,7 @@ export {
   CONFIDENCE,
   calculateConfidenceBoost,
   getPatternsForIntent,
-} from './patterns.js';
+} from "./patterns.js";
 
 export {
   createIntentRecognizer,
@@ -28,7 +28,7 @@ export {
   DEFAULT_INTENT_CONFIG,
   setLLMProvider,
   isLLMProviderConfigured,
-} from './recognizer.js';
+} from "./recognizer.js";
 
 // LLM Classifier exports
 export {
@@ -36,4 +36,4 @@ export {
   getLLMClassifier,
   hasLLMProvider,
   type LLMClassificationResult,
-} from './llm-classifier.js';
+} from "./llm-classifier.js";

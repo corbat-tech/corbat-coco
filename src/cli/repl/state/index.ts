@@ -14,15 +14,13 @@ export type {
   SpecificationSummary,
   ArchitectureSummary,
   SprintProgress,
-} from './types.js';
+} from "./types.js";
 
-export {
-  PHASE_METADATA,
-} from './types.js';
+export { PHASE_METADATA } from "./types.js";
 
 export {
   createStateManager,
   getStateManager,
   formatStateStatus,
   getStateSummary,
-} from './store.js';
+} from "./store.js";

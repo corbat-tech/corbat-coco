@@ -24,31 +24,26 @@ export interface Task {
  * Task types
  */
 export type TaskType =
-  | "feature"    // New functionality
-  | "test"       // Test implementation
-  | "refactor"   // Code improvement
-  | "docs"       // Documentation
-  | "infra"      // Infrastructure
-  | "config";    // Configuration
+  | "feature" // New functionality
+  | "test" // Test implementation
+  | "refactor" // Code improvement
+  | "docs" // Documentation
+  | "infra" // Infrastructure
+  | "config"; // Configuration
 
 /**
  * Task complexity levels
  */
 export type TaskComplexity =
-  | "trivial"    // < 30 min
-  | "simple"     // 30 min - 2 hours
-  | "moderate"   // 2-8 hours
-  | "complex";   // > 8 hours
+  | "trivial" // < 30 min
+  | "simple" // 30 min - 2 hours
+  | "moderate" // 2-8 hours
+  | "complex"; // > 8 hours
 
 /**
  * Task status
  */
-export type TaskStatus =
-  | "pending"
-  | "in_progress"
-  | "completed"
-  | "blocked"
-  | "rolled_back";
+export type TaskStatus = "pending" | "in_progress" | "completed" | "blocked" | "rolled_back";
 
 /**
  * Version of a task (iteration snapshot)
@@ -242,24 +237,19 @@ export interface Story {
   id: string;
   epicId: string;
   title: string;
-  asA: string;       // "As a [role]"
-  iWant: string;     // "I want [feature]"
-  soThat: string;    // "So that [benefit]"
+  asA: string; // "As a [role]"
+  iWant: string; // "I want [feature]"
+  soThat: string; // "So that [benefit]"
   acceptanceCriteria: string[];
-  tasks: string[];   // Task IDs
-  points: number;    // Story points (1, 2, 3, 5, 8, 13)
+  tasks: string[]; // Task IDs
+  points: number; // Story points (1, 2, 3, 5, 8, 13)
   status: StoryStatus;
 }
 
 /**
  * Story status
  */
-export type StoryStatus =
-  | "backlog"
-  | "ready"
-  | "in_progress"
-  | "review"
-  | "done";
+export type StoryStatus = "backlog" | "ready" | "in_progress" | "review" | "done";
 
 /**
  * Epic (collection of related stories)
@@ -268,7 +258,7 @@ export interface Epic {
   id: string;
   title: string;
   description: string;
-  stories: string[];     // Story IDs
+  stories: string[]; // Story IDs
   priority: 1 | 2 | 3 | 4 | 5;
   dependencies: string[]; // Epic IDs
   status: EpicStatus;
@@ -277,10 +267,7 @@ export interface Epic {
 /**
  * Epic status
  */
-export type EpicStatus =
-  | "planned"
-  | "in_progress"
-  | "done";
+export type EpicStatus = "planned" | "in_progress" | "done";
 
 /**
  * Sprint
@@ -291,7 +278,7 @@ export interface Sprint {
   goal: string;
   startDate: Date;
   endDate?: Date;
-  stories: string[];  // Story IDs
+  stories: string[]; // Story IDs
   status: SprintStatus;
   metrics?: SprintMetrics;
 }
@@ -299,11 +286,7 @@ export interface Sprint {
 /**
  * Sprint status
  */
-export type SprintStatus =
-  | "planning"
-  | "active"
-  | "review"
-  | "completed";
+export type SprintStatus = "planning" | "active" | "review" | "completed";
 
 /**
  * Sprint metrics

@@ -5,7 +5,7 @@
  * Supports both Spanish and English.
  */
 
-import type { IntentType } from './types.js';
+import type { IntentType } from "./types.js";
 
 /**
  * Confidence levels
@@ -173,7 +173,8 @@ export const ENTITY_PATTERNS = {
   flags: /--([a-zA-Z-]+)/g,
 
   /** Tech stack keywords */
-  techStack: /(node\.?js|typescript|python|go|golang|rust|java|react|vue|angular|docker|kubernetes|aws|gcp|azure|postgres|mysql|mongo|redis)\b/gi,
+  techStack:
+    /(node\.?js|typescript|python|go|golang|rust|java|react|vue|angular|docker|kubernetes|aws|gcp|azure|postgres|mysql|mongo|redis)\b/gi,
 };
 
 /**
@@ -195,7 +196,11 @@ export function calculateConfidenceBoost(input: string): number {
   }
 
   // Input starting with action verbs
-  if (/^(haz|crea|genera|construye|implementa|ejecuta|inicializa|create|make|build|run|start)/i.test(input)) {
+  if (
+    /^(haz|crea|genera|construye|implementa|ejecuta|inicializa|create|make|build|run|start)/i.test(
+      input,
+    )
+  ) {
     boost += 0.15;
   }
 

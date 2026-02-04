@@ -7,11 +7,7 @@
 
 import chalk from "chalk";
 import type { SlashCommand, ReplSession } from "../types.js";
-import type {
-  MemoryContext,
-  MemoryFile,
-  MemoryLevel,
-} from "../memory/types.js";
+import type { MemoryContext, MemoryFile, MemoryLevel } from "../memory/types.js";
 import { createEmptyMemoryContext, createMissingMemoryFile } from "../memory/types.js";
 
 /**
@@ -74,7 +70,9 @@ function displayMemoryFile(file: MemoryFile): void {
   const size = formatSize(file.content?.length ?? 0);
   const sectionCount = file.sections.length;
 
-  console.log(`  ${chalk.green("✓")} ${size}, ${sectionCount} section${sectionCount !== 1 ? "s" : ""}`);
+  console.log(
+    `  ${chalk.green("✓")} ${size}, ${sectionCount} section${sectionCount !== 1 ? "s" : ""}`,
+  );
 
   if (file.sections.length > 0) {
     const sectionNames = file.sections.map((s) => s.title).slice(0, 5);
@@ -107,7 +105,9 @@ function displaySection(sectionName: string, memoryContext: MemoryContext): bool
       if (section.title.toLowerCase() === normalizedName) {
         const { emoji, color } = getLevelStyle(file.level);
         console.log();
-        console.log(`${emoji} ${color.bold(section.title)} ${chalk.dim(`from ${getLevelName(file.level)}`)}`);
+        console.log(
+          `${emoji} ${color.bold(section.title)} ${chalk.dim(`from ${getLevelName(file.level)}`)}`,
+        );
         console.log();
         console.log(section.content.trim());
         console.log();
@@ -124,7 +124,9 @@ function displaySection(sectionName: string, memoryContext: MemoryContext): bool
       if (section.title.toLowerCase().includes(normalizedName)) {
         const { emoji, color } = getLevelStyle(file.level);
         console.log();
-        console.log(`${emoji} ${color.bold(section.title)} ${chalk.dim(`from ${getLevelName(file.level)}`)}`);
+        console.log(
+          `${emoji} ${color.bold(section.title)} ${chalk.dim(`from ${getLevelName(file.level)}`)}`,
+        );
         console.log();
         console.log(section.content.trim());
         console.log();
@@ -208,10 +210,7 @@ export const memoryCommand: SlashCommand = {
 
     // Calculate totals
     const loadedFiles = memoryContext.files.filter((f) => f.exists);
-    const totalSize = loadedFiles.reduce(
-      (sum, f) => sum + (f.content?.length ?? 0),
-      0
-    );
+    const totalSize = loadedFiles.reduce((sum, f) => sum + (f.content?.length ?? 0), 0);
     const totalSections = loadedFiles.reduce((sum, f) => sum + f.sections.length, 0);
 
     // Collect all imports from all files

@@ -16,8 +16,8 @@ import type {
   MCPPrompt,
   JSONRPCRequest,
   JSONRPCResponse,
-} from './types.js';
-import { MCPConnectionError, MCPTimeoutError } from './errors.js';
+} from "./types.js";
+import { MCPConnectionError, MCPTimeoutError } from "./errors.js";
 
 /**
  * Default request timeout in milliseconds
@@ -38,11 +38,11 @@ export class MCPClientImpl implements MCPClient {
     }
   >();
   private initialized = false;
-  private serverCapabilities: MCPInitializeResult['capabilities'] | null = null;
+  private serverCapabilities: MCPInitializeResult["capabilities"] | null = null;
 
   constructor(
     private readonly transport: MCPTransport,
-    private readonly requestTimeout = DEFAULT_REQUEST_TIMEOUT
+    private readonly requestTimeout = DEFAULT_REQUEST_TIMEOUT,
   ) {
     this.setupTransportHandlers();
   }
@@ -61,7 +61,7 @@ export class MCPClientImpl implements MCPClient {
 
     this.transport.onClose(() => {
       this.initialized = false;
-      this.rejectAllPending(new MCPConnectionError('Connection closed'));
+      this.rejectAllPending(new MCPConnectionError("Connection closed"));
     });
   }
 
@@ -96,17 +96,14 @@ export class MCPClientImpl implements MCPClient {
   /**
    * Send a request and wait for response
    */
-  private async sendRequest<T>(
-    method: string,
-    params?: Record<string, unknown>
-  ): Promise<T> {
+  private async sendRequest<T>(method: string, params?: Record<string, unknown>): Promise<T> {
     if (!this.transport.isConnected()) {
-      throw new MCPConnectionError('Transport not connected');
+      throw new MCPConnectionError("Transport not connected");
     }
 
     const id = ++this.requestId;
     const request: JSONRPCRequest = {
-      jsonrpc: '2.0',
+      jsonrpc: "2.0",
       id,
       method,
       params,
@@ -140,15 +137,15 @@ export class MCPClientImpl implements MCPClient {
       await this.transport.connect();
     }
 
-    const result = await this.sendRequest<MCPInitializeResult>('initialize', params);
+    const result = await this.sendRequest<MCPInitializeResult>("initialize", params);
     this.serverCapabilities = result.capabilities;
     this.initialized = true;
 
     // Send initialized notification
     await this.transport.send({
-      jsonrpc: '2.0',
+      jsonrpc: "2.0",
       id: ++this.requestId,
-      method: 'notifications/initialized',
+      method: "notifications/initialized",
     });
 
     return result;
@@ -159,7 +156,7 @@ export class MCPClientImpl implements MCPClient {
    */
   async listTools(): Promise<{ tools: MCPTool[] }> {
     this.ensureInitialized();
-    return this.sendRequest<{ tools: MCPTool[] }>('tools/list');
+    return this.sendRequest<{ tools: MCPTool[] }>("tools/list");
   }
 
   /**
@@ -167,7 +164,7 @@ export class MCPClientImpl implements MCPClient {
    */
   async callTool(params: MCPCallToolParams): Promise<MCPCallToolResult> {
     this.ensureInitialized();
-    return this.sendRequest<MCPCallToolResult>('tools/call', params);
+    return this.sendRequest<MCPCallToolResult>("tools/call", params);
   }
 
   /**
@@ -175,7 +172,7 @@ export class MCPClientImpl implements MCPClient {
    */
   async listResources(): Promise<{ resources: MCPResource[] }> {
     this.ensureInitialized();
-    return this.sendRequest<{ resources: MCPResource[] }>('resources/list');
+    return this.sendRequest<{ resources: MCPResource[] }>("resources/list");
   }
 
   /**
@@ -183,7 +180,7 @@ export class MCPClientImpl implements MCPClient {
    */
   async listPrompts(): Promise<{ prompts: MCPPrompt[] }> {
     this.ensureInitialized();
-    return this.sendRequest<{ prompts: MCPPrompt[] }>('prompts/list');
+    return this.sendRequest<{ prompts: MCPPrompt[] }>("prompts/list");
   }
 
   /**
@@ -191,7 +188,7 @@ export class MCPClientImpl implements MCPClient {
    */
   private ensureInitialized(): void {
     if (!this.initialized) {
-      throw new MCPConnectionError('Client not initialized. Call initialize() first.');
+      throw new MCPConnectionError("Client not initialized. Call initialize() first.");
     }
   }
 
@@ -213,7 +210,7 @@ export class MCPClientImpl implements MCPClient {
   /**
    * Get server capabilities
    */
-  getServerCapabilities(): MCPInitializeResult['capabilities'] | null {
+  getServerCapabilities(): MCPInitializeResult["capabilities"] | null {
     return this.serverCapabilities;
   }
 }
@@ -221,9 +218,6 @@ export class MCPClientImpl implements MCPClient {
 /**
  * Create a new MCP client
  */
-export function createMCPClient(
-  transport: MCPTransport,
-  requestTimeout?: number
-): MCPClient {
+export function createMCPClient(transport: MCPTransport, requestTimeout?: number): MCPClient {
   return new MCPClientImpl(transport, requestTimeout);
 }

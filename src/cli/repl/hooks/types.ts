@@ -309,18 +309,13 @@ export interface CreateHookContextOptions {
 /**
  * Factory function type for creating hook contexts.
  */
-export type CreateHookContext = (
-  options: CreateHookContextOptions
-) => HookContext;
+export type CreateHookContext = (options: CreateHookContextOptions) => HookContext;
 
 /**
  * Type guard to check if a value is a valid HookEvent.
  */
 export function isHookEvent(value: unknown): value is HookEvent {
-  return (
-    typeof value === "string" &&
-    HOOK_EVENTS.includes(value as HookEvent)
-  );
+  return typeof value === "string" && HOOK_EVENTS.includes(value as HookEvent);
 }
 
 /**

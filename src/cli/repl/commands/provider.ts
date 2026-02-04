@@ -29,7 +29,7 @@ interface ProviderOption {
  */
 async function selectProviderInteractively(
   providers: ProviderOption[],
-  currentProviderId: string
+  currentProviderId: string,
 ): Promise<string | null> {
   return new Promise((resolve) => {
     let selectedIndex = providers.findIndex((p) => p.id === currentProviderId);
@@ -53,7 +53,9 @@ async function selectProviderInteractively(
           const status = provider.isConfigured ? chalk.green("✓") : chalk.dim("○");
           line += marker;
           line += `${status} ${provider.emoji} `;
-          line += isCurrent ? chalk.green(provider.id.padEnd(12)) : chalk.yellow(provider.id.padEnd(12));
+          line += isCurrent
+            ? chalk.green(provider.id.padEnd(12))
+            : chalk.yellow(provider.id.padEnd(12));
           line += chalk.dim(provider.description.slice(0, 40));
         }
 
@@ -148,7 +150,10 @@ export const providerCommand: SlashCommand = {
         isConfigured: configuredProviders.some((cp) => cp.id === p.id),
       }));
 
-      const selectedProviderId = await selectProviderInteractively(providerOptions, currentProvider);
+      const selectedProviderId = await selectProviderInteractively(
+        providerOptions,
+        currentProvider,
+      );
 
       if (!selectedProviderId) {
         console.log(chalk.dim("Cancelled\n"));
@@ -190,7 +195,7 @@ export const providerCommand: SlashCommand = {
  */
 async function switchProvider(
   newProvider: ReturnType<typeof getAllProviders>[number],
-  session: ReplSession
+  session: ReplSession,
 ): Promise<boolean> {
   // Check if provider is configured
   const apiKey = process.env[newProvider.envVar];
@@ -251,7 +256,9 @@ async function switchProvider(
     console.log(chalk.dim(`  Use /model to change models\n`));
   } catch (error) {
     spinner.stop(chalk.red("Error"));
-    console.log(chalk.red(`\n❌ Error: ${error instanceof Error ? error.message : String(error)}\n`));
+    console.log(
+      chalk.red(`\n❌ Error: ${error instanceof Error ? error.message : String(error)}\n`),
+    );
   }
 
   return false;

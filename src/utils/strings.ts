@@ -83,11 +83,7 @@ export function dedent(str: string): string {
 /**
  * Pluralize a word based on count
  */
-export function pluralize(
-  word: string,
-  count: number,
-  plural?: string
-): string {
+export function pluralize(word: string, count: number, plural?: string): string {
   if (count === 1) {
     return word;
   }
@@ -156,7 +152,7 @@ export function padString(
   str: string,
   length: number,
   char: string = " ",
-  position: "start" | "end" = "end"
+  position: "start" | "end" = "end",
 ): string {
   if (str.length >= length) return str;
   const padding = char.repeat(length - str.length);

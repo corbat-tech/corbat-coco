@@ -64,9 +64,7 @@ function createMockSpecification() {
           acceptance: ["Login works"],
         },
       ],
-      nonFunctional: [
-        { id: "nfr-1", title: "Performance", description: "Fast responses" },
-      ],
+      nonFunctional: [{ id: "nfr-1", title: "Performance", description: "Fast responses" }],
       constraints: ["Must use TypeScript"],
     },
     technical: {
@@ -94,9 +92,7 @@ function createMockArchitectureDoc(): ArchitectureDoc {
       pattern: "hexagonal",
       description: "Clean architecture with hexagonal design",
       principles: ["Dependency Inversion", "Single Responsibility"],
-      qualityAttributes: [
-        { name: "Testability", description: "Easy to test", priority: "high" },
-      ],
+      qualityAttributes: [{ name: "Testability", description: "Easy to test", priority: "high" }],
     },
     components: [
       {
@@ -119,9 +115,7 @@ function createMockArchitectureDoc(): ArchitectureDoc {
         dependencies: [],
       },
     ],
-    relationships: [
-      { from: "api", to: "domain", type: "uses" },
-    ],
+    relationships: [{ from: "api", to: "domain", type: "uses" }],
     dataModels: [
       {
         name: "User",
@@ -176,18 +170,16 @@ describe("ArchitectureGenerator", () => {
             { name: "Maintainability", description: "Easy to maintain", priority: "high" },
           ],
         },
-        components: [
-          { id: "api", name: "API", type: "controller", description: "REST endpoints" },
-        ],
-        relationships: [
-          { from: "api", to: "domain", type: "uses" },
-        ],
+        components: [{ id: "api", name: "API", type: "controller", description: "REST endpoints" }],
+        relationships: [{ from: "api", to: "domain", type: "uses" }],
         dataModels: [
-          { name: "User", description: "User model", fields: [{ name: "id", type: "string", required: true }] },
+          {
+            name: "User",
+            description: "User model",
+            fields: [{ name: "id", type: "string", required: true }],
+          },
         ],
-        integrations: [
-          { name: "DB", type: "database", description: "PostgreSQL" },
-        ],
+        integrations: [{ name: "DB", type: "database", description: "PostgreSQL" }],
       });
 
       const llm = createMockLLM(llmResponse);
@@ -219,7 +211,13 @@ describe("ArchitectureGenerator", () => {
 
       const diagramResponse = JSON.stringify({
         diagrams: [
-          { id: "ctx", type: "c4_context", title: "Context", description: "Context diagram", mermaid: "C4Context\n" },
+          {
+            id: "ctx",
+            type: "c4_context",
+            title: "Context",
+            description: "Context diagram",
+            mermaid: "C4Context\n",
+          },
         ],
       });
 
@@ -262,7 +260,13 @@ describe("ArchitectureGenerator", () => {
 
       const seqResponse = JSON.stringify({
         diagrams: [
-          { id: "seq1", type: "sequence", title: "Auth Flow", description: "Authentication sequence", mermaid: "sequenceDiagram\n" },
+          {
+            id: "seq1",
+            type: "sequence",
+            title: "Auth Flow",
+            description: "Authentication sequence",
+            mermaid: "sequenceDiagram\n",
+          },
         ],
       });
 
@@ -302,7 +306,9 @@ describe("ArchitectureGenerator", () => {
         generateSequenceDiagrams: false,
       });
 
-      await expect(generator.generate(createMockSpecification() as any)).rejects.toThrow(PhaseError);
+      await expect(generator.generate(createMockSpecification() as any)).rejects.toThrow(
+        PhaseError,
+      );
     });
 
     it("should provide default values for missing fields", async () => {
@@ -360,14 +366,10 @@ describe("ArchitectureGenerator", () => {
 
       const baseResponse = JSON.stringify({
         overview: { pattern: "hexagonal", description: "Test description here" },
-        components: [
-          { id: "api", name: "API", type: "controller", layer: "presentation" },
-        ],
+        components: [{ id: "api", name: "API", type: "controller", layer: "presentation" }],
         relationships: [],
         dataModels: [],
-        integrations: [
-          { name: "External Service", type: "rest_api", description: "External" },
-        ],
+        integrations: [{ name: "External Service", type: "rest_api", description: "External" }],
       });
 
       let callCount = 0;
@@ -405,8 +407,8 @@ describe("ArchitectureGenerator", () => {
 
       // Should have fallback diagrams
       expect(result.diagrams.length).toBeGreaterThan(0);
-      expect(result.diagrams.some(d => d.type === "c4_context")).toBe(true);
-      expect(result.diagrams.some(d => d.type === "c4_container")).toBe(true);
+      expect(result.diagrams.some((d) => d.type === "c4_context")).toBe(true);
+      expect(result.diagrams.some((d) => d.type === "c4_container")).toBe(true);
     });
   });
 });
@@ -556,7 +558,8 @@ describe("generateArchitectureMarkdown", () => {
 
 describe("createArchitectureGenerator", () => {
   it("should create an ArchitectureGenerator instance", async () => {
-    const { createArchitectureGenerator, ArchitectureGenerator } = await import("./architecture.js");
+    const { createArchitectureGenerator, ArchitectureGenerator } =
+      await import("./architecture.js");
 
     const llm = createMockLLM("{}");
     const generator = createArchitectureGenerator(llm, DEFAULT_ORCHESTRATE_CONFIG);

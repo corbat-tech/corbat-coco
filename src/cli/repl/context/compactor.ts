@@ -71,12 +71,9 @@ export class ContextCompactor {
    * @param provider - The LLM provider to use for summarization
    * @returns Compacted messages with summary replacing older messages
    */
-  async compact(
-    messages: Message[],
-    provider: LLMProvider
-  ): Promise<CompactionResult> {
+  async compact(messages: Message[], provider: LLMProvider): Promise<CompactionResult> {
     // Filter out system messages - those are handled separately
-    const conversationMessages = messages.filter(m => m.role !== "system");
+    const conversationMessages = messages.filter((m) => m.role !== "system");
 
     // If not enough messages to compact, return as-is
     if (conversationMessages.length <= this.config.preserveLastN) {
@@ -89,13 +86,8 @@ export class ContextCompactor {
     }
 
     // Split messages: older ones to summarize, recent ones to preserve
-    const messagesToSummarize = conversationMessages.slice(
-      0,
-      -this.config.preserveLastN
-    );
-    const messagesToPreserve = conversationMessages.slice(
-      -this.config.preserveLastN
-    );
+    const messagesToSummarize = conversationMessages.slice(0, -this.config.preserveLastN);
+    const messagesToPreserve = conversationMessages.slice(-this.config.preserveLastN);
 
     // If nothing to summarize, return as-is
     if (messagesToSummarize.length === 0) {
@@ -114,24 +106,17 @@ export class ContextCompactor {
     const conversationText = this.formatMessagesForSummary(messagesToSummarize);
 
     // Generate summary using the LLM
-    const summary = await this.generateSummary(
-      conversationText,
-      provider
-    );
+    const summary = await this.generateSummary(conversationText, provider);
 
     // Create compacted message array
     // Include system messages at the start, then summary, then preserved messages
-    const systemMessages = messages.filter(m => m.role === "system");
+    const systemMessages = messages.filter((m) => m.role === "system");
     const summaryMessage: Message = {
       role: "user",
       content: `[Previous conversation summary]\n${summary}\n[End of summary - continuing conversation]`,
     };
 
-    const compactedMessages: Message[] = [
-      ...systemMessages,
-      summaryMessage,
-      ...messagesToPreserve,
-    ];
+    const compactedMessages: Message[] = [...systemMessages, summaryMessage, ...messagesToPreserve];
 
     // Estimate compacted token count
     const compactedTokens = this.estimateTokens(compactedMessages, provider);
@@ -191,20 +176,14 @@ export class ContextCompactor {
   /**
    * Generate a summary of the conversation using the LLM
    */
-  private async generateSummary(
-    conversationText: string,
-    provider: LLMProvider
-  ): Promise<string> {
+  private async generateSummary(conversationText: string, provider: LLMProvider): Promise<string> {
     const prompt = COMPACTION_PROMPT + conversationText;
 
     try {
-      const response = await provider.chat(
-        [{ role: "user", content: prompt }],
-        {
-          maxTokens: this.config.summaryMaxTokens,
-          temperature: 0.3, // Lower temperature for more consistent summaries
-        }
-      );
+      const response = await provider.chat([{ role: "user", content: prompt }], {
+        maxTokens: this.config.summaryMaxTokens,
+        temperature: 0.3, // Lower temperature for more consistent summaries
+      });
 
       return response.content;
     } catch (error) {
@@ -247,8 +226,6 @@ export class ContextCompactor {
 /**
  * Create a context compactor with optional configuration
  */
-export function createContextCompactor(
-  config?: Partial<CompactorConfig>
-): ContextCompactor {
+export function createContextCompactor(config?: Partial<CompactorConfig>): ContextCompactor {
   return new ContextCompactor(config);
 }

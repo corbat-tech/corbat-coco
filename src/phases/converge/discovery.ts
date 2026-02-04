@@ -175,10 +175,9 @@ export class DiscoveryEngine {
         techHints: parseTechHints(parsed.techRecommendations || []),
       };
     } catch {
-      throw new PhaseError(
-        "Failed to parse LLM response for input analysis",
-        { phase: "converge" }
-      );
+      throw new PhaseError("Failed to parse LLM response for input analysis", {
+        phase: "converge",
+      });
     }
   }
 
@@ -241,9 +240,7 @@ export class DiscoveryEngine {
       // Apply modifications
       if (parsed.modifications) {
         for (const mod of parsed.modifications) {
-          const req = this.session.requirements.find(
-            (r) => r.id === mod.requirementId
-          );
+          const req = this.session.requirements.find((r) => r.id === mod.requirementId);
           if (req && mod.change === "description" && typeof mod.newValue === "string") {
             req.description = mod.newValue;
           }
@@ -254,9 +251,8 @@ export class DiscoveryEngine {
       if (parsed.newRequirements) {
         const newReqs = parseRequirements(parsed.newRequirements);
         for (const req of newReqs) {
-          req.sourceMessageId = this.session.conversation[
-            this.session.conversation.length - 1
-          ]?.id || "";
+          req.sourceMessageId =
+            this.session.conversation[this.session.conversation.length - 1]?.id || "";
           this.session.requirements.push(req);
         }
       }
@@ -264,9 +260,7 @@ export class DiscoveryEngine {
       // Confirm assumptions
       if (parsed.confirmedAssumptions) {
         for (const assumptionId of parsed.confirmedAssumptions) {
-          const assumption = this.session.assumptions.find(
-            (a) => a.id === assumptionId
-          );
+          const assumption = this.session.assumptions.find((a) => a.id === assumptionId);
           if (assumption) {
             assumption.confirmed = true;
           }
@@ -284,9 +278,7 @@ export class DiscoveryEngine {
       this.session.clarifications.push(clarification);
 
       // Remove answered question from open questions
-      this.session.openQuestions = this.session.openQuestions.filter(
-        (q) => q.id !== questionId
-      );
+      this.session.openQuestions = this.session.openQuestions.filter((q) => q.id !== questionId);
 
       // Update session
       this.session.updatedAt = new Date();
@@ -307,9 +299,7 @@ export class DiscoveryEngine {
     const prompt = fillPrompt(GENERATE_QUESTIONS_PROMPT, {
       requirements: JSON.stringify(this.session.requirements),
       clarifications: JSON.stringify(this.session.clarifications),
-      assumptions: JSON.stringify(
-        this.session.assumptions.filter((a) => !a.confirmed)
-      ),
+      assumptions: JSON.stringify(this.session.assumptions.filter((a) => !a.confirmed)),
     });
 
     const response = await this.llm.chat([
@@ -403,8 +393,7 @@ export class DiscoveryEngine {
 
       // Add new requirements
       const newReqs = parseRequirements(parsed.newRequirements || []);
-      const lastMsgId =
-        this.session.conversation[this.session.conversation.length - 1]?.id || "";
+      const lastMsgId = this.session.conversation[this.session.conversation.length - 1]?.id || "";
       for (const req of newReqs) {
         req.sourceMessageId = lastMsgId;
         this.session.requirements.push(req);
@@ -414,9 +403,7 @@ export class DiscoveryEngine {
       if (parsed.techPreferences) {
         for (const pref of parsed.techPreferences) {
           if (pref.area && pref.preference) {
-            const existing = this.session.techDecisions.find(
-              (t) => t.area === pref.area
-            );
+            const existing = this.session.techDecisions.find((t) => t.area === pref.area);
             if (!existing) {
               this.session.techDecisions.push({
                 id: randomUUID(),
@@ -453,10 +440,7 @@ export class DiscoveryEngine {
   isComplete(): boolean {
     if (!this.session) return false;
 
-    return (
-      this.session.status === "complete" ||
-      this.session.status === "spec_generated"
-    );
+    return this.session.status === "complete" || this.session.status === "spec_generated";
   }
 
   /**
@@ -526,8 +510,7 @@ export class DiscoveryEngine {
     if (!this.session) return;
 
     // Add requirements
-    const lastMsgId =
-      this.session.conversation[this.session.conversation.length - 1]?.id || "";
+    const lastMsgId = this.session.conversation[this.session.conversation.length - 1]?.id || "";
     for (const req of analysis.requirements) {
       req.sourceMessageId = lastMsgId;
       this.session.requirements.push(req);
@@ -561,11 +544,10 @@ export class DiscoveryEngine {
   private updateSessionStatus(): void {
     if (!this.session) return;
 
-    const hasMinRequirements =
-      this.session.requirements.length >= this.config.minRequirements;
+    const hasMinRequirements = this.session.requirements.length >= this.config.minRequirements;
     const hasCriticalQuestions = this.getCriticalQuestions().length > 0;
     const hasUnconfirmedHighImpact = this.session.assumptions.some(
-      (a) => !a.confirmed && a.confidence === "low"
+      (a) => !a.confirmed && a.confidence === "low",
     );
 
     if (hasCriticalQuestions || hasUnconfirmedHighImpact) {
@@ -583,7 +565,7 @@ export class DiscoveryEngine {
  */
 export function createDiscoveryEngine(
   llm: LLMProvider,
-  config?: Partial<DiscoveryConfig>
+  config?: Partial<DiscoveryConfig>,
 ): DiscoveryEngine {
   return new DiscoveryEngine(llm, config);
 }

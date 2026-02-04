@@ -74,7 +74,7 @@ vi.mock("./confirmation.js", () => ({
  */
 function createMockStreamWithTools(
   content: string,
-  toolCalls: ToolCall[] = []
+  toolCalls: ToolCall[] = [],
 ): () => AsyncIterable<StreamChunk> {
   return function* mockStream(): Generator<StreamChunk> {
     // Yield text content character by character (or in chunks)
@@ -119,12 +119,14 @@ function createMockProvider(): LLMProvider {
     chat: vi.fn(),
     chatWithTools: vi.fn(),
     stream: vi.fn(),
-    streamWithTools: vi.fn().mockImplementation(() => toAsyncIterable(
-      (function* (): Generator<StreamChunk> {
-        yield { type: "text", text: "Mock response" };
-        yield { type: "done" };
-      })()
-    )),
+    streamWithTools: vi.fn().mockImplementation(() =>
+      toAsyncIterable(
+        (function* (): Generator<StreamChunk> {
+          yield { type: "text", text: "Mock response" };
+          yield { type: "done" };
+        })(),
+      ),
+    ),
     countTokens: vi.fn((text: string) => Math.ceil(text.length / 4)),
     getContextWindow: vi.fn(() => 200000),
     isAvailable: vi.fn().mockResolvedValue(true),
@@ -139,7 +141,11 @@ function createMockToolRegistry(): ToolRegistry {
     getToolDefinitionsForLLM: vi.fn(() => [
       { name: "read_file", description: "Read a file", input_schema: { type: "object" } },
       { name: "write_file", description: "Write a file", input_schema: { type: "object" } },
-      { name: "bash_exec", description: "Execute a bash command", input_schema: { type: "object" } },
+      {
+        name: "bash_exec",
+        description: "Execute a bash command",
+        input_schema: { type: "object" },
+      },
     ]),
     execute: vi.fn(),
     register: vi.fn(),
@@ -321,7 +327,7 @@ describe("REPL Integration Tests", () => {
               yield { type: "tool_use_start", toolCall: { id: toolCall.id, name: toolCall.name } };
               yield { type: "tool_use_end", toolCall };
               yield { type: "done" };
-            })()
+            })(),
           );
         }
         // Second call: return final response
@@ -329,7 +335,7 @@ describe("REPL Integration Tests", () => {
           (function* (): Generator<StreamChunk> {
             yield { type: "text", text: "The file contains TypeScript code." };
             yield { type: "done" };
-          })()
+          })(),
         );
       });
 
@@ -344,13 +350,17 @@ describe("REPL Integration Tests", () => {
         mockSession,
         "Read test.ts",
         mockProvider,
-        mockToolRegistry
+        mockToolRegistry,
       );
 
       expect(result.toolCalls).toHaveLength(1);
       expect(result.toolCalls[0]?.name).toBe("read_file");
       expect(result.toolCalls[0]?.result.success).toBe(true);
-      expect(mockToolRegistry.execute).toHaveBeenCalledWith("read_file", { path: "/test.ts" }, expect.anything());
+      expect(mockToolRegistry.execute).toHaveBeenCalledWith(
+        "read_file",
+        { path: "/test.ts" },
+        expect.anything(),
+      );
     });
 
     it("should handle multiple parallel tool calls", async () => {
@@ -374,14 +384,14 @@ describe("REPL Integration Tests", () => {
                 yield { type: "tool_use_end", toolCall: tc };
               }
               yield { type: "done" };
-            })()
+            })(),
           );
         }
         return toAsyncIterable(
           (function* (): Generator<StreamChunk> {
             yield { type: "text", text: "All files read successfully." };
             yield { type: "done" };
-          })()
+          })(),
         );
       });
 
@@ -395,7 +405,7 @@ describe("REPL Integration Tests", () => {
         mockSession,
         "Read all files",
         mockProvider,
-        mockToolRegistry
+        mockToolRegistry,
       );
 
       expect(result.toolCalls).toHaveLength(3);
@@ -405,7 +415,11 @@ describe("REPL Integration Tests", () => {
     it("should handle tool execution errors gracefully", async () => {
       const { executeAgentTurn } = await import("./agent-loop.js");
 
-      const toolCall: ToolCall = { id: "tool-1", name: "read_file", input: { path: "/nonexistent.ts" } };
+      const toolCall: ToolCall = {
+        id: "tool-1",
+        name: "read_file",
+        input: { path: "/nonexistent.ts" },
+      };
 
       let callCount = 0;
       (mockProvider.streamWithTools as Mock).mockImplementation(() => {
@@ -416,14 +430,14 @@ describe("REPL Integration Tests", () => {
               yield { type: "tool_use_start", toolCall: { id: toolCall.id, name: toolCall.name } };
               yield { type: "tool_use_end", toolCall };
               yield { type: "done" };
-            })()
+            })(),
           );
         }
         return toAsyncIterable(
           (function* (): Generator<StreamChunk> {
             yield { type: "text", text: "The file does not exist." };
             yield { type: "done" };
-          })()
+          })(),
         );
       });
 
@@ -437,7 +451,7 @@ describe("REPL Integration Tests", () => {
         mockSession,
         "Read nonexistent.ts",
         mockProvider,
-        mockToolRegistry
+        mockToolRegistry,
       );
 
       expect(result.toolCalls[0]?.result.success).toBe(false);
@@ -451,7 +465,11 @@ describe("REPL Integration Tests", () => {
       (requiresConfirmation as Mock).mockReturnValue(true);
       (confirmToolExecution as Mock).mockResolvedValue("no");
 
-      const toolCall: ToolCall = { id: "tool-1", name: "write_file", input: { path: "/test.ts", content: "code" } };
+      const toolCall: ToolCall = {
+        id: "tool-1",
+        name: "write_file",
+        input: { path: "/test.ts", content: "code" },
+      };
 
       let callCount = 0;
       (mockProvider.streamWithTools as Mock).mockImplementation(() => {
@@ -462,26 +480,22 @@ describe("REPL Integration Tests", () => {
               yield { type: "tool_use_start", toolCall: { id: toolCall.id, name: toolCall.name } };
               yield { type: "tool_use_end", toolCall };
               yield { type: "done" };
-            })()
+            })(),
           );
         }
         return toAsyncIterable(
           (function* (): Generator<StreamChunk> {
             yield { type: "text", text: "Skipped writing file." };
             yield { type: "done" };
-          })()
+          })(),
         );
       });
 
       const onToolSkipped = vi.fn();
 
-      await executeAgentTurn(
-        mockSession,
-        "Write file",
-        mockProvider,
-        mockToolRegistry,
-        { onToolSkipped }
-      );
+      await executeAgentTurn(mockSession, "Write file", mockProvider, mockToolRegistry, {
+        onToolSkipped,
+      });
 
       expect(onToolSkipped).toHaveBeenCalled();
       expect(mockToolRegistry.execute).not.toHaveBeenCalled();
@@ -670,14 +684,14 @@ describe("REPL Integration Tests", () => {
               yield { type: "tool_use_start", toolCall: { id: toolCall.id, name: toolCall.name } };
               yield { type: "tool_use_end", toolCall };
               yield { type: "done" };
-            })()
+            })(),
           );
         }
         return toAsyncIterable(
           (function* (): Generator<StreamChunk> {
             yield { type: "text", text: "File analyzed successfully." };
             yield { type: "done" };
-          })()
+          })(),
         );
       });
 
@@ -692,7 +706,7 @@ describe("REPL Integration Tests", () => {
         sessionWithTracking,
         "Analyze test.ts",
         mockProvider,
-        mockToolRegistry
+        mockToolRegistry,
       );
 
       // Verify result
@@ -731,7 +745,7 @@ describe("REPL Integration Tests", () => {
               yield { type: "tool_use_end", toolCall: tc };
             }
             yield { type: "done" };
-          })()
+          })(),
         );
       });
 
@@ -748,7 +762,7 @@ describe("REPL Integration Tests", () => {
         "Read files",
         mockProvider,
         mockToolRegistry,
-        { signal: abortController.signal }
+        { signal: abortController.signal },
       );
 
       expect(result.toolCalls.length).toBeLessThanOrEqual(2);

@@ -89,11 +89,7 @@ export class BackgroundTaskManager {
    * console.log(task.id); // 'task_1704067200000_abc123'
    * ```
    */
-  createTask(
-    name: string,
-    description: string,
-    executor: TaskExecutor
-  ): BackgroundTask {
+  createTask(name: string, description: string, executor: TaskExecutor): BackgroundTask {
     const task: BackgroundTask = {
       id: generateTaskId(),
       name,
@@ -306,7 +302,7 @@ export class BackgroundTaskManager {
   private async executeTask(
     _task: BackgroundTask,
     executor: TaskExecutor,
-    signal: AbortSignal
+    signal: AbortSignal,
   ): Promise<string> {
     // Check if already aborted
     if (signal.aborted) {

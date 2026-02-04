@@ -107,8 +107,7 @@ describe("types.ts", () => {
     });
 
     it("should not share filePatterns array with constants", async () => {
-      const { createDefaultMemoryConfig, DEFAULT_FILE_PATTERNS } =
-        await import("./types.js");
+      const { createDefaultMemoryConfig, DEFAULT_FILE_PATTERNS } = await import("./types.js");
 
       const config = createDefaultMemoryConfig();
       config.filePatterns.push("NEW.md");
@@ -677,7 +676,7 @@ Use TypeScript with strict mode
 
 ## Testing
 Run tests with vitest`,
-        "utf-8"
+        "utf-8",
       );
 
       const context = await loader.loadMemory(tempDir);
@@ -700,7 +699,7 @@ Run tests with vitest`,
         `# Memory
 
 @./nonexistent-file.md`,
-        "utf-8"
+        "utf-8",
       );
 
       const context = await loader.loadMemory(tempDir);

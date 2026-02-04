@@ -92,9 +92,7 @@ export function registerStatusCommand(program: Command): void {
       try {
         await runStatus({ ...options, cwd: process.cwd() });
       } catch (error) {
-        p.log.error(
-          error instanceof Error ? error.message : "An error occurred"
-        );
+        p.log.error(error instanceof Error ? error.message : "An error occurred");
         process.exit(1);
       }
     });
@@ -139,12 +137,16 @@ export async function runStatus(options: StatusOptions = {}): Promise<StatusResu
 
   // Display status
   p.log.info(chalk.bold(`Project: ${state.name}`));
-  p.log.info(`Phase: ${formatPhaseStatus(state.currentPhase, getPhaseStatusForPhase(state.currentPhase))}`);
+  p.log.info(
+    `Phase: ${formatPhaseStatus(state.currentPhase, getPhaseStatusForPhase(state.currentPhase))}`,
+  );
   p.log.info(`Progress: ${formatProgress(state.progress)}`);
 
   // Show sprint info
   if (state.sprint) {
-    p.log.info(`Sprint: ${state.sprint.name} (${state.sprint.completed}/${state.sprint.total} tasks)`);
+    p.log.info(
+      `Sprint: ${state.sprint.name} (${state.sprint.completed}/${state.sprint.total} tasks)`,
+    );
   }
 
   // Show quality metrics if verbose
@@ -156,7 +158,9 @@ export async function runStatus(options: StatusOptions = {}): Promise<StatusResu
 
   // Show checkpoints if verbose
   if (options.verbose && state.checkpoints.length > 0) {
-    p.log.info(`Checkpoints: ${state.checkpoints.length} available (checkpoint: ${state.checkpoints[0]})`);
+    p.log.info(
+      `Checkpoints: ${state.checkpoints.length} available (checkpoint: ${state.checkpoints[0]})`,
+    );
   }
 
   return {
@@ -297,11 +301,12 @@ async function loadProjectState(cwd: string, config: CocoConfig): Promise<Projec
     sprint,
     metrics,
     checkpoints,
-    lastCheckpoint: checkpoints.length > 0
-      ? {
-          timestamp: new Date().toISOString(),
-          canResume: true,
-        }
-      : undefined,
+    lastCheckpoint:
+      checkpoints.length > 0
+        ? {
+            timestamp: new Date().toISOString(),
+            canResume: true,
+          }
+        : undefined,
   };
 }

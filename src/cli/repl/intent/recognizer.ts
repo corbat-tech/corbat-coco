@@ -11,19 +11,19 @@ import type {
   IntentEntities,
   IntentConfig,
   IntentResolution,
-} from './types.js';
+} from "./types.js";
 import {
   INTENT_PATTERNS,
   ENTITY_PATTERNS,
   CONFIDENCE,
   calculateConfidenceBoost,
-} from './patterns.js';
-import type { LLMProvider } from '../../../providers/types.js';
+} from "./patterns.js";
+import type { LLMProvider } from "../../../providers/types.js";
 import {
   getLLMClassifier,
   setLLMProvider as setClassifierProvider,
   hasLLMProvider,
-} from './llm-classifier.js';
+} from "./llm-classifier.js";
 
 /**
  * Threshold below which LLM classification is attempted
@@ -34,10 +34,10 @@ const LLM_FALLBACK_THRESHOLD = 0.7;
  * Default configuration
  */
 export const DEFAULT_INTENT_CONFIG: IntentConfig = {
-  minConfidence: CONFIDENCE['MINIMUM'] ?? 0.5,
+  minConfidence: CONFIDENCE["MINIMUM"] ?? 0.5,
   autoExecute: false,
-  autoExecuteThreshold: CONFIDENCE['HIGH'] ?? 0.9,
-  alwaysConfirm: ['init', 'build', 'output'],
+  autoExecuteThreshold: CONFIDENCE["HIGH"] ?? 0.9,
+  alwaysConfirm: ["init", "build", "output"],
   autoExecutePreferences: {},
 };
 
@@ -100,7 +100,7 @@ export function createIntentRecognizer(config: Partial<IntentConfig> = {}) {
     const quotedMatches = input.match(/"([^"]+)"|'([^']+)'/g);
     if (quotedMatches) {
       for (const match of quotedMatches) {
-        args.push(match.replace(/["']/g, ''));
+        args.push(match.replace(/["']/g, ""));
       }
     }
     entities.args = args;
@@ -111,17 +111,20 @@ export function createIntentRecognizer(config: Partial<IntentConfig> = {}) {
   /**
    * Match input against patterns for a specific intent type
    */
-  function matchIntent(input: string, type: IntentType): { matched: boolean; confidence: number; pattern?: string } {
+  function matchIntent(
+    input: string,
+    type: IntentType,
+  ): { matched: boolean; confidence: number; pattern?: string } {
     const patterns = INTENT_PATTERNS[type];
 
     for (const pattern of patterns) {
       if (pattern.test(input)) {
         // Calculate base confidence based on match quality
-        let confidence = CONFIDENCE['MEDIUM'] ?? 0.75;
+        let confidence = CONFIDENCE["MEDIUM"] ?? 0.75;
 
         // Exact match gets higher confidence
         if (input.toLowerCase().trim() === type.toLowerCase()) {
-          confidence = CONFIDENCE['HIGH'] ?? 0.9;
+          confidence = CONFIDENCE["HIGH"] ?? 0.9;
         }
 
         // Add boost based on input characteristics
@@ -146,7 +149,7 @@ export function createIntentRecognizer(config: Partial<IntentConfig> = {}) {
 
     if (!trimmedInput) {
       return {
-        type: 'chat',
+        type: "chat",
         confidence: 1,
         entities: {},
         raw: input,
@@ -155,8 +158,15 @@ export function createIntentRecognizer(config: Partial<IntentConfig> = {}) {
 
     // Try to match against all intent types except chat (fallback)
     const intentTypes: IntentType[] = [
-      'plan', 'build', 'task', 'init', 'output',
-      'status', 'trust', 'help', 'exit',
+      "plan",
+      "build",
+      "task",
+      "init",
+      "output",
+      "status",
+      "trust",
+      "help",
+      "exit",
     ];
 
     let bestMatch: Intent | null = null;
@@ -183,7 +193,10 @@ export function createIntentRecognizer(config: Partial<IntentConfig> = {}) {
         // Combine regex and LLM scores if regex had a match
         if (bestMatch && bestMatch.type === llmResult.intent) {
           // Both methods agree - boost confidence
-          const combinedConfidence = Math.min(1, (bestMatch.confidence + llmResult.confidence) / 2 + 0.1);
+          const combinedConfidence = Math.min(
+            1,
+            (bestMatch.confidence + llmResult.confidence) / 2 + 0.1,
+          );
           return {
             type: llmResult.intent,
             confidence: combinedConfidence,
@@ -206,7 +219,7 @@ export function createIntentRecognizer(config: Partial<IntentConfig> = {}) {
     // If no good match, fallback to chat
     if (!bestMatch || bestMatch.confidence < fullConfig.minConfidence) {
       return {
-        type: 'chat',
+        type: "chat",
         confidence: bestMatch?.confidence || 0.3,
         entities: extractEntities(trimmedInput),
         raw: input,
@@ -246,57 +259,57 @@ export function createIntentRecognizer(config: Partial<IntentConfig> = {}) {
     const args: string[] = [];
 
     switch (intent.type) {
-      case 'plan':
-        if (intent.entities.flags?.includes('dry-run')) {
-          args.push('--dry-run');
+      case "plan":
+        if (intent.entities.flags?.includes("dry-run")) {
+          args.push("--dry-run");
         }
-        return { command: 'plan', args };
+        return { command: "plan", args };
 
-      case 'build':
+      case "build":
         if (intent.entities.sprint !== undefined) {
           args.push(`--sprint=${intent.entities.sprint}`);
         }
-        return { command: 'build', args };
+        return { command: "build", args };
 
-      case 'task':
+      case "task":
         if (intent.entities.taskId) {
           args.push(intent.entities.taskId);
         } else if (intent.entities.args?.[0]) {
           args.push(intent.entities.args[0]);
         }
-        return { command: 'task', args };
+        return { command: "task", args };
 
-      case 'init':
+      case "init":
         if (intent.entities.projectName) {
           args.push(intent.entities.projectName);
         } else if (intent.entities.args?.[0]) {
           args.push(intent.entities.args[0]);
         }
-        if (intent.entities.flags?.includes('yes')) {
-          args.push('--yes');
+        if (intent.entities.flags?.includes("yes")) {
+          args.push("--yes");
         }
-        return { command: 'init', args };
+        return { command: "init", args };
 
-      case 'output':
-        if (intent.entities.flags?.includes('ci')) {
-          args.push('--ci');
+      case "output":
+        if (intent.entities.flags?.includes("ci")) {
+          args.push("--ci");
         }
-        if (intent.entities.flags?.includes('docs')) {
-          args.push('--docs');
+        if (intent.entities.flags?.includes("docs")) {
+          args.push("--docs");
         }
-        return { command: 'output', args };
+        return { command: "output", args };
 
-      case 'status':
-        return { command: 'status', args };
+      case "status":
+        return { command: "status", args };
 
-      case 'trust':
-        return { command: 'trust', args: ['status'] };
+      case "trust":
+        return { command: "trust", args: ["status"] };
 
-      case 'help':
-        return { command: 'help', args };
+      case "help":
+        return { command: "help", args };
 
-      case 'exit':
-        return { command: 'exit', args };
+      case "exit":
+        return { command: "exit", args };
 
       default:
         return null;
@@ -320,7 +333,7 @@ export function createIntentRecognizer(config: Partial<IntentConfig> = {}) {
     }
 
     // For chat intents, never execute as command
-    if (intent.type === 'chat') {
+    if (intent.type === "chat") {
       return { execute: false };
     }
 
@@ -362,7 +375,9 @@ let globalRecognizer: ReturnType<typeof createIntentRecognizer> | null = null;
 /**
  * Get or create global intent recognizer
  */
-export function getIntentRecognizer(config?: Partial<IntentConfig>): ReturnType<typeof createIntentRecognizer> {
+export function getIntentRecognizer(
+  config?: Partial<IntentConfig>,
+): ReturnType<typeof createIntentRecognizer> {
   if (!globalRecognizer || config) {
     globalRecognizer = createIntentRecognizer(config);
   }

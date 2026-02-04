@@ -87,9 +87,7 @@ describe("build command", () => {
 
       registerBuildCommand(mockCommand as any);
 
-      expect(mockCommand.description).toHaveBeenCalledWith(
-        expect.stringContaining("task")
-      );
+      expect(mockCommand.description).toHaveBeenCalledWith(expect.stringContaining("task"));
     });
 
     it("should have task option with short flag", async () => {
@@ -104,10 +102,7 @@ describe("build command", () => {
 
       registerBuildCommand(mockCommand as any);
 
-      expect(mockCommand.option).toHaveBeenCalledWith(
-        "-t, --task <task-id>",
-        expect.any(String)
-      );
+      expect(mockCommand.option).toHaveBeenCalledWith("-t, --task <task-id>", expect.any(String));
     });
 
     it("should have sprint option with short flag", async () => {
@@ -124,7 +119,7 @@ describe("build command", () => {
 
       expect(mockCommand.option).toHaveBeenCalledWith(
         "-s, --sprint <sprint-id>",
-        expect.any(String)
+        expect.any(String),
       );
     });
 
@@ -140,10 +135,7 @@ describe("build command", () => {
 
       registerBuildCommand(mockCommand as any);
 
-      expect(mockCommand.option).toHaveBeenCalledWith(
-        "--no-review",
-        expect.any(String)
-      );
+      expect(mockCommand.option).toHaveBeenCalledWith("--no-review", expect.any(String));
     });
 
     it("should have max-iterations option with default value", async () => {
@@ -161,7 +153,7 @@ describe("build command", () => {
       expect(mockCommand.option).toHaveBeenCalledWith(
         "--max-iterations <n>",
         expect.any(String),
-        "10"
+        "10",
       );
     });
 
@@ -180,7 +172,7 @@ describe("build command", () => {
       expect(mockCommand.option).toHaveBeenCalledWith(
         "--min-quality <n>",
         expect.any(String),
-        "85"
+        "85",
       );
     });
 
@@ -289,7 +281,7 @@ describe("build command", () => {
       await promise;
 
       expect(p.log.error).toHaveBeenCalledWith(
-        "No Corbat-Coco project found. Run 'coco init' first."
+        "No Corbat-Coco project found. Run 'coco init' first.",
       );
       expect(process.exit).toHaveBeenCalledWith(1);
     });
@@ -313,9 +305,7 @@ describe("build command", () => {
       await vi.runAllTimersAsync();
       await promise;
 
-      expect(p.log.error).toHaveBeenCalledWith(
-        "No development plan found. Run 'coco plan' first."
-      );
+      expect(p.log.error).toHaveBeenCalledWith("No development plan found. Run 'coco plan' first.");
       expect(process.exit).toHaveBeenCalledWith(1);
     });
 
@@ -325,9 +315,7 @@ describe("build command", () => {
       await vi.runAllTimersAsync();
       await promise;
 
-      expect(p.log.step).toHaveBeenCalledWith(
-        expect.stringContaining("85")
-      );
+      expect(p.log.step).toHaveBeenCalledWith(expect.stringContaining("85"));
     });
 
     it("should parse custom minQuality", async () => {
@@ -336,9 +324,7 @@ describe("build command", () => {
       await vi.runAllTimersAsync();
       await promise;
 
-      expect(p.log.step).toHaveBeenCalledWith(
-        expect.stringContaining("90")
-      );
+      expect(p.log.step).toHaveBeenCalledWith(expect.stringContaining("90"));
     });
 
     it("should log number of tasks found", async () => {
@@ -347,9 +333,7 @@ describe("build command", () => {
       await vi.runAllTimersAsync();
       await promise;
 
-      expect(p.log.info).toHaveBeenCalledWith(
-        expect.stringMatching(/Found \d+ tasks to complete/)
-      );
+      expect(p.log.info).toHaveBeenCalledWith(expect.stringMatching(/Found \d+ tasks to complete/));
     });
 
     it("should execute tasks with spinner", async () => {
@@ -444,7 +428,7 @@ describe("build command", () => {
       registerBuildCommand(mockCommand as any);
 
       const maxIterationsCall = mockCommand.option.mock.calls.find(
-        (call: string[]) => call[0] === "--max-iterations <n>"
+        (call: string[]) => call[0] === "--max-iterations <n>",
       );
 
       expect(maxIterationsCall).toBeDefined();
@@ -464,7 +448,7 @@ describe("build command", () => {
       registerBuildCommand(mockCommand as any);
 
       const minQualityCall = mockCommand.option.mock.calls.find(
-        (call: string[]) => call[0] === "--min-quality <n>"
+        (call: string[]) => call[0] === "--min-quality <n>",
       );
 
       expect(minQualityCall).toBeDefined();
@@ -483,9 +467,7 @@ describe("build command", () => {
 
       registerBuildCommand(mockCommand as any);
 
-      expect(mockCommand.description).toHaveBeenCalledWith(
-        expect.stringMatching(/build/i)
-      );
+      expect(mockCommand.description).toHaveBeenCalledWith(expect.stringMatching(/build/i));
     });
   });
 
@@ -557,7 +539,7 @@ describe("build command", () => {
       // Stop should be called with quality score messages
       const stopCalls = mockSpinnerInstance.stop.mock.calls;
       const qualityCalls = stopCalls.filter((call: string[]) =>
-        call[0]?.includes("Quality score:")
+        call[0]?.includes("Quality score:"),
       );
       expect(qualityCalls.length).toBeGreaterThan(0);
     });
@@ -581,9 +563,7 @@ describe("build command", () => {
       await promise;
 
       // Should log a warning about score below threshold
-      expect(p.log.warn).toHaveBeenCalledWith(
-        expect.stringContaining("below threshold")
-      );
+      expect(p.log.warn).toHaveBeenCalledWith(expect.stringContaining("below threshold"));
     });
 
     it("should process tasks in order", async () => {

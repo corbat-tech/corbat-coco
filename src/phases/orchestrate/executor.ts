@@ -24,11 +24,13 @@ import { DEFAULT_ORCHESTRATE_CONFIG } from "./types.js";
 import type { Specification } from "../converge/types.js";
 import { createLLMAdapter } from "../converge/executor.js";
 import type { Sprint } from "../../types/task.js";
+import { ArchitectureGenerator, generateArchitectureMarkdown } from "./architecture.js";
 import {
-  ArchitectureGenerator,
-  generateArchitectureMarkdown,
-} from "./architecture.js";
-import { ADRGenerator, generateADRMarkdown, getADRFilename, generateADRIndexMarkdown } from "./adr.js";
+  ADRGenerator,
+  generateADRMarkdown,
+  getADRFilename,
+  generateADRIndexMarkdown,
+} from "./adr.js";
 import { BacklogGenerator, generateBacklogMarkdown, generateSprintMarkdown } from "./backlog.js";
 import type { LLMProvider } from "../../providers/types.js";
 // FileSystemError reserved for future use
@@ -95,10 +97,7 @@ export class OrchestrateExecutor implements PhaseExecutor {
       }
 
       // Generate backlog
-      const backlogResult = await backlogGenerator.generate(
-        architecture,
-        specification
-      );
+      const backlogResult = await backlogGenerator.generate(architecture, specification);
       const backlogPath = await this.saveBacklog(context.projectPath, backlogResult);
       artifacts.push({
         type: "backlog",
@@ -107,14 +106,8 @@ export class OrchestrateExecutor implements PhaseExecutor {
       });
 
       // Plan first sprint
-      const firstSprint = await backlogGenerator.planFirstSprint(
-        backlogResult.backlog
-      );
-      const sprintPath = await this.saveSprint(
-        context.projectPath,
-        firstSprint,
-        backlogResult
-      );
+      const firstSprint = await backlogGenerator.planFirstSprint(backlogResult.backlog);
+      const sprintPath = await this.saveSprint(context.projectPath, firstSprint, backlogResult);
       artifacts.push({
         type: "backlog",
         path: sprintPath,
@@ -126,7 +119,7 @@ export class OrchestrateExecutor implements PhaseExecutor {
         const diagramPath = await this.saveDiagram(
           context.projectPath,
           diagram.id,
-          diagram.mermaid
+          diagram.mermaid,
         );
         artifacts.push({
           type: "diagram",
@@ -186,10 +179,7 @@ export class OrchestrateExecutor implements PhaseExecutor {
   /**
    * Restore from checkpoint
    */
-  async restore(
-    _checkpoint: PhaseCheckpoint,
-    _context: PhaseContext
-  ): Promise<void> {
+  async restore(_checkpoint: PhaseCheckpoint, _context: PhaseContext): Promise<void> {
     // ORCHESTRATE is typically fast enough to re-run
   }
 
@@ -371,7 +361,7 @@ export class OrchestrateExecutor implements PhaseExecutor {
 
   private async saveArchitecture(
     projectPath: string,
-    architecture: ArchitectureDoc
+    architecture: ArchitectureDoc,
   ): Promise<string> {
     const dir = path.join(projectPath, ".coco", "architecture");
     await fs.mkdir(dir, { recursive: true });
@@ -409,20 +399,13 @@ export class OrchestrateExecutor implements PhaseExecutor {
     return paths;
   }
 
-  private async saveBacklog(
-    projectPath: string,
-    backlogResult: BacklogResult
-  ): Promise<string> {
+  private async saveBacklog(projectPath: string, backlogResult: BacklogResult): Promise<string> {
     const dir = path.join(projectPath, ".coco", "planning");
     await fs.mkdir(dir, { recursive: true });
 
     // Save markdown
     const mdPath = path.join(dir, "BACKLOG.md");
-    await fs.writeFile(
-      mdPath,
-      generateBacklogMarkdown(backlogResult.backlog),
-      "utf-8"
-    );
+    await fs.writeFile(mdPath, generateBacklogMarkdown(backlogResult.backlog), "utf-8");
 
     // Save JSON
     const jsonPath = path.join(dir, "backlog.json");
@@ -434,18 +417,14 @@ export class OrchestrateExecutor implements PhaseExecutor {
   private async saveSprint(
     projectPath: string,
     sprint: Sprint,
-    backlogResult: BacklogResult
+    backlogResult: BacklogResult,
   ): Promise<string> {
     const dir = path.join(projectPath, ".coco", "planning", "sprints");
     await fs.mkdir(dir, { recursive: true });
 
     const filename = `${sprint.id}.md`;
     const sprintPath = path.join(dir, filename);
-    await fs.writeFile(
-      sprintPath,
-      generateSprintMarkdown(sprint, backlogResult.backlog),
-      "utf-8"
-    );
+    await fs.writeFile(sprintPath, generateSprintMarkdown(sprint, backlogResult.backlog), "utf-8");
 
     // Also save JSON
     const jsonPath = path.join(dir, `${sprint.id}.json`);
@@ -454,11 +433,7 @@ export class OrchestrateExecutor implements PhaseExecutor {
     return sprintPath;
   }
 
-  private async saveDiagram(
-    projectPath: string,
-    id: string,
-    mermaid: string
-  ): Promise<string> {
+  private async saveDiagram(projectPath: string, id: string, mermaid: string): Promise<string> {
     const dir = path.join(projectPath, ".coco", "architecture", "diagrams");
     await fs.mkdir(dir, { recursive: true });
 
@@ -473,7 +448,7 @@ export class OrchestrateExecutor implements PhaseExecutor {
  * Create an ORCHESTRATE phase executor
  */
 export function createOrchestrateExecutor(
-  config?: Partial<OrchestrateConfig>
+  config?: Partial<OrchestrateConfig>,
 ): OrchestrateExecutor {
   return new OrchestrateExecutor(config);
 }
@@ -484,7 +459,7 @@ export function createOrchestrateExecutor(
 export async function runOrchestratePhase(
   projectPath: string,
   llm: LLMProvider,
-  config?: Partial<OrchestrateConfig>
+  config?: Partial<OrchestrateConfig>,
 ): Promise<OrchestrateOutput | { error: string }> {
   const executor = createOrchestrateExecutor(config);
 
@@ -517,7 +492,9 @@ export async function runOrchestratePhase(
   if (result.success) {
     // Load the generated artifacts
     const archPath = result.artifacts.find((a) => a.type === "architecture")?.path;
-    const backlogPath = result.artifacts.find((a) => a.type === "backlog" && a.description === "Project backlog")?.path;
+    const backlogPath = result.artifacts.find(
+      (a) => a.type === "backlog" && a.description === "Project backlog",
+    )?.path;
 
     return {
       architecture: {} as ArchitectureDoc, // Would load from file

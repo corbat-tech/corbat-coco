@@ -7,12 +7,7 @@
 /**
  * Status of a background task
  */
-export type BackgroundTaskStatus =
-  | "pending"
-  | "running"
-  | "completed"
-  | "failed"
-  | "cancelled";
+export type BackgroundTaskStatus = "pending" | "running" | "completed" | "failed" | "cancelled";
 
 /**
  * A background task that runs asynchronously

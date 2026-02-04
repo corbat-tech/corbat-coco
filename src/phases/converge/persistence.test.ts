@@ -78,13 +78,7 @@ describe("getPersistencePaths", () => {
 
 describe("createCheckpoint", () => {
   it("should create a valid checkpoint", () => {
-    const checkpoint = createCheckpoint(
-      "session-123",
-      "discovery",
-      50,
-      false,
-      { key: "value" }
-    );
+    const checkpoint = createCheckpoint("session-123", "discovery", 50, false, { key: "value" });
 
     expect(checkpoint.id).toContain("converge-");
     expect(checkpoint.sessionId).toBe("session-123");
@@ -508,9 +502,9 @@ describe("SessionPersistence - error paths with mocked fs", () => {
     };
 
     try {
-      await expect(
-        persistence.appendConversation("user", "test message")
-      ).rejects.toThrow(/Failed to append to conversation log/);
+      await expect(persistence.appendConversation("user", "test message")).rejects.toThrow(
+        /Failed to append to conversation log/,
+      );
     } finally {
       fs.appendFile = originalAppendFile;
     }
@@ -531,7 +525,7 @@ describe("SessionPersistence - error paths with mocked fs", () => {
 
     try {
       await expect(persistence.deleteSession()).rejects.toThrow(
-        /Failed to delete discovery session/
+        /Failed to delete discovery session/,
       );
     } finally {
       fs.unlink = originalUnlink;
@@ -549,9 +543,9 @@ describe("SessionPersistence - error paths with mocked fs", () => {
     };
 
     try {
-      await expect(
-        persistence.saveSpecification("# Spec content")
-      ).rejects.toThrow(/Failed to save specification/);
+      await expect(persistence.saveSpecification("# Spec content")).rejects.toThrow(
+        /Failed to save specification/,
+      );
     } finally {
       fs.writeFile = originalWriteFile;
     }
@@ -570,9 +564,7 @@ describe("SessionPersistence - error paths with mocked fs", () => {
     };
 
     try {
-      await expect(persistence.clearAll()).rejects.toThrow(
-        /Failed to clear persistence data/
-      );
+      await expect(persistence.clearAll()).rejects.toThrow(/Failed to clear persistence data/);
     } finally {
       fs.rm = originalRm;
     }

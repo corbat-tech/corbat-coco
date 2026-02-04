@@ -179,14 +179,17 @@ describe("createLLMAdapter", () => {
         },
       ];
 
-      await adapter.chatWithTools(
-        [{ role: "user", content: "Read the file" }],
-        { tools }
-      );
+      await adapter.chatWithTools([{ role: "user", content: "Read the file" }], { tools });
 
       expect(mockChatWithTools).toHaveBeenCalledWith(
         [{ role: "user", content: "Read the file" }],
-        [{ name: "file_read", description: "Read a file", parameters: { type: "object", properties: { path: { type: "string" } } } }]
+        [
+          {
+            name: "file_read",
+            description: "Read a file",
+            parameters: { type: "object", properties: { path: { type: "string" } } },
+          },
+        ],
       );
     });
 
@@ -201,12 +204,12 @@ describe("createLLMAdapter", () => {
 
       await adapter.chatWithTools(
         [{ role: "user", content: { nested: "object" } as unknown as string }],
-        { tools: [] }
+        { tools: [] },
       );
 
       expect(mockChatWithTools).toHaveBeenCalledWith(
         [{ role: "user", content: '{"nested":"object"}' }],
-        []
+        [],
       );
     });
 
@@ -214,10 +217,9 @@ describe("createLLMAdapter", () => {
       const context = createMockContext();
       const adapter = createLLMAdapter(context);
 
-      const response = await adapter.chatWithTools(
-        [{ role: "user", content: "Call the tool" }],
-        { tools: [{ name: "test", description: "Test", input_schema: {} }] }
-      );
+      const response = await adapter.chatWithTools([{ role: "user", content: "Call the tool" }], {
+        tools: [{ name: "test", description: "Test", input_schema: {} }],
+      });
 
       expect(response.id).toMatch(/^chat-\d+$/);
       expect(response.content).toBe("Tool response");
@@ -242,10 +244,9 @@ describe("createLLMAdapter", () => {
       const context = createMockContext({ chatWithTools: mockChatWithTools });
       const adapter = createLLMAdapter(context);
 
-      const response = await adapter.chatWithTools(
-        [{ role: "user", content: "Hello" }],
-        { tools: [] }
-      );
+      const response = await adapter.chatWithTools([{ role: "user", content: "Hello" }], {
+        tools: [],
+      });
 
       expect(response.toolCalls).toEqual([]);
     });
@@ -259,10 +260,9 @@ describe("createLLMAdapter", () => {
       const context = createMockContext({ chatWithTools: mockChatWithTools });
       const adapter = createLLMAdapter(context);
 
-      const response = await adapter.chatWithTools(
-        [{ role: "user", content: "Hello" }],
-        { tools: [] }
-      );
+      const response = await adapter.chatWithTools([{ role: "user", content: "Hello" }], {
+        tools: [],
+      });
 
       expect(response.toolCalls).toEqual([]);
     });
@@ -271,10 +271,7 @@ describe("createLLMAdapter", () => {
       const context = createMockContext();
       const adapter = createLLMAdapter(context);
 
-      await adapter.chatWithTools(
-        [{ role: "user", content: "Call tool" }],
-        { tools: [] }
-      );
+      await adapter.chatWithTools([{ role: "user", content: "Call tool" }], { tools: [] });
 
       const usage = adapter.getTokenUsage();
       expect(usage.inputTokens).toBe(200);
@@ -316,9 +313,7 @@ describe("createLLMAdapter", () => {
         events.push(event);
       }
 
-      expect(mockChat).toHaveBeenCalledWith([
-        { role: "user", content: '{"streaming":true}' },
-      ]);
+      expect(mockChat).toHaveBeenCalledWith([{ role: "user", content: '{"streaming":true}' }]);
       expect(events[0]).toEqual({ type: "text", text: "Streamed response" });
     });
 

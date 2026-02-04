@@ -243,9 +243,7 @@ describe("registry.ts", () => {
 
       registry.register(hook);
 
-      expect(() => registry.register(hook)).toThrow(
-        "Hook with ID 'duplicate-id' already exists"
-      );
+      expect(() => registry.register(hook)).toThrow("Hook with ID 'duplicate-id' already exists");
     });
 
     it("should allow multiple hooks with different IDs", () => {
@@ -500,7 +498,7 @@ describe("registry.ts", () => {
       await writeFile(configPath, JSON.stringify(config), "utf-8");
 
       await expect(registry.loadFromFile(configPath)).rejects.toThrow(
-        "Invalid hooks config: missing version"
+        "Invalid hooks config: missing version",
       );
     });
 
@@ -510,7 +508,7 @@ describe("registry.ts", () => {
       await writeFile(configPath, JSON.stringify(config), "utf-8");
 
       await expect(registry.loadFromFile(configPath)).rejects.toThrow(
-        "Invalid hooks config: hooks must be an array"
+        "Invalid hooks config: hooks must be an array",
       );
     });
 
@@ -785,9 +783,7 @@ describe("executor.ts", () => {
     await rm(tempDir, { recursive: true, force: true });
   });
 
-  const createContext = (
-    overrides: Partial<HookContext> = {}
-  ): HookContext => ({
+  const createContext = (overrides: Partial<HookContext> = {}): HookContext => ({
     event: "PreToolUse",
     sessionId: "test-session-123",
     projectPath: tempDir,

@@ -83,9 +83,7 @@ export function createHelpSkill(registry: SkillRegistry): Skill {
         for (const skill of skills) {
           const names = [skill.name, ...(skill.aliases ?? [])];
           const nameStr = names.map((n) => `/${n}`).join(", ");
-          lines.push(
-            `  ${chalk.yellow(nameStr.padEnd(22))} ${chalk.dim(skill.description)}`
-          );
+          lines.push(`  ${chalk.yellow(nameStr.padEnd(22))} ${chalk.dim(skill.description)}`);
         }
 
         lines.push("");
@@ -93,9 +91,7 @@ export function createHelpSkill(registry: SkillRegistry): Skill {
 
       lines.push(chalk.dim("Tips:"));
       lines.push(chalk.dim("  - Type naturally to interact with the agent"));
-      lines.push(
-        chalk.dim("  - The agent can read/write files, run commands, and more")
-      );
+      lines.push(chalk.dim("  - The agent can read/write files, run commands, and more"));
       lines.push(chalk.dim("  - Use Ctrl+D or /exit to quit"));
       lines.push("");
 

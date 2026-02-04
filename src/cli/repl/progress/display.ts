@@ -8,16 +8,16 @@ import chalk from "chalk";
 
 // Alias for consistency with original code
 const pc = chalk;
-import type { TodoItem, ProgressStats } from './types.js';
+import type { TodoItem, ProgressStats } from "./types.js";
 
 /**
  * Status icons for todo items
  */
 const STATUS_ICONS: Record<string, string> = {
-  pending: pc.dim('○'),
-  in_progress: pc.cyan('◐'),
-  completed: pc.green('●'),
-  failed: pc.red('✖'),
+  pending: pc.dim("○"),
+  in_progress: pc.cyan("◐"),
+  completed: pc.green("●"),
+  failed: pc.red("✖"),
 };
 
 /**
@@ -25,10 +25,10 @@ const STATUS_ICONS: Record<string, string> = {
  * Used for verbose output when needed
  */
 export const STATUS_LABELS: Record<string, string> = {
-  pending: pc.dim('pending'),
-  in_progress: pc.cyan('in progress'),
-  completed: pc.green('completed'),
-  failed: pc.red('failed'),
+  pending: pc.dim("pending"),
+  in_progress: pc.cyan("in progress"),
+  completed: pc.green("completed"),
+  failed: pc.red("failed"),
 };
 
 /**
@@ -38,20 +38,16 @@ export const STATUS_LABELS: Record<string, string> = {
  * @param width Width of the progress bar in characters (default 20)
  * @returns Formatted progress bar string
  */
-export function renderProgressBar(
-  completed: number,
-  total: number,
-  width: number = 20
-): string {
+export function renderProgressBar(completed: number, total: number, width: number = 20): string {
   if (total === 0) {
-    return pc.dim('[' + ' '.repeat(width) + '] 0%');
+    return pc.dim("[" + " ".repeat(width) + "] 0%");
   }
 
   const percent = Math.min(100, (completed / total) * 100);
   const filled = Math.round((percent / 100) * width);
   const empty = width - filled;
 
-  const bar = pc.green('█'.repeat(filled)) + pc.dim('░'.repeat(empty));
+  const bar = pc.green("█".repeat(filled)) + pc.dim("░".repeat(empty));
   const percentStr = `${percent.toFixed(0)}%`.padStart(4);
 
   return `[${bar}] ${percentStr}`;
@@ -65,14 +61,14 @@ export function renderProgressBar(
  */
 export function renderTodoItem(todo: TodoItem, indent: number = 0): string {
   const icon = STATUS_ICONS[todo.status];
-  const indentStr = '  '.repeat(indent);
+  const indentStr = "  ".repeat(indent);
 
   let content: string;
-  if (todo.status === 'in_progress') {
+  if (todo.status === "in_progress") {
     content = pc.cyan(todo.activeForm);
-  } else if (todo.status === 'completed') {
+  } else if (todo.status === "completed") {
     content = pc.dim(todo.content);
-  } else if (todo.status === 'failed') {
+  } else if (todo.status === "failed") {
     content = pc.red(todo.content);
   } else {
     content = todo.content;
@@ -87,12 +83,9 @@ export function renderTodoItem(todo: TodoItem, indent: number = 0): string {
  * @param showNested Whether to show nested todos (default true)
  * @returns Formatted todo list string
  */
-export function renderTodoList(
-  todos: TodoItem[],
-  showNested: boolean = true
-): string {
+export function renderTodoList(todos: TodoItem[], showNested: boolean = true): string {
   if (todos.length === 0) {
-    return pc.dim('No tasks');
+    return pc.dim("No tasks");
   }
 
   const lines: string[] = [];
@@ -124,7 +117,7 @@ export function renderTodoList(
     }
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 /**
@@ -133,8 +126,8 @@ export function renderTodoList(
  * @returns Formatted current task string
  */
 export function renderCurrentTask(task: TodoItem): string {
-  const spinner = pc.cyan('◐');
-  const label = pc.dim('Current:');
+  const spinner = pc.cyan("◐");
+  const label = pc.dim("Current:");
   const content = pc.cyan(pc.bold(task.activeForm));
 
   return `${spinner} ${label} ${content}`;
@@ -162,10 +155,10 @@ export function renderProgressStats(stats: ProgressStats): string {
   }
 
   if (parts.length === 0) {
-    return pc.dim('No tasks');
+    return pc.dim("No tasks");
   }
 
-  return parts.join(pc.dim(' | '));
+  return parts.join(pc.dim(" | "));
 }
 
 /**
@@ -175,7 +168,7 @@ export function renderProgressStats(stats: ProgressStats): string {
  */
 export function renderCompactProgress(stats: ProgressStats): string {
   if (stats.total === 0) {
-    return '';
+    return "";
   }
 
   const bar = renderProgressBar(stats.completed, stats.total, 10);
@@ -188,30 +181,27 @@ export function renderCompactProgress(stats: ProgressStats): string {
  * @param currentTask Current task (optional)
  * @returns Full progress display string
  */
-export function renderFullProgress(
-  todos: TodoItem[],
-  currentTask?: TodoItem
-): string {
+export function renderFullProgress(todos: TodoItem[], currentTask?: TodoItem): string {
   const lines: string[] = [];
 
   // Calculate stats
   const total = todos.length;
-  const completed = todos.filter((t) => t.status === 'completed').length;
-  const failed = todos.filter((t) => t.status === 'failed').length;
-  const inProgress = todos.filter((t) => t.status === 'in_progress').length;
-  const pending = todos.filter((t) => t.status === 'pending').length;
+  const completed = todos.filter((t) => t.status === "completed").length;
+  const failed = todos.filter((t) => t.status === "failed").length;
+  const inProgress = todos.filter((t) => t.status === "in_progress").length;
+  const pending = todos.filter((t) => t.status === "pending").length;
 
   // Header with progress bar
   if (total > 0) {
     const bar = renderProgressBar(completed, total);
-    lines.push(`${pc.bold('Progress:')} ${bar}`);
-    lines.push('');
+    lines.push(`${pc.bold("Progress:")} ${bar}`);
+    lines.push("");
   }
 
   // Current task
   if (currentTask) {
     lines.push(renderCurrentTask(currentTask));
-    lines.push('');
+    lines.push("");
   }
 
   // Stats summary
@@ -225,5 +215,5 @@ export function renderFullProgress(
   };
   lines.push(renderProgressStats(stats));
 
-  return lines.join('\n');
+  return lines.join("\n");
 }

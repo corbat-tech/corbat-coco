@@ -150,7 +150,8 @@ describe("withRetry", () => {
   it("should retry on retryable error", async () => {
     const { withRetry } = await import("./retry.js");
 
-    const fn = vi.fn()
+    const fn = vi
+      .fn()
       .mockRejectedValueOnce(new Error("HTTP 500: Server Error"))
       .mockResolvedValue("success");
 
@@ -185,7 +186,7 @@ describe("withRetry", () => {
         maxRetries: 2,
         initialDelayMs: 1, // Minimal delay for fast test
         jitterFactor: 0,
-      })
+      }),
     ).rejects.toThrow("HTTP 500");
 
     expect(fn).toHaveBeenCalledTimes(3); // Initial + 2 retries
@@ -195,9 +196,7 @@ describe("withRetry", () => {
   it("should use custom config", async () => {
     const { withRetry } = await import("./retry.js");
 
-    const fn = vi.fn()
-      .mockRejectedValueOnce(new Error("HTTP 429"))
-      .mockResolvedValue("success");
+    const fn = vi.fn().mockRejectedValueOnce(new Error("HTTP 429")).mockResolvedValue("success");
 
     const resultPromise = withRetry(fn, {
       maxRetries: 1,
@@ -216,7 +215,8 @@ describe("withRetry", () => {
   it("should increase delay exponentially", async () => {
     const { withRetry } = await import("./retry.js");
 
-    const fn = vi.fn()
+    const fn = vi
+      .fn()
       .mockRejectedValueOnce(new Error("HTTP 500"))
       .mockRejectedValueOnce(new Error("HTTP 500"))
       .mockResolvedValue("success");
@@ -241,7 +241,8 @@ describe("withRetry", () => {
   it("should cap delay at maxDelayMs", async () => {
     const { withRetry } = await import("./retry.js");
 
-    const fn = vi.fn()
+    const fn = vi
+      .fn()
       .mockRejectedValueOnce(new Error("HTTP 500"))
       .mockRejectedValueOnce(new Error("HTTP 500"))
       .mockRejectedValueOnce(new Error("HTTP 500"))
@@ -276,7 +277,8 @@ describe("createRetryableMethod", () => {
   it("should wrap method with retry logic", async () => {
     const { createRetryableMethod } = await import("./retry.js");
 
-    const originalMethod = vi.fn()
+    const originalMethod = vi
+      .fn()
       .mockRejectedValueOnce(new Error("HTTP 500"))
       .mockResolvedValue("result");
 

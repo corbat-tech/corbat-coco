@@ -135,10 +135,11 @@ describe("statusCommand", () => {
 
     it("should truncate long git status", async () => {
       const { execSync } = await import("node:child_process");
-      const manyFiles = Array(15).fill(0).map((_, i) => `M  file${i}.ts`).join("\n");
-      vi.mocked(execSync)
-        .mockReturnValueOnce(manyFiles)
-        .mockReturnValueOnce("main");
+      const manyFiles = Array(15)
+        .fill(0)
+        .map((_, i) => `M  file${i}.ts`)
+        .join("\n");
+      vi.mocked(execSync).mockReturnValueOnce(manyFiles).mockReturnValueOnce("main");
 
       await statusCommand.execute([], mockSession);
 

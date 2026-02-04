@@ -9,9 +9,7 @@ import {
 import type { ProviderType } from "../../providers/index.js";
 
 export function registerConfigCommand(program: Command): void {
-  const configCmd = program
-    .command("config")
-    .description("Manage Corbat-Coco configuration");
+  const configCmd = program.command("config").description("Manage Corbat-Coco configuration");
 
   configCmd
     .command("get <key>")
@@ -251,9 +249,10 @@ function printConfig(obj: unknown, prefix: string): void {
     if (typeof value === "object" && value !== null && !Array.isArray(value)) {
       printConfig(value, fullKey);
     } else {
-      const displayValue = typeof value === "string" && value.startsWith("sk-")
-        ? chalk.dim("[hidden]")
-        : chalk.cyan(JSON.stringify(value));
+      const displayValue =
+        typeof value === "string" && value.startsWith("sk-")
+          ? chalk.dim("[hidden]")
+          : chalk.cyan(JSON.stringify(value));
       console.log(`  ${chalk.dim(fullKey + ":")} ${displayValue}`);
     }
   }

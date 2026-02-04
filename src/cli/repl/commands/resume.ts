@@ -101,7 +101,7 @@ function getStatusIcon(status: PersistedSession["status"]): string {
 function displaySessionEntry(
   index: number,
   session: PersistedSession,
-  isCurrentProject: boolean
+  isCurrentProject: boolean,
 ): void {
   const timeAgo = formatRelativeTime(new Date(session.lastSavedAt));
   const tokenStr = formatTokenCount(session.totalTokens);
@@ -109,7 +109,7 @@ function displaySessionEntry(
 
   console.log();
   console.log(
-    `${chalk.yellow(`${index}.`)} ${statusIcon} ${chalk.dim(`[${timeAgo}]`)} ${session.messageCount} messages, ${tokenStr}`
+    `${chalk.yellow(`${index}.`)} ${statusIcon} ${chalk.dim(`[${timeAgo}]`)} ${session.messageCount} messages, ${tokenStr}`,
   );
 
   if (session.title) {
@@ -127,9 +127,9 @@ function displaySessionEntry(
 function displaySessionList(
   currentProjectSessions: PersistedSession[],
   otherSessions: PersistedSession[],
-  currentProjectPath: string
+  currentProjectPath: string,
 ): number {
-  console.log(chalk.cyan.bold("\n" + String.fromCodePoint(0x1F4C2) + " Recent Sessions\n"));
+  console.log(chalk.cyan.bold("\n" + String.fromCodePoint(0x1f4c2) + " Recent Sessions\n"));
 
   let displayIndex = 1;
 
@@ -159,9 +159,7 @@ function displaySessionList(
   // No sessions found
   if (displayIndex === 1) {
     console.log(chalk.yellow("  No sessions found."));
-    console.log(
-      chalk.dim("  Sessions are saved automatically as you work.")
-    );
+    console.log(chalk.dim("  Sessions are saved automatically as you work."));
   }
 
   return displayIndex - 1;
@@ -176,12 +174,8 @@ function displaySessionDetails(session: PersistedSession): void {
   console.log();
   console.log(`${chalk.dim("ID:")} ${session.id}`);
   console.log(`${chalk.dim("Project:")} ${session.projectPath}`);
-  console.log(
-    `${chalk.dim("Started:")} ${formatRelativeTime(new Date(session.startedAt))}`
-  );
-  console.log(
-    `${chalk.dim("Last saved:")} ${formatRelativeTime(new Date(session.lastSavedAt))}`
-  );
+  console.log(`${chalk.dim("Started:")} ${formatRelativeTime(new Date(session.startedAt))}`);
+  console.log(`${chalk.dim("Last saved:")} ${formatRelativeTime(new Date(session.lastSavedAt))}`);
   console.log(`${chalk.dim("Messages:")} ${session.messageCount}`);
   console.log(`${chalk.dim("Tokens:")} ${formatTokenCount(session.totalTokens)}`);
   console.log(`${chalk.dim("Status:")} ${session.status}`);
@@ -202,7 +196,7 @@ function displaySessionDetails(session: PersistedSession): void {
  */
 async function resumeSession(
   targetSession: PersistedSession,
-  currentSession: ReplSession
+  currentSession: ReplSession,
 ): Promise<boolean> {
   const store = getSessionStore();
 
@@ -234,8 +228,8 @@ async function resumeSession(
   console.log();
   console.log(
     chalk.green(
-      `${String.fromCodePoint(0x2713)} Session resumed: ${loadedSession.messages.length} messages loaded`
-    )
+      `${String.fromCodePoint(0x2713)} Session resumed: ${loadedSession.messages.length} messages loaded`,
+    ),
   );
 
   if (targetSession.title) {
@@ -265,10 +259,10 @@ async function runInteractiveMode(session: ReplSession): Promise<boolean> {
 
   // Separate current project sessions from others
   const currentProjectSessions = allSessions.filter(
-    (s) => s.projectPath === currentPath && s.id !== session.id
+    (s) => s.projectPath === currentPath && s.id !== session.id,
   );
   const otherSessions = allSessions.filter(
-    (s) => s.projectPath !== currentPath && s.id !== session.id
+    (s) => s.projectPath !== currentPath && s.id !== session.id,
   );
 
   // Limit to reasonable number
@@ -276,11 +270,7 @@ async function runInteractiveMode(session: ReplSession): Promise<boolean> {
   const limitedOther = otherSessions.slice(0, 5);
 
   // Display sessions
-  const totalCount = displaySessionList(
-    limitedCurrentProject,
-    limitedOther,
-    currentPath
-  );
+  const totalCount = displaySessionList(limitedCurrentProject, limitedOther, currentPath);
 
   if (totalCount === 0) {
     console.log();
@@ -343,10 +333,7 @@ async function runInteractiveMode(session: ReplSession): Promise<boolean> {
 /**
  * Run direct session resumption by ID
  */
-async function runDirectMode(
-  session: ReplSession,
-  sessionId: string
-): Promise<boolean> {
+async function runDirectMode(session: ReplSession, sessionId: string): Promise<boolean> {
   const store = getSessionStore();
 
   // Get all sessions to find the one with matching ID
@@ -356,9 +343,7 @@ async function runDirectMode(
   if (!targetSession) {
     console.log();
     console.log(chalk.red(`Session not found: ${sessionId}`));
-    console.log(
-      chalk.dim("Use /resume without arguments to see available sessions.")
-    );
+    console.log(chalk.dim("Use /resume without arguments to see available sessions."));
     console.log();
     return false;
   }

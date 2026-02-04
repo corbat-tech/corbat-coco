@@ -3,11 +3,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import {
-  renderTaskStatus,
-  renderTaskList,
-  renderTaskNotification,
-} from "./display.js";
+import { renderTaskStatus, renderTaskList, renderTaskNotification } from "./display.js";
 import type { BackgroundTask } from "./types.js";
 
 describe("Background Task Display", () => {

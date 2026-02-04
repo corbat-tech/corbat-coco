@@ -75,7 +75,7 @@ describe("DEFAULT_QUALITY_THRESHOLDS", () => {
     expect(DEFAULT_QUALITY_THRESHOLDS.maxIterations).toBe(10);
     expect(DEFAULT_QUALITY_THRESHOLDS.minIterations).toBe(2);
     expect(DEFAULT_QUALITY_THRESHOLDS.maxIterations).toBeGreaterThan(
-      DEFAULT_QUALITY_THRESHOLDS.minIterations
+      DEFAULT_QUALITY_THRESHOLDS.minIterations,
     );
   });
 
@@ -85,10 +85,10 @@ describe("DEFAULT_QUALITY_THRESHOLDS", () => {
 
   it("target should be higher than minimum", () => {
     expect(DEFAULT_QUALITY_THRESHOLDS.target.overall).toBeGreaterThan(
-      DEFAULT_QUALITY_THRESHOLDS.minimum.overall
+      DEFAULT_QUALITY_THRESHOLDS.minimum.overall,
     );
     expect(DEFAULT_QUALITY_THRESHOLDS.target.testCoverage).toBeGreaterThan(
-      DEFAULT_QUALITY_THRESHOLDS.minimum.testCoverage
+      DEFAULT_QUALITY_THRESHOLDS.minimum.testCoverage,
     );
   });
 });
@@ -124,7 +124,7 @@ describe("QualityScores type", () => {
 describe("Quality calculation helpers", () => {
   function calculateOverallScore(
     dimensions: QualityDimensions,
-    weights: typeof DEFAULT_QUALITY_WEIGHTS
+    weights: typeof DEFAULT_QUALITY_WEIGHTS,
   ): number {
     let score = 0;
     for (const [key, weight] of Object.entries(weights)) {
@@ -137,7 +137,7 @@ describe("Quality calculation helpers", () => {
   function checkConvergence(
     currentScore: number,
     previousScore: number,
-    threshold: number
+    threshold: number,
   ): boolean {
     return Math.abs(currentScore - previousScore) < threshold;
   }
@@ -146,7 +146,7 @@ describe("Quality calculation helpers", () => {
     score: number,
     previousScore: number,
     iteration: number,
-    thresholds: QualityThresholds
+    thresholds: QualityThresholds,
   ): ConvergenceReason {
     if (score >= thresholds.target.overall) {
       return "target_reached";

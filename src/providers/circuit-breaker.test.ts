@@ -239,10 +239,13 @@ describe("CircuitBreaker", () => {
     });
 
     it("should throw CircuitOpenError when circuit is open", async () => {
-      const breaker = new CircuitBreaker({
-        failureThreshold: 2,
-        resetTimeout: 5000,
-      }, "test-provider");
+      const breaker = new CircuitBreaker(
+        {
+          failureThreshold: 2,
+          resetTimeout: 5000,
+        },
+        "test-provider",
+      );
 
       // Open the circuit
       breaker.recordFailure();
@@ -252,7 +255,7 @@ describe("CircuitBreaker", () => {
 
       await expect(breaker.execute(fn)).rejects.toThrow(CircuitOpenError);
       await expect(breaker.execute(fn)).rejects.toThrow(
-        "Circuit breaker is open for provider: test-provider"
+        "Circuit breaker is open for provider: test-provider",
       );
       expect(fn).not.toHaveBeenCalled();
     });
@@ -317,7 +320,7 @@ describe("CircuitBreaker", () => {
       await expect(
         breaker.execute(async () => {
           throw new Error("failure");
-        })
+        }),
       ).rejects.toThrow();
 
       expect(breaker.getState()).toBe("open");
@@ -405,20 +408,18 @@ describe("CircuitBreaker", () => {
       await expect(
         breaker.execute(async () => {
           throw new Error("fail 1");
-        })
+        }),
       ).rejects.toThrow();
       await expect(
         breaker.execute(async () => {
           throw new Error("fail 2");
-        })
+        }),
       ).rejects.toThrow();
 
       expect(breaker.getState()).toBe("open");
 
       // Calls are blocked while open
-      await expect(breaker.execute(async () => "blocked")).rejects.toThrow(
-        CircuitOpenError
-      );
+      await expect(breaker.execute(async () => "blocked")).rejects.toThrow(CircuitOpenError);
 
       // Time passes, circuit becomes half-open
       vi.advanceTimersByTime(5001);

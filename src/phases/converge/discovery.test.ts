@@ -219,7 +219,7 @@ describe("DiscoveryEngine", () => {
       await engine.startSession("Build an API");
 
       const result = await engine.processMessage(
-        "I need user authentication with login and password reset"
+        "I need user authentication with login and password reset",
       );
 
       expect(result.newRequirements.length).toBe(2);
@@ -287,7 +287,9 @@ describe("DiscoveryEngine", () => {
         projectType: "cli",
         complexity: "simple",
         completeness: 30,
-        requirements: [{ category: "functional", priority: "must_have", title: "Test", description: "Test" }],
+        requirements: [
+          { category: "functional", priority: "must_have", title: "Test", description: "Test" },
+        ],
         assumptions: [],
         questions: [
           {
@@ -377,15 +379,17 @@ describe("DiscoveryEngine", () => {
         minRequirements: 10,
       };
 
-      const llm = createMockLLM([JSON.stringify({
-        projectType: "cli",
-        complexity: "simple",
-        completeness: 50,
-        requirements: [],
-        assumptions: [],
-        questions: [],
-        techRecommendations: [],
-      })]);
+      const llm = createMockLLM([
+        JSON.stringify({
+          projectType: "cli",
+          complexity: "simple",
+          completeness: 50,
+          requirements: [],
+          assumptions: [],
+          questions: [],
+          techRecommendations: [],
+        }),
+      ]);
 
       const engine = new DiscoveryEngine(llm, customConfig);
       const session = await engine.startSession("Test");
@@ -461,7 +465,7 @@ describe("DiscoveryEngine - error cases and edge cases", () => {
 
       // Before forceComplete, assumptions should not be confirmed
       const sessionBefore = engine.getSession();
-      expect(sessionBefore?.assumptions.filter(a => a.confirmed).length).toBe(0);
+      expect(sessionBefore?.assumptions.filter((a) => a.confirmed).length).toBe(0);
 
       // Force complete with autoConfirmLowConfidence = true
       engine.forceComplete();
@@ -469,10 +473,12 @@ describe("DiscoveryEngine - error cases and edge cases", () => {
       const sessionAfter = engine.getSession();
       expect(sessionAfter?.status).toBe("complete");
       // Low and medium confidence assumptions should be confirmed
-      expect(sessionAfter?.assumptions.find(a => a.confidence === "low")?.confirmed).toBe(true);
-      expect(sessionAfter?.assumptions.find(a => a.confidence === "medium")?.confirmed).toBe(true);
+      expect(sessionAfter?.assumptions.find((a) => a.confidence === "low")?.confirmed).toBe(true);
+      expect(sessionAfter?.assumptions.find((a) => a.confidence === "medium")?.confirmed).toBe(
+        true,
+      );
       // High confidence assumptions should not be auto-confirmed
-      expect(sessionAfter?.assumptions.find(a => a.confidence === "high")?.confirmed).toBe(false);
+      expect(sessionAfter?.assumptions.find((a) => a.confidence === "high")?.confirmed).toBe(false);
     });
 
     it("should complete without confirming assumptions when autoConfirmLowConfidence is false", async () => {
@@ -502,7 +508,7 @@ describe("DiscoveryEngine - error cases and edge cases", () => {
       const session = engine.getSession();
       expect(session?.status).toBe("complete");
       // Assumption should NOT be confirmed
-      expect(session?.assumptions.find(a => a.confidence === "low")?.confirmed).toBe(false);
+      expect(session?.assumptions.find((a) => a.confidence === "low")?.confirmed).toBe(false);
     });
   });
 
@@ -511,7 +517,9 @@ describe("DiscoveryEngine - error cases and edge cases", () => {
       const llm = createMockLLM(["{}"]);
       const engine = new DiscoveryEngine(llm);
 
-      await expect(engine.processAnswer("q1", "answer")).rejects.toThrow("No active discovery session");
+      await expect(engine.processAnswer("q1", "answer")).rejects.toThrow(
+        "No active discovery session",
+      );
     });
 
     it("should throw error when question not found", async () => {
@@ -530,7 +538,9 @@ describe("DiscoveryEngine - error cases and edge cases", () => {
 
       await engine.startSession("Build something");
 
-      await expect(engine.processAnswer("nonexistent-id", "answer")).rejects.toThrow("Question not found");
+      await expect(engine.processAnswer("nonexistent-id", "answer")).rejects.toThrow(
+        "Question not found",
+      );
     });
   });
 
@@ -548,7 +558,9 @@ describe("DiscoveryEngine - error cases and edge cases", () => {
       const llm = createMockLLM(["{}"]);
       const engine = new DiscoveryEngine(llm);
 
-      await expect(engine.processMessage("some message")).rejects.toThrow("No active discovery session");
+      await expect(engine.processMessage("some message")).rejects.toThrow(
+        "No active discovery session",
+      );
     });
   });
 
@@ -557,14 +569,18 @@ describe("DiscoveryEngine - error cases and edge cases", () => {
       const llm = createMockLLM(["This is not JSON"]);
       const engine = new DiscoveryEngine(llm);
 
-      await expect(engine.analyzeInput("Build something")).rejects.toThrow("Failed to parse LLM response");
+      await expect(engine.analyzeInput("Build something")).rejects.toThrow(
+        "Failed to parse LLM response",
+      );
     });
 
     it("should throw error when LLM response has invalid JSON", async () => {
       const llm = createMockLLM(["{ invalid json }"]);
       const engine = new DiscoveryEngine(llm);
 
-      await expect(engine.analyzeInput("Build something")).rejects.toThrow("Failed to parse LLM response");
+      await expect(engine.analyzeInput("Build something")).rejects.toThrow(
+        "Failed to parse LLM response",
+      );
     });
   });
 
@@ -883,7 +899,9 @@ describe("DiscoveryEngine - error cases and edge cases", () => {
       const questionId = session.openQuestions[0]?.id;
 
       if (questionId) {
-        await expect(engine.processAnswer(questionId, "answer")).rejects.toThrow("Failed to process answer");
+        await expect(engine.processAnswer(questionId, "answer")).rejects.toThrow(
+          "Failed to process answer",
+        );
       }
     });
   });
@@ -926,7 +944,9 @@ describe("DiscoveryEngine - error cases and edge cases", () => {
 
       await engine.startSession("Build a tool");
 
-      await expect(engine.processMessage("some message")).rejects.toThrow("Failed to process message");
+      await expect(engine.processMessage("some message")).rejects.toThrow(
+        "Failed to process message",
+      );
     });
   });
 });

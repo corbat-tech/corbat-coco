@@ -148,13 +148,9 @@ describe("Converge utility functions", () => {
 
   describe("createCheckpoint", () => {
     it("should create a valid checkpoint", () => {
-      const checkpoint = ConvergeExports.createCheckpoint(
-        "session-123",
-        "discovery",
-        50,
-        false,
-        { customKey: "customValue" }
-      );
+      const checkpoint = ConvergeExports.createCheckpoint("session-123", "discovery", 50, false, {
+        customKey: "customValue",
+      });
 
       expect(checkpoint.id).toContain("converge-");
       expect(checkpoint.sessionId).toBe("session-123");

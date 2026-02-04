@@ -101,14 +101,16 @@ export class GeminiProvider implements LLMProvider {
    */
   async chatWithTools(
     messages: Message[],
-    options: ChatWithToolsOptions
+    options: ChatWithToolsOptions,
   ): Promise<ChatWithToolsResponse> {
     this.ensureInitialized();
 
     try {
-      const tools: Tool[] = [{
-        functionDeclarations: this.convertTools(options.tools),
-      }];
+      const tools: Tool[] = [
+        {
+          functionDeclarations: this.convertTools(options.tools),
+        },
+      ];
 
       const model = this.client!.getGenerativeModel({
         model: options?.model ?? this.config.model ?? DEFAULT_MODEL,
@@ -139,10 +141,7 @@ export class GeminiProvider implements LLMProvider {
   /**
    * Stream a chat response
    */
-  async *stream(
-    messages: Message[],
-    options?: ChatOptions
-  ): AsyncIterable<StreamChunk> {
+  async *stream(messages: Message[], options?: ChatOptions): AsyncIterable<StreamChunk> {
     this.ensureInitialized();
 
     try {
@@ -178,7 +177,7 @@ export class GeminiProvider implements LLMProvider {
    */
   async *streamWithTools(
     messages: Message[],
-    options: ChatWithToolsOptions
+    options: ChatWithToolsOptions,
   ): AsyncIterable<StreamChunk> {
     this.ensureInitialized();
 
@@ -394,9 +393,7 @@ export class GeminiProvider implements LLMProvider {
   /**
    * Convert tool choice to Gemini format
    */
-  private convertToolChoice(
-    choice: ChatWithToolsOptions["toolChoice"]
-  ): FunctionCallingMode {
+  private convertToolChoice(choice: ChatWithToolsOptions["toolChoice"]): FunctionCallingMode {
     if (!choice || choice === "auto") return FunctionCallingMode.AUTO;
     if (choice === "any") return FunctionCallingMode.ANY;
     return FunctionCallingMode.AUTO;
@@ -464,9 +461,7 @@ export class GeminiProvider implements LLMProvider {
   /**
    * Map finish reason to our format
    */
-  private mapFinishReason(
-    reason?: string
-  ): ChatResponse["stopReason"] {
+  private mapFinishReason(reason?: string): ChatResponse["stopReason"] {
     switch (reason) {
       case "STOP":
         return "end_turn";

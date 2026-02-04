@@ -44,7 +44,7 @@ export async function startRepl(
   options: {
     projectPath?: string;
     config?: Partial<ReplConfig>;
-  } = {}
+  } = {},
 ): Promise<void> {
   const projectPath = options.projectPath ?? process.cwd();
 
@@ -66,7 +66,7 @@ export async function startRepl(
     p.log.message(chalk.dim("\n👋 Setup cancelled. See you next time!"));
     process.exit(0);
   }
-  
+
   // Update session with configured provider
   session.config = configured;
 
@@ -78,7 +78,9 @@ export async function startRepl(
       maxTokens: session.config.provider.maxTokens,
     });
   } catch (error) {
-    p.log.error(`Failed to initialize provider: ${error instanceof Error ? error.message : String(error)}`);
+    p.log.error(
+      `Failed to initialize provider: ${error instanceof Error ? error.message : String(error)}`,
+    );
     process.exit(1);
   }
 
@@ -128,9 +130,9 @@ export async function startRepl(
 
     // Detect intent from natural language
     const intent = await intentRecognizer.recognize(input);
-    
+
     // If intent is not chat and has good confidence, offer to execute as command
-    if (intent.type !== 'chat' && intent.confidence >= 0.6) {
+    if (intent.type !== "chat" && intent.confidence >= 0.6) {
       const shouldExecute = await handleIntentConfirmation(intent, intentRecognizer);
       if (shouldExecute) {
         const { command, args } = intentRecognizer.intentToCommand(intent)!;
@@ -179,42 +181,35 @@ export async function startRepl(
 
       process.once("SIGINT", sigintHandler);
 
-      const result = await executeAgentTurn(
-        session,
-        input,
-        provider,
-        toolRegistry,
-        {
-          onStream: renderStreamChunk,
-          onToolStart: (tc, index, total) => {
-            // Update spinner to show running tool
-            const msg = total > 1
-              ? `Running ${tc.name}... [${index}/${total}]`
-              : `Running ${tc.name}...`;
-            setSpinner(msg);
-          },
-          onToolEnd: (result) => {
-            // Clear spinner and show result
-            clearSpinner();
-            renderToolStart(result.name, result.input);
-            renderToolEnd(result);
-          },
-          onToolSkipped: (tc, reason) => {
-            clearSpinner();
-            console.log(chalk.yellow(`⊘ Skipped ${tc.name}: ${reason}`));
-          },
-          onThinkingStart: () => {
-            setSpinner("Thinking...");
-          },
-          onThinkingEnd: () => {
-            clearSpinner();
-          },
-          onToolPreparing: (toolName) => {
-            setSpinner(`Preparing ${toolName}...`);
-          },
-          signal: abortController.signal,
-        }
-      );
+      const result = await executeAgentTurn(session, input, provider, toolRegistry, {
+        onStream: renderStreamChunk,
+        onToolStart: (tc, index, total) => {
+          // Update spinner to show running tool
+          const msg =
+            total > 1 ? `Running ${tc.name}... [${index}/${total}]` : `Running ${tc.name}...`;
+          setSpinner(msg);
+        },
+        onToolEnd: (result) => {
+          // Clear spinner and show result
+          clearSpinner();
+          renderToolStart(result.name, result.input);
+          renderToolEnd(result);
+        },
+        onToolSkipped: (tc, reason) => {
+          clearSpinner();
+          console.log(chalk.yellow(`⊘ Skipped ${tc.name}: ${reason}`));
+        },
+        onThinkingStart: () => {
+          setSpinner("Thinking...");
+        },
+        onThinkingEnd: () => {
+          clearSpinner();
+        },
+        onToolPreparing: (toolName) => {
+          setSpinner(`Preparing ${toolName}...`);
+        },
+        signal: abortController.signal,
+      });
 
       // Remove SIGINT handler after agent turn completes
       process.off("SIGINT", sigintHandler);
@@ -238,7 +233,7 @@ export async function startRepl(
           renderUsageStats(
             result.usage.inputTokens,
             result.usage.outputTokens,
-            result.toolCalls.length
+            result.toolCalls.length,
           );
         }
 
@@ -255,7 +250,7 @@ export async function startRepl(
       renderUsageStats(
         result.usage.inputTokens,
         result.usage.outputTokens,
-        result.toolCalls.length
+        result.toolCalls.length,
       );
 
       // Check and perform context compaction if needed
@@ -265,7 +260,9 @@ export async function startRepl(
         if (compactionResult?.wasCompacted) {
           const usageAfter = getContextUsagePercent(session);
           console.log(
-            chalk.dim(`Context compacted (${usageBefore.toFixed(0)}% -> ${usageAfter.toFixed(0)}%)`)
+            chalk.dim(
+              `Context compacted (${usageBefore.toFixed(0)}% -> ${usageAfter.toFixed(0)}%)`,
+            ),
           );
         }
       } catch (compactError) {
@@ -298,43 +295,45 @@ async function printWelcome(session: { projectPath: string; config: ReplConfig }
   const trustStore = createTrustStore();
   await trustStore.init();
   const trustLevel = trustStore.getLevel(session.projectPath);
-  
+
   console.log(
     chalk.cyan.bold(`
 ╔══════════════════════════════════════════════════╗
 ║         🥥 Corbat-Coco REPL                      ║
 ║   Autonomous Coding Agent v${VERSION.padEnd(31)}║
 ╚══════════════════════════════════════════════════╝
-`)
+`),
   );
-  
+
   // Project info
   console.log(chalk.dim(`📁 ${session.projectPath}`));
-  
+
   // Trust status
   if (trustLevel) {
-    const emoji = trustLevel === 'full' ? '🔓' : trustLevel === 'write' ? '✏️' : '👁️';
+    const emoji = trustLevel === "full" ? "🔓" : trustLevel === "write" ? "✏️" : "👁️";
     console.log(chalk.dim(`${emoji} ${trustLevel} access`));
   }
-  
+
   // State status
   console.log(`📊 ${formatStateStatus(state)}`);
-  
+
   // Progress indicators
   console.log(
-    chalk.dim(`   ${summary.spec ? '✅' : '⬜'} Spec  ${summary.architecture ? '✅' : '⬜'} Architecture  ${summary.implementation ? '✅' : '⬜'} Implementation`)
+    chalk.dim(
+      `   ${summary.spec ? "✅" : "⬜"} Spec  ${summary.architecture ? "✅" : "⬜"} Architecture  ${summary.implementation ? "✅" : "⬜"} Implementation`,
+    ),
   );
-  
+
   console.log();
   console.log(chalk.dim(`🤖 ${session.config.provider.type} / ${session.config.provider.model}`));
-  
+
   // Contextual suggestion
   const suggestion = await stateManager.getSuggestion(session.projectPath);
   console.log();
   console.log(chalk.yellow(`💡 ${suggestion}`));
-  
+
   console.log();
-  console.log(chalk.dim('Type /help for commands, /exit to quit\n'));
+  console.log(chalk.dim("Type /help for commands, /exit to quit\n"));
 }
 
 export type { ReplConfig, ReplSession, AgentTurnResult } from "./types.js";
@@ -416,7 +415,7 @@ async function checkProjectTrust(projectPath: string): Promise<boolean> {
  */
 async function handleIntentConfirmation(
   intent: Intent,
-  recognizer: ReturnType<typeof createIntentRecognizer>
+  recognizer: ReturnType<typeof createIntentRecognizer>,
 ): Promise<boolean> {
   // Check if auto-execute is enabled
   if (recognizer.shouldAutoExecute(intent)) {
@@ -425,14 +424,18 @@ async function handleIntentConfirmation(
 
   // Show detected intent
   console.log();
-  console.log(chalk.cyan(`🔍 Detected intent: /${intent.type} (confidence: ${(intent.confidence * 100).toFixed(0)}%)`));
-  
+  console.log(
+    chalk.cyan(
+      `🔍 Detected intent: /${intent.type} (confidence: ${(intent.confidence * 100).toFixed(0)}%)`,
+    ),
+  );
+
   // Show extracted entities if any
   if (Object.keys(intent.entities).length > 0) {
     const entityStr = Object.entries(intent.entities)
       .filter(([, v]) => v !== undefined && (Array.isArray(v) ? v.length > 0 : true))
-      .map(([k, v]) => `${k}=${Array.isArray(v) ? v.join(',') : v}`)
-      .join(', ');
+      .map(([k, v]) => `${k}=${Array.isArray(v) ? v.join(",") : v}`)
+      .join(", ");
     if (entityStr) {
       console.log(chalk.dim(`   Entities: ${entityStr}`));
     }
@@ -443,21 +446,21 @@ async function handleIntentConfirmation(
   const action = await p.select({
     message: `Execute /${intent.type} command?`,
     options: [
-      { value: 'yes', label: '✓ Yes, execute command' },
-      { value: 'no', label: '✗ No, continue as chat' },
-      { value: 'always', label: '⚡ Always execute this intent' },
+      { value: "yes", label: "✓ Yes, execute command" },
+      { value: "no", label: "✗ No, continue as chat" },
+      { value: "always", label: "⚡ Always execute this intent" },
     ],
   });
 
-  if (p.isCancel(action) || action === 'no') {
+  if (p.isCancel(action) || action === "no") {
     return false;
   }
 
-  if (action === 'always') {
+  if (action === "always") {
     recognizer.setAutoExecutePreference(intent.type, true);
     console.log(chalk.dim(`   Auto-execute enabled for /${intent.type}`));
     return true;
   }
 
-  return action === 'yes';
+  return action === "yes";
 }

@@ -763,9 +763,7 @@ describe("storage.ts", () => {
       const store = createSessionStore({ storageDir: tempDir });
 
       // Append to non-existent session
-      await store.appendMessages("new-append", [
-        { role: "user", content: "New message" },
-      ]);
+      await store.appendMessages("new-append", [{ role: "user", content: "New message" }]);
 
       const conversationPath = join(tempDir, "new-append", "conversation.jsonl");
       const content = await readFile(conversationPath, "utf-8");
@@ -781,15 +779,11 @@ describe("storage.ts", () => {
       const store = createSessionStore({ storageDir: tempDir });
       const session = createTestSession({
         id: "append-preserve",
-        messages: [
-          { role: "user", content: "Original" },
-        ],
+        messages: [{ role: "user", content: "Original" }],
       });
 
       await store.save(session);
-      await store.appendMessages("append-preserve", [
-        { role: "assistant", content: "Added" },
-      ]);
+      await store.appendMessages("append-preserve", [{ role: "assistant", content: "Added" }]);
 
       const conversationPath = join(tempDir, "append-preserve", "conversation.jsonl");
       const content = await readFile(conversationPath, "utf-8");
@@ -823,9 +817,7 @@ describe("storage.ts", () => {
       const store = createSessionStore({ storageDir: tempDir });
 
       const before = new Date();
-      await store.appendMessages("append-timestamp", [
-        { role: "user", content: "Timestamped" },
-      ]);
+      await store.appendMessages("append-timestamp", [{ role: "user", content: "Timestamped" }]);
       const after = new Date();
 
       const conversationPath = join(tempDir, "append-timestamp", "conversation.jsonl");
@@ -847,9 +839,7 @@ describe("storage.ts", () => {
 
       // Create 5 sessions for the same project
       for (let i = 0; i < 5; i++) {
-        await store.save(
-          createTestSession({ id: `prune-${i}`, projectPath: "/prune-project" })
-        );
+        await store.save(createTestSession({ id: `prune-${i}`, projectPath: "/prune-project" }));
         await new Promise((r) => setTimeout(r, 10));
       }
 
@@ -1028,7 +1018,7 @@ describe("Storage Format", () => {
 
       const content = await readFile(
         join(tempDir, "jsonl-timestamp", "conversation.jsonl"),
-        "utf-8"
+        "utf-8",
       );
       const parsed = JSON.parse(content.trim()) as SerializedMessage;
 
@@ -1174,9 +1164,7 @@ describe("Edge Cases", () => {
 
   it("should handle messages with newlines in content", async () => {
     const store = createSessionStore({ storageDir: tempDir });
-    const messages: Message[] = [
-      { role: "user", content: "Line 1\nLine 2\nLine 3" },
-    ];
+    const messages: Message[] = [{ role: "user", content: "Line 1\nLine 2\nLine 3" }];
     const session = createTestSession({ id: "newline-test", messages });
 
     await store.save(session);
@@ -1187,9 +1175,7 @@ describe("Edge Cases", () => {
 
   it("should handle messages with unicode content", async () => {
     const store = createSessionStore({ storageDir: tempDir });
-    const messages: Message[] = [
-      { role: "user", content: "Hello! Bonjour!" },
-    ];
+    const messages: Message[] = [{ role: "user", content: "Hello! Bonjour!" }];
     const session = createTestSession({ id: "unicode-test", messages });
 
     await store.save(session);
@@ -1212,7 +1198,7 @@ describe("Edge Cases", () => {
     const store = createSessionStore({ storageDir: tempDir });
 
     const promises = Array.from({ length: 5 }, (_, i) =>
-      store.save(createTestSession({ id: `concurrent-${i}` }))
+      store.save(createTestSession({ id: `concurrent-${i}` })),
     );
 
     await Promise.all(promises);
@@ -1304,8 +1290,12 @@ describe("Integration", () => {
   it("should isolate sessions by ID", async () => {
     const store = createSessionStore({ storageDir: tempDir });
 
-    await store.save(createTestSession({ id: "session-a", messages: [{ role: "user", content: "A" }] }));
-    await store.save(createTestSession({ id: "session-b", messages: [{ role: "user", content: "B" }] }));
+    await store.save(
+      createTestSession({ id: "session-a", messages: [{ role: "user", content: "A" }] }),
+    );
+    await store.save(
+      createTestSession({ id: "session-b", messages: [{ role: "user", content: "B" }] }),
+    );
 
     const loadedA = await store.load("session-a");
     const loadedB = await store.load("session-b");

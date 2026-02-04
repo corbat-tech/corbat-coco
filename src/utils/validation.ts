@@ -8,11 +8,7 @@ import { ValidationError, type ValidationIssue } from "./errors.js";
 /**
  * Validate data against a Zod schema
  */
-export function validate<T>(
-  schema: z.ZodSchema<T>,
-  data: unknown,
-  context?: string
-): T {
+export function validate<T>(schema: z.ZodSchema<T>, data: unknown, context?: string): T {
   const result = schema.safeParse(data);
 
   if (result.success) {
@@ -25,12 +21,9 @@ export function validate<T>(
     code: issue.code,
   }));
 
-  throw new ValidationError(
-    context
-      ? `Validation failed for ${context}`
-      : "Validation failed",
-    { issues }
-  );
+  throw new ValidationError(context ? `Validation failed for ${context}` : "Validation failed", {
+    issues,
+  });
 }
 
 /**
@@ -38,7 +31,7 @@ export function validate<T>(
  */
 export function safeValidate<T>(
   schema: z.ZodSchema<T>,
-  data: unknown
+  data: unknown,
 ): { success: true; data: T } | { success: false; issues: ValidationIssue[] } {
   const result = schema.safeParse(data);
 
@@ -67,18 +60,19 @@ export const CommonSchemas = {
   /**
    * Slug (lowercase letters, numbers, hyphens)
    */
-  slug: z.string().regex(
-    /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-    "Must be lowercase letters, numbers, and hyphens"
-  ),
+  slug: z
+    .string()
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Must be lowercase letters, numbers, and hyphens"),
 
   /**
    * Semantic version
    */
-  semver: z.string().regex(
-    /^\d+\.\d+\.\d+(?:-[a-zA-Z0-9.]+)?(?:\+[a-zA-Z0-9.]+)?$/,
-    "Must be a valid semantic version (e.g., 1.0.0)"
-  ),
+  semver: z
+    .string()
+    .regex(
+      /^\d+\.\d+\.\d+(?:-[a-zA-Z0-9.]+)?(?:\+[a-zA-Z0-9.]+)?$/,
+      "Must be a valid semantic version (e.g., 1.0.0)",
+    ),
 
   /**
    * File path
@@ -132,7 +126,7 @@ export function createIdGenerator(prefix: string): () => string {
  */
 export function assertDefined<T>(
   value: T | null | undefined,
-  message: string = "Value is not defined"
+  message: string = "Value is not defined",
 ): asserts value is T {
   if (value === null || value === undefined) {
     throw new ValidationError(message);
@@ -144,7 +138,7 @@ export function assertDefined<T>(
  */
 export function assert(
   condition: boolean,
-  message: string = "Assertion failed"
+  message: string = "Assertion failed",
 ): asserts condition {
   if (!condition) {
     throw new ValidationError(message);
@@ -154,11 +148,7 @@ export function assert(
 /**
  * Coerce a value to a specific type, with fallback
  */
-export function coerce<T>(
-  value: unknown,
-  schema: z.ZodSchema<T>,
-  fallback: T
-): T {
+export function coerce<T>(value: unknown, schema: z.ZodSchema<T>, fallback: T): T {
   const result = schema.safeParse(value);
   return result.success ? result.data : fallback;
 }
@@ -166,10 +156,7 @@ export function coerce<T>(
 /**
  * Validate file extension
  */
-export function validateFileExtension(
-  filename: string,
-  allowedExtensions: string[]
-): boolean {
+export function validateFileExtension(filename: string, allowedExtensions: string[]): boolean {
   const ext = filename.split(".").pop()?.toLowerCase();
   return ext !== undefined && allowedExtensions.includes(ext);
 }
@@ -191,7 +178,7 @@ export function isValidJson(str: string): boolean {
  */
 export function parseJsonSafe<T>(
   str: string,
-  schema?: z.ZodSchema<T>
+  schema?: z.ZodSchema<T>,
 ): { success: true; data: T } | { success: false; error: string } {
   try {
     const parsed = JSON.parse(str);

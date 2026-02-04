@@ -54,9 +54,7 @@ describe("ToolRegistry", () => {
       registry.register({ ...tool, description: "Second tool" });
 
       const logger = getLogger();
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining("already registered")
-      );
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining("already registered"));
     });
   });
 
@@ -372,7 +370,10 @@ describe("zodFieldToJsonSchema edge cases", () => {
     const definitions = registry.getToolDefinitionsForLLM();
 
     expect(definitions[0].input_schema).toBeDefined();
-    const props = definitions[0].input_schema.properties as Record<string, { type: string; enum?: string[] }>;
+    const props = definitions[0].input_schema.properties as Record<
+      string,
+      { type: string; enum?: string[] }
+    >;
     expect(props.status.type).toBe("string");
     expect(props.status.enum).toEqual(["active", "inactive", "pending"]);
   });
@@ -414,7 +415,10 @@ describe("zodFieldToJsonSchema edge cases", () => {
 
     const definitions = registry.getToolDefinitionsForLLM();
 
-    const props = definitions[0].input_schema.properties as Record<string, { type: string; items?: { type: string } }>;
+    const props = definitions[0].input_schema.properties as Record<
+      string,
+      { type: string; items?: { type: string } }
+    >;
     expect(props.items.type).toBe("array");
     expect(props.items.items).toEqual({ type: "string" });
   });

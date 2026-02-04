@@ -34,11 +34,7 @@ export type {
 } from "./types.js";
 
 // Discovery Engine
-export {
-  DiscoveryEngine,
-  createDiscoveryEngine,
-  DEFAULT_DISCOVERY_CONFIG,
-} from "./discovery.js";
+export { DiscoveryEngine, createDiscoveryEngine, DEFAULT_DISCOVERY_CONFIG } from "./discovery.js";
 
 // Specification Generator
 export {

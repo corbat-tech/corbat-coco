@@ -5,8 +5,8 @@
  * Includes a simple cache to avoid redundant LLM calls.
  */
 
-import type { LLMProvider, Message } from '../../../providers/types.js';
-import type { IntentType } from './types.js';
+import type { LLMProvider, Message } from "../../../providers/types.js";
+import type { IntentType } from "./types.js";
 
 /**
  * Classification result from the LLM
@@ -32,16 +32,16 @@ interface CacheEntry {
  * Valid intent types for classification
  */
 const VALID_INTENTS: IntentType[] = [
-  'plan',
-  'build',
-  'init',
-  'task',
-  'status',
-  'help',
-  'exit',
-  'chat',
-  'output',
-  'trust',
+  "plan",
+  "build",
+  "init",
+  "task",
+  "status",
+  "help",
+  "exit",
+  "chat",
+  "output",
+  "trust",
 ];
 
 /**
@@ -193,7 +193,7 @@ export class LLMIntentClassifier {
       }
 
       // Validate confidence
-      const confidence = typeof parsed.confidence === 'number' ? parsed.confidence : 0.5;
+      const confidence = typeof parsed.confidence === "number" ? parsed.confidence : 0.5;
       const normalizedConfidence = Math.max(0, Math.min(1, confidence));
 
       return {
@@ -227,7 +227,7 @@ export class LLMIntentClassifier {
     try {
       const messages: Message[] = [
         {
-          role: 'user',
+          role: "user",
           content: `Classify this user input: "${input}"`,
         },
       ];
@@ -248,7 +248,10 @@ export class LLMIntentClassifier {
       return null;
     } catch (error) {
       // Log error but don't throw - LLM classification is optional
-      console.debug('LLM classification failed:', error instanceof Error ? error.message : 'Unknown error');
+      console.debug(
+        "LLM classification failed:",
+        error instanceof Error ? error.message : "Unknown error",
+      );
       return null;
     }
   }

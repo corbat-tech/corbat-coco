@@ -3,7 +3,14 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { getApiKey, getBaseUrl, getDefaultModel, getDefaultProvider, env, type ProviderType } from "./env.js";
+import {
+  getApiKey,
+  getBaseUrl,
+  getDefaultModel,
+  getDefaultProvider,
+  env,
+  type ProviderType,
+} from "./env.js";
 
 describe("getApiKey", () => {
   const originalEnv = { ...process.env };

@@ -340,7 +340,7 @@ Respond in JSON format:
  */
 export function fillPrompt(
   template: string,
-  variables: Record<string, string | number | unknown>
+  variables: Record<string, string | number | unknown>,
 ): string {
   let result = template;
 
@@ -364,7 +364,7 @@ export function fillPrompt(
  */
 export function createMessage(
   role: "system" | "user" | "assistant",
-  content: string
+  content: string,
 ): { role: "system" | "user" | "assistant"; content: string } {
   return { role, content };
 }
@@ -374,7 +374,7 @@ export function createMessage(
  */
 export function buildConversation(
   systemPrompt: string,
-  messages: Array<{ role: "user" | "assistant"; content: string }>
+  messages: Array<{ role: "user" | "assistant"; content: string }>,
 ): Array<{ role: "system" | "user" | "assistant"; content: string }> {
   return [createMessage("system", systemPrompt), ...messages];
 }

@@ -5,11 +5,7 @@
  */
 
 import { randomUUID } from "node:crypto";
-import type {
-  BacklogResult,
-  OrchestrateConfig,
-  ArchitectureDoc,
-} from "./types.js";
+import type { BacklogResult, OrchestrateConfig, ArchitectureDoc } from "./types.js";
 import type {
   Backlog,
   Epic,
@@ -46,7 +42,7 @@ export class BacklogGenerator {
    */
   async generate(
     architecture: ArchitectureDoc,
-    specification: Specification
+    specification: Specification,
   ): Promise<BacklogResult> {
     const prompt = fillPrompt(GENERATE_BACKLOG_PROMPT, {
       architecture: JSON.stringify({
@@ -118,8 +114,7 @@ export class BacklogGenerator {
       // Calculate velocity based on configuration
       const totalPoints = stories.reduce((sum, s) => sum + s.points, 0);
       const estimatedSprints =
-        parsed.estimatedSprints ||
-        Math.ceil(totalPoints / this.config.sprint.targetVelocity);
+        parsed.estimatedSprints || Math.ceil(totalPoints / this.config.sprint.targetVelocity);
 
       return {
         backlog: {
@@ -144,7 +139,7 @@ export class BacklogGenerator {
   async planFirstSprint(backlog: Backlog): Promise<Sprint> {
     // Get available stories (ready and not assigned)
     const availableStories = backlog.stories.filter(
-      (s) => s.status === "backlog" || s.status === "ready"
+      (s) => s.status === "backlog" || s.status === "ready",
     );
 
     // Check dependencies
@@ -175,7 +170,7 @@ export class BacklogGenerator {
           title: s.title,
           points: s.points,
           epicId: s.epicId,
-        }))
+        })),
       ),
     });
 
@@ -267,7 +262,7 @@ export class BacklogGenerator {
       priority?: number;
       dependencies?: string[];
       status?: string;
-    }>
+    }>,
   ): Epic[] {
     return data.map((e) => ({
       id: e.id || `epic_${randomUUID().substring(0, 8)}`,
@@ -291,7 +286,7 @@ export class BacklogGenerator {
       acceptanceCriteria?: string[];
       points?: number;
       status?: string;
-    }>
+    }>,
   ): Story[] {
     return data.map((s) => ({
       id: s.id || `story_${randomUUID().substring(0, 8)}`,
@@ -318,7 +313,7 @@ export class BacklogGenerator {
       dependencies?: string[];
       estimatedComplexity?: string;
       status?: string;
-    }>
+    }>,
   ): Task[] {
     return data.map((t) => ({
       id: t.id || `task_${randomUUID().substring(0, 8)}`,
@@ -337,7 +332,7 @@ export class BacklogGenerator {
     const fibonacciPoints = [1, 2, 3, 5, 8, 13];
     if (!value) return 3;
     const closest = fibonacciPoints.reduce((prev, curr) =>
-      Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev
+      Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev,
     );
     return closest as Story["points"];
   }
@@ -357,9 +352,7 @@ export function generateBacklogMarkdown(backlog: Backlog): string {
   sections.push(`- **Epics:** ${backlog.epics.length}`);
   sections.push(`- **Stories:** ${backlog.stories.length}`);
   sections.push(`- **Tasks:** ${backlog.tasks.length}`);
-  sections.push(
-    `- **Total Points:** ${backlog.stories.reduce((sum, s) => sum + s.points, 0)}`
-  );
+  sections.push(`- **Total Points:** ${backlog.stories.reduce((sum, s) => sum + s.points, 0)}`);
   sections.push("");
 
   // Epics
@@ -382,9 +375,7 @@ export function generateBacklogMarkdown(backlog: Backlog): string {
       sections.push("| ID | Title | Points | Status |");
       sections.push("|----|-------|--------|--------|");
       for (const story of epicStories) {
-        sections.push(
-          `| ${story.id} | ${story.title} | ${story.points} | ${story.status} |`
-        );
+        sections.push(`| ${story.id} | ${story.title} | ${story.points} | ${story.status} |`);
       }
       sections.push("");
     }
@@ -421,7 +412,7 @@ export function generateBacklogMarkdown(backlog: Backlog): string {
       sections.push("|----|-------|------|------------|");
       for (const task of storyTasks) {
         sections.push(
-          `| ${task.id} | ${task.title} | ${task.type} | ${task.estimatedComplexity} |`
+          `| ${task.id} | ${task.title} | ${task.type} | ${task.estimatedComplexity} |`,
         );
       }
       sections.push("");
@@ -452,9 +443,7 @@ export function generateSprintMarkdown(sprint: Sprint, backlog: Backlog): string
   sections.push("");
 
   // Stories in sprint
-  const sprintStories = backlog.stories.filter((s) =>
-    sprint.stories.includes(s.id)
-  );
+  const sprintStories = backlog.stories.filter((s) => sprint.stories.includes(s.id));
 
   const totalPoints = sprintStories.reduce((sum, s) => sum + s.points, 0);
 
@@ -495,7 +484,7 @@ export function generateSprintMarkdown(sprint: Sprint, backlog: Backlog): string
  */
 export function createBacklogGenerator(
   llm: LLMProvider,
-  config: OrchestrateConfig
+  config: OrchestrateConfig,
 ): BacklogGenerator {
   return new BacklogGenerator(llm, config);
 }

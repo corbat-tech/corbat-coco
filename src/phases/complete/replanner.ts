@@ -37,11 +37,11 @@ export interface ToolAttempt {
  * Re-plan strategy
  */
 export type ReplanStrategy =
-  | "simplify"      // Break down into smaller steps
-  | "alternative"   // Try a different approach
-  | "defer"         // Move to later in backlog
-  | "escalate"      // Require human intervention
-  | "skip";         // Skip this task
+  | "simplify" // Break down into smaller steps
+  | "alternative" // Try a different approach
+  | "defer" // Move to later in backlog
+  | "escalate" // Require human intervention
+  | "skip"; // Skip this task
 
 /**
  * Re-plan decision
@@ -84,7 +84,7 @@ const defaultOptions: Required<ReplanOptions> = {
  */
 export function analyzeFailure(
   context: FailureContext,
-  options: ReplanOptions = {}
+  options: ReplanOptions = {},
 ): ReplanDecision {
   const opts = { ...defaultOptions, ...options };
 
@@ -123,7 +123,7 @@ export function analyzeFailure(
   }
 
   // Check for tool failures
-  const toolFailures = context.toolHistory.filter(t => !t.success);
+  const toolFailures = context.toolHistory.filter((t) => !t.success);
   if (toolFailures.length > 0) {
     const criticalFailure = analyzeCriticalToolFailure(toolFailures);
     if (criticalFailure) {
@@ -131,7 +131,7 @@ export function analyzeFailure(
         strategy: "defer",
         reason: `Critical tool failures: ${criticalFailure}`,
         confidence: 0.6,
-        blockingIssues: toolFailures.map(t => `${t.name}: ${t.error}`),
+        blockingIssues: toolFailures.map((t) => `${t.name}: ${t.error}`),
       };
     }
   }
@@ -141,7 +141,10 @@ export function analyzeFailure(
     strategy: "alternative",
     reason: "Previous approach did not succeed, trying alternative",
     confidence: 0.5,
-    suggestedPrompt: generateAlternativePrompt(context.task, context.errorHistory[0] ?? "unknown error"),
+    suggestedPrompt: generateAlternativePrompt(
+      context.task,
+      context.errorHistory[0] ?? "unknown error",
+    ),
   };
 }
 
@@ -152,7 +155,7 @@ function findRepeatingError(errorHistory: string[]): string | null {
   if (errorHistory.length < 2) return null;
 
   // Normalize errors for comparison
-  const normalized = errorHistory.map(e => e.toLowerCase().trim().substring(0, 200));
+  const normalized = errorHistory.map((e) => e.toLowerCase().trim().substring(0, 200));
 
   // Check for exact repeats
   const counts = new Map<string, number>();
@@ -172,10 +175,7 @@ function findRepeatingError(errorHistory: string[]): string | null {
 /**
  * Detect quality score stagnation
  */
-function detectQualityStagnation(
-  scoreHistory: QualityScores[],
-  minDelta: number
-): boolean {
+function detectQualityStagnation(scoreHistory: QualityScores[], minDelta: number): boolean {
   if (scoreHistory.length < 2) return false;
 
   const recent = scoreHistory.slice(-2);
@@ -203,8 +203,8 @@ function extractBlockingIssues(context: FailureContext): string[] {
 
   // Add tool failures
   const toolErrors = context.toolHistory
-    .filter(t => !t.success)
-    .map(t => `Tool ${t.name} failed: ${t.error}`);
+    .filter((t) => !t.success)
+    .map((t) => `Tool ${t.name} failed: ${t.error}`);
   issues.push(...toolErrors.slice(0, 5));
 
   return issues;
@@ -235,8 +235,11 @@ function suggestSimplifiedTasks(task: Task): Task[] {
 
   // Simplify complexity based on original
   const simplifiedComplexity: TaskComplexity =
-    task.estimatedComplexity === "complex" ? "moderate" :
-    task.estimatedComplexity === "moderate" ? "simple" : "trivial";
+    task.estimatedComplexity === "complex"
+      ? "moderate"
+      : task.estimatedComplexity === "moderate"
+        ? "simple"
+        : "trivial";
 
   const subtasks: Task[] = [
     {
@@ -284,12 +287,10 @@ function analyzeCriticalToolFailure(failures: ToolAttempt[]): string | null {
   // Critical tools that indicate blocking issues
   const criticalTools = ["git_commit", "git_push", "write_file", "run_tests"];
 
-  const criticalFailures = failures.filter(f =>
-    criticalTools.some(ct => f.name.includes(ct))
-  );
+  const criticalFailures = failures.filter((f) => criticalTools.some((ct) => f.name.includes(ct)));
 
   if (criticalFailures.length > 0) {
-    return criticalFailures.map(f => f.name).join(", ");
+    return criticalFailures.map((f) => f.name).join(", ");
   }
 
   return null;
@@ -298,10 +299,7 @@ function analyzeCriticalToolFailure(failures: ToolAttempt[]): string | null {
 /**
  * Create re-plan prompt for LLM
  */
-export function createReplanPrompt(
-  context: FailureContext,
-  decision: ReplanDecision
-): string {
+export function createReplanPrompt(context: FailureContext, decision: ReplanDecision): string {
   const lines: string[] = [];
 
   lines.push("# Re-planning Required");
@@ -344,7 +342,7 @@ export function shouldReplan(
   attemptCount: number,
   lastScore: QualityScores | null,
   targetScore: number,
-  options: ReplanOptions = {}
+  options: ReplanOptions = {},
 ): boolean {
   const opts = { ...defaultOptions, ...options };
 

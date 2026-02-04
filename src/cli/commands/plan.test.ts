@@ -64,7 +64,9 @@ vi.mock("../../phases/orchestrate/executor.js", () => ({
 vi.mock("../../providers/index.js", () => ({
   createProvider: vi.fn().mockResolvedValue({
     chat: vi.fn().mockResolvedValue({ content: "{}", usage: { inputTokens: 0, outputTokens: 0 } }),
-    chatWithTools: vi.fn().mockResolvedValue({ content: "{}", usage: { inputTokens: 0, outputTokens: 0 } }),
+    chatWithTools: vi
+      .fn()
+      .mockResolvedValue({ content: "{}", usage: { inputTokens: 0, outputTokens: 0 } }),
   }),
 }));
 
@@ -165,10 +167,10 @@ describe("plan command", () => {
 
       // Using a path that doesn't exist will throw
       await expect(loadExistingSpecification("/nonexistent/path")).rejects.toThrow(
-        "No existing specification found"
+        "No existing specification found",
       );
     });
-  })
+  });
 
   describe("runPlan user interaction", () => {
     it("should cancel when user cancels confirmation", async () => {
@@ -234,14 +236,10 @@ describe("plan command", () => {
       const { runPlan } = await import("./plan.js");
       await runPlan({ cwd: "/test", auto: false });
 
-      expect(prompts.log.info).toHaveBeenCalledWith(
-        expect.stringContaining("Phase 1")
-      );
-      expect(prompts.log.info).toHaveBeenCalledWith(
-        expect.stringContaining("Phase 2")
-      );
+      expect(prompts.log.info).toHaveBeenCalledWith(expect.stringContaining("Phase 1"));
+      expect(prompts.log.info).toHaveBeenCalledWith(expect.stringContaining("Phase 2"));
     });
-  })
+  });
 
   describe("runPlan summary display", () => {
     it("should display summary with artifacts in non-auto mode", async () => {
@@ -287,7 +285,7 @@ describe("plan command", () => {
 
       expect(prompts.outro).toHaveBeenCalled();
     });
-  })
+  });
 
   describe("runPlan progress callback", () => {
     it("should call progress callback in non-auto mode", async () => {
@@ -321,9 +319,7 @@ describe("plan command", () => {
       const { runPlan } = await import("./plan.js");
       await runPlan({ cwd: "/test", auto: false });
 
-      expect(prompts.log.step).toHaveBeenCalledWith(
-        expect.stringContaining("[discovery]")
-      );
+      expect(prompts.log.step).toHaveBeenCalledWith(expect.stringContaining("[discovery]"));
     });
 
     it("should not call progress callback in auto mode", async () => {
@@ -358,11 +354,9 @@ describe("plan command", () => {
       await runPlan({ cwd: "/test", auto: true });
 
       // In auto mode, step should not be called with progress info
-      expect(prompts.log.step).not.toHaveBeenCalledWith(
-        expect.stringContaining("[discovery]")
-      );
+      expect(prompts.log.step).not.toHaveBeenCalledWith(expect.stringContaining("[discovery]"));
     });
-  })
+  });
 
   describe("createCliPhaseContext with mock LLM", () => {
     it("should create mock LLM when provider creation fails", async () => {
@@ -387,11 +381,13 @@ describe("plan command", () => {
 
       // Mock a successful provider
       const mockProvider = {
-        chat: vi.fn().mockResolvedValue({ content: "{}", usage: { inputTokens: 0, outputTokens: 0 } }),
+        chat: vi
+          .fn()
+          .mockResolvedValue({ content: "{}", usage: { inputTokens: 0, outputTokens: 0 } }),
         chatWithTools: vi.fn().mockResolvedValue({
           content: "{}",
           usage: { inputTokens: 0, outputTokens: 0 },
-          toolCalls: [{ name: "test", input: {} }]
+          toolCalls: [{ name: "test", input: {} }],
         }),
       };
       vi.mocked(createProvider).mockResolvedValue(mockProvider as any);
@@ -401,7 +397,7 @@ describe("plan command", () => {
 
       expect(result.success).toBe(true);
     });
-  })
+  });
 
   describe("user input handler", () => {
     it("should handle select with options", async () => {
@@ -421,10 +417,10 @@ describe("plan command", () => {
           execute: vi.fn().mockImplementation(async () => {
             // Call the onUserInput callback with options
             if (capturedOptions?.onUserInput) {
-              const result = await capturedOptions.onUserInput(
-                "Choose an option:",
-                ["option1", "option2"]
-              );
+              const result = await capturedOptions.onUserInput("Choose an option:", [
+                "option1",
+                "option2",
+              ]);
               expect(result).toBe("selected-option");
             }
             return {
@@ -564,9 +560,17 @@ describe("plan command", () => {
       registerPlanCommand(mockProgram as any);
 
       expect(mockProgram.command).toHaveBeenCalledWith("plan");
-      expect(mockProgram.description).toHaveBeenCalledWith("Run discovery and create a development plan");
-      expect(mockProgram.option).toHaveBeenCalledWith("-i, --interactive", "Run in interactive mode (default)");
-      expect(mockProgram.option).toHaveBeenCalledWith("--skip-discovery", "Skip discovery, use existing specification");
+      expect(mockProgram.description).toHaveBeenCalledWith(
+        "Run discovery and create a development plan",
+      );
+      expect(mockProgram.option).toHaveBeenCalledWith(
+        "-i, --interactive",
+        "Run in interactive mode (default)",
+      );
+      expect(mockProgram.option).toHaveBeenCalledWith(
+        "--skip-discovery",
+        "Skip discovery, use existing specification",
+      );
       expect(mockProgram.option).toHaveBeenCalledWith("--dry-run", "Generate plan without saving");
       expect(mockProgram.option).toHaveBeenCalledWith("--auto", "Run without confirmations");
     });
@@ -590,7 +594,7 @@ describe("plan command", () => {
 
       expect(actionHandler).not.toBeNull();
     });
-  })
+  });
 
   describe("registerPlanCommand action handler", () => {
     let actionHandler: ((options: any) => Promise<void>) | null = null;
@@ -630,9 +634,7 @@ describe("plan command", () => {
       await vi.runAllTimersAsync();
       await promise;
 
-      expect(prompts.log.error).toHaveBeenCalledWith(
-        expect.stringContaining("config")
-      );
+      expect(prompts.log.error).toHaveBeenCalledWith(expect.stringContaining("config"));
       expect(process.exit).toHaveBeenCalledWith(1);
     });
 
@@ -882,7 +884,7 @@ describe("plan command", () => {
       await fs.writeFile(
         path.join(cocoDir, "specification.json"),
         JSON.stringify(mockSpec),
-        "utf-8"
+        "utf-8",
       );
 
       const { loadExistingSpecification } = await import("./plan.js");
@@ -927,9 +929,7 @@ describe("plan command", () => {
         return {
           execute: vi.fn().mockImplementation(async (context: any) => {
             // Call the LLM chat method
-            const result = await context.llm.chat([
-              { role: "user", content: "Hello" },
-            ]);
+            const result = await context.llm.chat([{ role: "user", content: "Hello" }]);
             expect(result.content).toBe("test response");
             expect(result.usage.inputTokens).toBe(10);
             return {
@@ -982,7 +982,13 @@ describe("plan command", () => {
             // Call the LLM chatWithTools method
             const result = await context.llm.chatWithTools(
               [{ role: "user", content: "Use a tool" }],
-              [{ name: "test_tool", description: "A test tool", parameters: { type: "object", properties: {} } }]
+              [
+                {
+                  name: "test_tool",
+                  description: "A test tool",
+                  parameters: { type: "object", properties: {} },
+                },
+              ],
             );
             expect(result.content).toBe("tool response");
             expect(result.toolCalls).toBeDefined();

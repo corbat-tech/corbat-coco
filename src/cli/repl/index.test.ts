@@ -110,7 +110,7 @@ describe("REPL index", () => {
       await expect(startRepl({ projectPath: "/test" })).rejects.toThrow("process.exit called");
 
       expect(renderError).toHaveBeenCalledWith(
-        "LLM provider is not available. Check your API key and connection."
+        "LLM provider is not available. Check your API key and connection.",
       );
       expect(process.exit).toHaveBeenCalledWith(1);
     });
@@ -225,10 +225,7 @@ describe("REPL index", () => {
       });
 
       const mockInputHandler = {
-        prompt: vi
-          .fn()
-          .mockResolvedValueOnce("/help")
-          .mockResolvedValueOnce(null),
+        prompt: vi.fn().mockResolvedValueOnce("/help").mockResolvedValueOnce(null),
         close: vi.fn(),
       };
       vi.mocked(createInputHandler).mockReturnValue(mockInputHandler);
@@ -242,11 +239,7 @@ describe("REPL index", () => {
       const { startRepl } = await import("./index.js");
       await startRepl();
 
-      expect(executeSlashCommand).toHaveBeenCalledWith(
-        "help",
-        [],
-        expect.any(Object)
-      );
+      expect(executeSlashCommand).toHaveBeenCalledWith("help", [], expect.any(Object));
     });
 
     it("should exit on slash command that returns true", async () => {
@@ -324,10 +317,7 @@ describe("REPL index", () => {
       });
 
       const mockInputHandler = {
-        prompt: vi
-          .fn()
-          .mockResolvedValueOnce("Hello")
-          .mockResolvedValueOnce(null),
+        prompt: vi.fn().mockResolvedValueOnce("Hello").mockResolvedValueOnce(null),
         close: vi.fn(),
       };
       vi.mocked(createInputHandler).mockReturnValue(mockInputHandler);
@@ -353,9 +343,7 @@ describe("REPL index", () => {
       const { createSession } = await import("./session.js");
       const { createInputHandler } = await import("./input/handler.js");
       const { isSlashCommand } = await import("./commands/index.js");
-      const { executeAgentTurn, formatAbortSummary } = await import(
-        "./agent-loop.js"
-      );
+      const { executeAgentTurn, formatAbortSummary } = await import("./agent-loop.js");
 
       const mockProvider: Partial<LLMProvider> = {
         isAvailable: vi.fn().mockResolvedValue(true),
@@ -378,10 +366,7 @@ describe("REPL index", () => {
       });
 
       const mockInputHandler = {
-        prompt: vi
-          .fn()
-          .mockResolvedValueOnce("Do something")
-          .mockResolvedValueOnce(null),
+        prompt: vi.fn().mockResolvedValueOnce("Do something").mockResolvedValueOnce(null),
         close: vi.fn(),
       };
       vi.mocked(createInputHandler).mockReturnValue(mockInputHandler);
@@ -430,17 +415,12 @@ describe("REPL index", () => {
       });
 
       const mockInputHandler = {
-        prompt: vi
-          .fn()
-          .mockResolvedValueOnce("trigger error")
-          .mockResolvedValueOnce(null),
+        prompt: vi.fn().mockResolvedValueOnce("trigger error").mockResolvedValueOnce(null),
         close: vi.fn(),
       };
       vi.mocked(createInputHandler).mockReturnValue(mockInputHandler);
       vi.mocked(isSlashCommand).mockReturnValue(false);
-      vi.mocked(executeAgentTurn).mockRejectedValue(
-        new Error("Network error")
-      );
+      vi.mocked(executeAgentTurn).mockRejectedValue(new Error("Network error"));
 
       const { startRepl } = await import("./index.js");
       await startRepl();
@@ -477,10 +457,7 @@ describe("REPL index", () => {
       });
 
       const mockInputHandler = {
-        prompt: vi
-          .fn()
-          .mockResolvedValueOnce("abort")
-          .mockResolvedValueOnce(null),
+        prompt: vi.fn().mockResolvedValueOnce("abort").mockResolvedValueOnce(null),
         close: vi.fn(),
       };
       vi.mocked(createInputHandler).mockReturnValue(mockInputHandler);
@@ -526,10 +503,7 @@ describe("REPL index", () => {
       });
 
       const mockInputHandler = {
-        prompt: vi
-          .fn()
-          .mockResolvedValueOnce("throw string")
-          .mockResolvedValueOnce(null),
+        prompt: vi.fn().mockResolvedValueOnce("throw string").mockResolvedValueOnce(null),
         close: vi.fn(),
       };
       vi.mocked(createInputHandler).mockReturnValue(mockInputHandler);
@@ -611,10 +585,7 @@ describe("REPL index", () => {
       });
 
       const mockInputHandler = {
-        prompt: vi
-          .fn()
-          .mockResolvedValueOnce("test input")
-          .mockResolvedValueOnce(null),
+        prompt: vi.fn().mockResolvedValueOnce("test input").mockResolvedValueOnce(null),
         close: vi.fn(),
       };
       vi.mocked(createInputHandler).mockReturnValue(mockInputHandler);
@@ -636,7 +607,7 @@ describe("REPL index", () => {
             aborted: false,
             iterations: 1,
           };
-        }
+        },
       );
 
       const { startRepl } = await import("./index.js");
@@ -653,9 +624,7 @@ describe("REPL index", () => {
       const { isSlashCommand } = await import("./commands/index.js");
       const { executeAgentTurn } = await import("./agent-loop.js");
       const { createSpinner } = await import("./output/spinner.js");
-      const { renderToolStart, renderToolEnd } = await import(
-        "./output/renderer.js"
-      );
+      const { renderToolStart, renderToolEnd } = await import("./output/renderer.js");
 
       const mockProvider: Partial<LLMProvider> = {
         isAvailable: vi.fn().mockResolvedValue(true),
@@ -678,10 +647,7 @@ describe("REPL index", () => {
       });
 
       const mockInputHandler = {
-        prompt: vi
-          .fn()
-          .mockResolvedValueOnce("run tools")
-          .mockResolvedValueOnce(null),
+        prompt: vi.fn().mockResolvedValueOnce("run tools").mockResolvedValueOnce(null),
         close: vi.fn(),
       };
       vi.mocked(createInputHandler).mockReturnValue(mockInputHandler);
@@ -710,7 +676,7 @@ describe("REPL index", () => {
             aborted: false,
             iterations: 1,
           };
-        }
+        },
       );
 
       const { startRepl } = await import("./index.js");

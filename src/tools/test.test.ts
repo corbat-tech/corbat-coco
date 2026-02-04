@@ -187,7 +187,7 @@ describe("runTestsTool advanced", () => {
     const { runTestsTool } = await import("./test.js");
 
     await expect(runTestsTool.execute({ cwd: "/empty" })).rejects.toThrow(
-      "No test framework detected"
+      "No test framework detected",
     );
   });
 
@@ -195,7 +195,7 @@ describe("runTestsTool advanced", () => {
     mockReadFile.mockImplementationOnce(async () =>
       JSON.stringify({
         devDependencies: { jest: "^29.0.0" },
-      })
+      }),
     );
 
     const { execa } = await import("execa");
@@ -221,7 +221,7 @@ describe("runTestsTool advanced", () => {
     mockReadFile.mockImplementationOnce(async () =>
       JSON.stringify({
         devDependencies: { mocha: "^10.0.0" },
-      })
+      }),
     );
 
     const { execa } = await import("execa");
@@ -241,9 +241,9 @@ describe("runTestsTool advanced", () => {
   it("should throw on unsupported framework", async () => {
     const { runTestsTool } = await import("./test.js");
 
-    await expect(
-      runTestsTool.execute({ cwd: "/test", framework: "unknown" })
-    ).rejects.toThrow("Unsupported test framework");
+    await expect(runTestsTool.execute({ cwd: "/test", framework: "unknown" })).rejects.toThrow(
+      "Unsupported test framework",
+    );
   });
 
   it("should handle execution errors", async () => {
@@ -252,9 +252,7 @@ describe("runTestsTool advanced", () => {
 
     const { runTestsTool } = await import("./test.js");
 
-    await expect(runTestsTool.execute({ cwd: "/test" })).rejects.toThrow(
-      "Test execution failed"
-    );
+    await expect(runTestsTool.execute({ cwd: "/test" })).rejects.toThrow("Test execution failed");
   });
 
   it("should parse output when JSON parsing fails", async () => {
@@ -294,7 +292,7 @@ describe("runTestsTool advanced", () => {
     mockReadFile.mockImplementationOnce(async () =>
       JSON.stringify({
         devDependencies: { ava: "^5.0.0" },
-      })
+      }),
     );
 
     const { runTestsTool } = await import("./test.js");
@@ -320,7 +318,7 @@ describe("getCoverageTool advanced", () => {
     const { getCoverageTool } = await import("./test.js");
 
     await expect(getCoverageTool.execute({ cwd: "/nocoverage" })).rejects.toThrow(
-      "Coverage data not found"
+      "Coverage data not found",
     );
   });
 

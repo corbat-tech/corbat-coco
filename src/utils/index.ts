@@ -49,15 +49,7 @@ export {
 } from "./validation.js";
 
 // Async utilities
-export {
-  sleep,
-  timeout,
-  debounce,
-  throttle,
-  retry,
-  parallel,
-  sequential,
-} from "./async.js";
+export { sleep, timeout, debounce, throttle, retry, parallel, sequential } from "./async.js";
 
 // String utilities
 export {

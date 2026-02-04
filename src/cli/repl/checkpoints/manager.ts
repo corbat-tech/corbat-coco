@@ -295,10 +295,7 @@ export class CheckpointManager {
   /**
    * Add a checkpoint to the index.
    */
-  private async addToIndex(
-    sessionId: string,
-    checkpoint: Checkpoint
-  ): Promise<void> {
+  private async addToIndex(sessionId: string, checkpoint: Checkpoint): Promise<void> {
     const index = await this.loadIndex(sessionId);
 
     const entry: CheckpointIndexEntry = {
@@ -319,10 +316,7 @@ export class CheckpointManager {
    * Remove a checkpoint from the index.
    * Used internally during checkpoint deletion operations.
    */
-  async removeFromIndex(
-    sessionId: string,
-    checkpointId: string
-  ): Promise<void> {
+  async removeFromIndex(sessionId: string, checkpointId: string): Promise<void> {
     const index = await this.loadIndex(sessionId);
     index.checkpoints = index.checkpoints.filter((c) => c.id !== checkpointId);
     await this.saveIndex(index);
@@ -335,10 +329,7 @@ export class CheckpointManager {
   /**
    * Store file content and return its hash.
    */
-  private async storeContent(
-    sessionId: string,
-    content: string
-  ): Promise<string> {
+  private async storeContent(sessionId: string, content: string): Promise<string> {
     const hash = hashContent(content);
     const contentPath = this.getContentPath(sessionId, hash);
 
@@ -357,10 +348,7 @@ export class CheckpointManager {
   /**
    * Load content by hash.
    */
-  private async loadContent(
-    sessionId: string,
-    hash: string
-  ): Promise<string | null> {
+  private async loadContent(sessionId: string, hash: string): Promise<string | null> {
     // Check cache first
     const cacheKey = `${sessionId}:${hash}`;
     if (this.contentCache.has(cacheKey)) {
@@ -409,7 +397,7 @@ export class CheckpointManager {
     _sessionId: string,
     filePath: string,
     triggeredBy: string,
-    toolCallId?: string
+    toolCallId?: string,
   ): Promise<FileCheckpoint> {
     // Read current content (empty if file doesn't exist)
     // Note: _sessionId is kept for API consistency but not used in this method
@@ -442,7 +430,7 @@ export class CheckpointManager {
    */
   updateFileCheckpointWithNewContent(
     checkpoint: FileCheckpoint,
-    newContent: string
+    newContent: string,
   ): FileCheckpoint {
     return {
       ...checkpoint,
@@ -476,7 +464,7 @@ export class CheckpointManager {
   async createConversationCheckpoint(
     sessionId: string,
     messages: Message[],
-    description?: string
+    description?: string,
   ): Promise<ConversationCheckpoint> {
     const checkpoint: ConversationCheckpoint = {
       id: generateId("conv"),
@@ -524,7 +512,7 @@ export class CheckpointManager {
     type: CheckpointType,
     files?: string[],
     messages?: Message[],
-    label?: string
+    label?: string,
   ): Promise<Checkpoint> {
     const fileCheckpoints: FileCheckpoint[] = [];
     let conversationCheckpoint: ConversationCheckpoint | undefined;
@@ -535,7 +523,7 @@ export class CheckpointManager {
         const fileCheckpoint = await this.createFileCheckpoint(
           sessionId,
           filePath,
-          "checkpoint_command"
+          "checkpoint_command",
         );
         fileCheckpoints.push(fileCheckpoint);
       }
@@ -543,11 +531,7 @@ export class CheckpointManager {
 
     // Create conversation checkpoint
     if ((type === "conversation" || type === "combined") && messages) {
-      conversationCheckpoint = await this.createConversationCheckpoint(
-        sessionId,
-        messages,
-        label
-      );
+      conversationCheckpoint = await this.createConversationCheckpoint(sessionId, messages, label);
     }
 
     const checkpoint: Checkpoint = {
@@ -576,10 +560,7 @@ export class CheckpointManager {
     // Store file contents and create stored format
     const storedFiles: StoredFileCheckpoint[] = [];
     for (const file of checkpoint.files) {
-      const contentHash = await this.storeContent(
-        sessionId,
-        file.originalContent
-      );
+      const contentHash = await this.storeContent(sessionId, file.originalContent);
       let newContentHash: string | undefined;
       if (file.newContent !== undefined) {
         newContentHash = await this.storeContent(sessionId, file.newContent);
@@ -619,10 +600,7 @@ export class CheckpointManager {
     };
 
     // Write checkpoint file
-    await writeJson(
-      this.getCheckpointPath(sessionId, checkpoint.id),
-      stored
-    );
+    await writeJson(this.getCheckpointPath(sessionId, checkpoint.id), stored);
 
     // Update index
     await this.addToIndex(sessionId, checkpoint);
@@ -633,7 +611,7 @@ export class CheckpointManager {
    */
   private async loadCheckpoint(
     sessionId: string,
-    checkpointId: string
+    checkpointId: string,
   ): Promise<Checkpoint | null> {
     const checkpointPath = this.getCheckpointPath(sessionId, checkpointId);
     const stored = await readJson<StoredCheckpoint>(checkpointPath);
@@ -645,10 +623,7 @@ export class CheckpointManager {
     // Load file contents
     const files: FileCheckpoint[] = [];
     for (const storedFile of stored.files) {
-      const originalContent = await this.loadContent(
-        sessionId,
-        storedFile.contentHash
-      );
+      const originalContent = await this.loadContent(sessionId, storedFile.contentHash);
       if (originalContent === null) {
         // Content missing, skip this file
         continue;
@@ -656,9 +631,7 @@ export class CheckpointManager {
 
       let newContent: string | undefined;
       if (storedFile.newContentHash) {
-        newContent =
-          (await this.loadContent(sessionId, storedFile.newContentHash)) ??
-          undefined;
+        newContent = (await this.loadContent(sessionId, storedFile.newContentHash)) ?? undefined;
       }
 
       files.push({
@@ -720,9 +693,7 @@ export class CheckpointManager {
     }
 
     // Sort by creation time, newest first
-    checkpoints.sort(
-      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
-    );
+    checkpoints.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
     return checkpoints;
   }
@@ -772,7 +743,7 @@ export class CheckpointManager {
 
     // Sort by creation time and get the latest
     const sorted = [...index.checkpoints].sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
 
     const latest = sorted[0];
@@ -833,8 +804,7 @@ export class CheckpointManager {
    * ```
    */
   async rewind(options: RewindOptions): Promise<RewindResult> {
-    const { checkpointId, restoreFiles, restoreConversation, excludeFiles } =
-      options;
+    const { checkpointId, restoreFiles, restoreConversation, excludeFiles } = options;
 
     // Load the checkpoint
     const checkpoint = await this.getCheckpoint(checkpointId);
@@ -870,8 +840,7 @@ export class CheckpointManager {
         } catch (error) {
           result.filesFailed.push({
             path: file.filePath,
-            error:
-              error instanceof Error ? error.message : "Unknown error occurred",
+            error: error instanceof Error ? error.message : "Unknown error occurred",
           });
         }
       }
@@ -907,7 +876,7 @@ export class CheckpointManager {
 
     // Sort by creation time, newest first
     const sorted = [...index.checkpoints].sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
 
     // Get checkpoints to delete
@@ -976,7 +945,7 @@ export class CheckpointManager {
   async storeAutoFileCheckpoint(
     sessionId: string,
     fileCheckpoint: FileCheckpoint,
-    label?: string
+    label?: string,
   ): Promise<Checkpoint> {
     const checkpoint: Checkpoint = {
       id: generateId("ckpt"),
@@ -1019,10 +988,7 @@ export class CheckpointManager {
    * @param filePath - Path to check
    * @returns Whether the file has changed since the last checkpoint
    */
-  async hasFileChangedSinceLastCheckpoint(
-    sessionId: string,
-    filePath: string
-  ): Promise<boolean> {
+  async hasFileChangedSinceLastCheckpoint(sessionId: string, filePath: string): Promise<boolean> {
     const index = await this.loadIndex(sessionId);
 
     // Find the most recent checkpoint for this file
@@ -1030,9 +996,7 @@ export class CheckpointManager {
       const checkpoint = await this.loadCheckpoint(sessionId, entry.id);
       if (!checkpoint) continue;
 
-      const fileCheckpoint = checkpoint.files.find(
-        (f) => f.filePath === filePath
-      );
+      const fileCheckpoint = checkpoint.files.find((f) => f.filePath === filePath);
       if (fileCheckpoint) {
         // Compare current content with checkpointed content
         try {
@@ -1083,9 +1047,7 @@ export class CheckpointManager {
  * });
  * ```
  */
-export function createCheckpointManager(
-  config?: Partial<CheckpointConfig>
-): CheckpointManager {
+export function createCheckpointManager(config?: Partial<CheckpointConfig>): CheckpointManager {
   return new CheckpointManager(config);
 }
 

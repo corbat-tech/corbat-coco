@@ -53,9 +53,7 @@ function formatDuration(ms: number): string {
  */
 function getElapsedTime(task: BackgroundTask): number {
   const startTime = new Date(task.startedAt).getTime();
-  const endTime = task.completedAt
-    ? new Date(task.completedAt).getTime()
-    : Date.now();
+  const endTime = task.completedAt ? new Date(task.completedAt).getTime() : Date.now();
   return endTime - startTime;
 }
 
@@ -86,9 +84,7 @@ export function renderTaskStatus(task: BackgroundTask): string {
   const elapsed = formatDuration(getElapsedTime(task));
 
   // Header line with ID, name, and status
-  lines.push(
-    `${icon} ${chalk.bold(task.name)} ${chalk.dim(`[${task.id}]`)} - ${statusLabel}`
-  );
+  lines.push(`${icon} ${chalk.bold(task.name)} ${chalk.dim(`[${task.id}]`)} - ${statusLabel}`);
 
   // Description
   lines.push(`  ${chalk.dim(task.description)}`);
@@ -104,10 +100,7 @@ export function renderTaskStatus(task: BackgroundTask): string {
 
   // Result for completed tasks
   if (task.status === "completed" && task.result) {
-    const resultPreview =
-      task.result.length > 100
-        ? task.result.slice(0, 97) + "..."
-        : task.result;
+    const resultPreview = task.result.length > 100 ? task.result.slice(0, 97) + "..." : task.result;
     lines.push(`  ${chalk.dim("Result:")} ${chalk.green(resultPreview)}`);
   }
 
@@ -211,8 +204,7 @@ function renderTaskCompact(task: BackgroundTask): string {
 
   let suffix = "";
   if (task.status === "failed" && task.error) {
-    const shortError =
-      task.error.length > 30 ? task.error.slice(0, 27) + "..." : task.error;
+    const shortError = task.error.length > 30 ? task.error.slice(0, 27) + "..." : task.error;
     suffix = chalk.red(` - ${shortError}`);
   }
 

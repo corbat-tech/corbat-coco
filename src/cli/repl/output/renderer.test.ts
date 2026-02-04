@@ -65,7 +65,7 @@ describe("renderStreamChunk", () => {
     // Typewriter writes character by character
     expect(stdoutWriteSpy).toHaveBeenCalled();
     // All characters should have been written
-    const allWrites = stdoutWriteSpy.mock.calls.map(call => call[0]).join("");
+    const allWrites = stdoutWriteSpy.mock.calls.map((call) => call[0]).join("");
     expect(allWrites).toBe("Hello");
   });
 
@@ -77,7 +77,7 @@ describe("renderStreamChunk", () => {
     renderStreamChunk(doneChunk);
 
     // Should have written all characters after flush
-    const allWrites = stdoutWriteSpy.mock.calls.map(call => call[0]).join("");
+    const allWrites = stdoutWriteSpy.mock.calls.map((call) => call[0]).join("");
     expect(allWrites).toBe("Test");
   });
 
@@ -446,7 +446,10 @@ describe("renderToolEnd with formatResultPreview edge cases", () => {
       id: "1",
       name: "bash_exec",
       input: { command: "ls" },
-      result: { success: true, output: '{"exitCode": 0, "stdout": "file1.txt\\nfile2.txt\\nfile3.txt"}' },
+      result: {
+        success: true,
+        output: '{"exitCode": 0, "stdout": "file1.txt\\nfile2.txt\\nfile3.txt"}',
+      },
       duration: 10,
     };
 
@@ -654,7 +657,7 @@ describe("renderToolStart with formatToolSummary edge cases", () => {
     renderToolStart("custom_tool", {
       nullVal: null,
       undefinedVal: undefined,
-      normalVal: "test"
+      normalVal: "test",
     });
 
     const output = consoleLogSpy.mock.calls[0][0];
@@ -665,7 +668,7 @@ describe("renderToolStart with formatToolSummary edge cases", () => {
 
   it("should handle object values in input", () => {
     renderToolStart("custom_tool", {
-      nested: { key: "value" }
+      nested: { key: "value" },
     });
 
     const output = consoleLogSpy.mock.calls[0][0];

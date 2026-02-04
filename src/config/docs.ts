@@ -57,7 +57,7 @@ const defaultOptions: Required<DocOptions> = {
 export function generateSchemaDocs(
   schema: z.ZodTypeAny,
   title: string,
-  options: DocOptions = {}
+  options: DocOptions = {},
 ): SchemaDoc {
   const opts = { ...defaultOptions, ...options };
 
@@ -86,7 +86,7 @@ function extractDescription(schema: z.ZodTypeAny): string | undefined {
 function extractFields(
   schema: z.ZodTypeAny,
   options: Required<DocOptions>,
-  depth: number
+  depth: number,
 ): FieldDoc[] {
   if (depth >= options.maxDepth) {
     return [];
@@ -120,7 +120,7 @@ function extractFields(
 function extractObjectFields(
   schema: z.ZodObject<z.ZodRawShape>,
   options: Required<DocOptions>,
-  depth: number
+  depth: number,
 ): FieldDoc[] {
   const shape = schema.shape;
   const fields: FieldDoc[] = [];
@@ -141,7 +141,7 @@ function extractFieldInfo(
   name: string,
   schema: z.ZodTypeAny,
   options: Required<DocOptions>,
-  depth: number
+  depth: number,
 ): FieldDoc {
   let innerSchema = schema;
   let isOptional = false;
@@ -173,11 +173,7 @@ function extractFieldInfo(
   // Extract nested fields for objects
   let nested: FieldDoc[] | undefined;
   if (innerSchema._def.typeName === "ZodObject" && depth < options.maxDepth) {
-    nested = extractObjectFields(
-      innerSchema as z.ZodObject<z.ZodRawShape>,
-      options,
-      depth + 1
-    );
+    nested = extractObjectFields(innerSchema as z.ZodObject<z.ZodRawShape>, options, depth + 1);
   }
 
   return {
@@ -311,7 +307,7 @@ export function formatDocsAsMarkdown(doc: SchemaDoc, options: DocOptions = {}): 
 function formatFieldsAsMarkdown(
   fields: FieldDoc[],
   options: Required<DocOptions>,
-  depth: number
+  depth: number,
 ): string {
   const lines: string[] = [];
   const indent = "  ".repeat(depth);
@@ -334,7 +330,7 @@ function formatFieldsAsMarkdown(
 
     // Enum values
     if (field.enum && field.enum.length > 0) {
-      lines.push(`${indent}  Values: ${field.enum.map(v => `\`${v}\``).join(", ")}`);
+      lines.push(`${indent}  Values: ${field.enum.map((v) => `\`${v}\``).join(", ")}`);
     }
 
     // Default value
@@ -392,7 +388,7 @@ export function formatDocsAsPlainText(doc: SchemaDoc, options: DocOptions = {}):
 function formatFieldsAsPlainText(
   fields: FieldDoc[],
   options: Required<DocOptions>,
-  depth: number
+  depth: number,
 ): string {
   const lines: string[] = [];
   const indent = "  ".repeat(depth);
@@ -440,7 +436,7 @@ function formatFieldsAsPlainText(
 export function generateDocs(
   schema: z.ZodTypeAny,
   title: string,
-  options: DocOptions = {}
+  options: DocOptions = {},
 ): string {
   const doc = generateSchemaDocs(schema, title, options);
   const format = options.format ?? "markdown";

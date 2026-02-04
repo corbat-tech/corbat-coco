@@ -4,11 +4,7 @@
  * Generates Dockerfile and Docker Compose configurations
  */
 
-import type {
-  DockerConfig,
-  ComposeConfig,
-  ProjectMetadata,
-} from "./types.js";
+import type { DockerConfig, ComposeConfig, ProjectMetadata } from "./types.js";
 
 /**
  * Docker Generator

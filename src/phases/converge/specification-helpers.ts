@@ -61,13 +61,11 @@ export function inferProjectType(session: DiscoverySession): string {
   const text = session.initialInput.toLowerCase();
 
   if (text.includes("cli") || text.includes("command line")) return "cli";
-  if (text.includes("api") || text.includes("rest") || text.includes("graphql"))
-    return "api";
+  if (text.includes("api") || text.includes("rest") || text.includes("graphql")) return "api";
   if (text.includes("web app") || text.includes("frontend")) return "web_app";
   if (text.includes("library") || text.includes("package")) return "library";
   if (text.includes("service") || text.includes("daemon")) return "service";
-  if (text.includes("full stack") || text.includes("fullstack"))
-    return "full_stack";
+  if (text.includes("full stack") || text.includes("fullstack")) return "full_stack";
 
   return "unknown";
 }
@@ -76,14 +74,12 @@ export function inferProjectType(session: DiscoverySession): string {
  * Assess project complexity
  */
 export function assessComplexity(
-  session: DiscoverySession
+  session: DiscoverySession,
 ): "simple" | "moderate" | "complex" | "enterprise" {
   const reqCount = session.requirements.length;
-  const hasIntegrations = session.requirements.some(
-    (r) => r.category === "integration"
-  );
+  const hasIntegrations = session.requirements.some((r) => r.category === "integration");
   const hasSecurity = session.requirements.some((r) =>
-    r.description.toLowerCase().includes("security")
+    r.description.toLowerCase().includes("security"),
   );
 
   if (reqCount > 20 || (hasIntegrations && hasSecurity)) return "enterprise";
@@ -96,21 +92,15 @@ export function assessComplexity(
  * Extract integrations from session
  */
 export function extractIntegrations(session: DiscoverySession): string[] {
-  return session.requirements
-    .filter((r) => r.category === "integration")
-    .map((r) => r.title);
+  return session.requirements.filter((r) => r.category === "integration").map((r) => r.title);
 }
 
 /**
  * Extract deployment info from session
  */
 export function extractDeployment(session: DiscoverySession): string {
-  const deployReq = session.requirements.find(
-    (r) => r.category === "deployment"
-  );
-  const deployTech = session.techDecisions.find(
-    (t) => t.area === "infrastructure"
-  );
+  const deployReq = session.requirements.find((r) => r.category === "deployment");
+  const deployTech = session.techDecisions.find((t) => t.area === "infrastructure");
 
   if (deployReq) return deployReq.description;
   if (deployTech) return deployTech.decision;
@@ -121,9 +111,7 @@ export function extractDeployment(session: DiscoverySession): string {
  * Extract out-of-scope items
  */
 export function extractOutOfScope(session: DiscoverySession): string[] {
-  return session.requirements
-    .filter((r) => r.priority === "wont_have")
-    .map((r) => r.title);
+  return session.requirements.filter((r) => r.priority === "wont_have").map((r) => r.title);
 }
 
 /**
@@ -175,9 +163,7 @@ export function generateRisksFromSession(session: DiscoverySession): Risk[] {
 
   // Add common risks based on tech decisions
   const hasDatabase = session.techDecisions.some((t) => t.area === "database");
-  const hasIntegrations = session.requirements.some(
-    (r) => r.category === "integration"
-  );
+  const hasIntegrations = session.requirements.some((r) => r.category === "integration");
 
   if (hasDatabase) {
     risks.push({

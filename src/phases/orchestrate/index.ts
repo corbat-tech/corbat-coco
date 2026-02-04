@@ -66,11 +66,7 @@ export {
 } from "./backlog.js";
 
 // Executor
-export {
-  OrchestrateExecutor,
-  createOrchestrateExecutor,
-  runOrchestratePhase,
-} from "./executor.js";
+export { OrchestrateExecutor, createOrchestrateExecutor, runOrchestratePhase } from "./executor.js";
 
 // Prompts (for customization)
 export {

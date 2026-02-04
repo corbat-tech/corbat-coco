@@ -22,8 +22,4 @@ export {
 } from "./manager.js";
 
 // Display
-export {
-  renderTaskStatus,
-  renderTaskList,
-  renderTaskNotification,
-} from "./display.js";
+export { renderTaskStatus, renderTaskList, renderTaskNotification } from "./display.js";

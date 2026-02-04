@@ -78,9 +78,7 @@ export function parseSlashCommand(input: string): {
  * Find command by name or alias
  */
 function findCommand(name: string): SlashCommand | undefined {
-  return commands.find(
-    (cmd) => cmd.name === name || cmd.aliases.includes(name)
-  );
+  return commands.find((cmd) => cmd.name === name || cmd.aliases.includes(name));
 }
 
 /**
@@ -90,7 +88,7 @@ function findCommand(name: string): SlashCommand | undefined {
 export async function executeSlashCommand(
   commandName: string,
   args: string[],
-  session: ReplSession
+  session: ReplSession,
 ): Promise<boolean> {
   const command = findCommand(commandName);
 

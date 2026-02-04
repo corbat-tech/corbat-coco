@@ -2,7 +2,7 @@
  * MCP (Model Context Protocol) Errors
  */
 
-import { MCPErrorCode } from './types.js';
+import { MCPErrorCode } from "./types.js";
 
 /**
  * Base MCP Error class
@@ -12,7 +12,7 @@ export class MCPError extends Error {
 
   constructor(code: MCPErrorCode, message: string) {
     super(message);
-    this.name = 'MCPError';
+    this.name = "MCPError";
     this.code = code;
   }
 }
@@ -23,7 +23,7 @@ export class MCPError extends Error {
 export class MCPTransportError extends MCPError {
   constructor(message: string) {
     super(MCPErrorCode.TRANSPORT_ERROR, message);
-    this.name = 'MCPTransportError';
+    this.name = "MCPTransportError";
   }
 }
 
@@ -33,7 +33,7 @@ export class MCPTransportError extends MCPError {
 export class MCPConnectionError extends MCPError {
   constructor(message: string) {
     super(MCPErrorCode.CONNECTION_ERROR, message);
-    this.name = 'MCPConnectionError';
+    this.name = "MCPConnectionError";
   }
 }
 
@@ -41,9 +41,9 @@ export class MCPConnectionError extends MCPError {
  * Timeout error - occurs when request times out
  */
 export class MCPTimeoutError extends MCPError {
-  constructor(message: string = 'Request timed out') {
+  constructor(message: string = "Request timed out") {
     super(MCPErrorCode.TIMEOUT_ERROR, message);
-    this.name = 'MCPTimeoutError';
+    this.name = "MCPTimeoutError";
   }
 }
 
@@ -53,6 +53,6 @@ export class MCPTimeoutError extends MCPError {
 export class MCPInitializationError extends MCPError {
   constructor(message: string) {
     super(MCPErrorCode.INITIALIZATION_ERROR, message);
-    this.name = 'MCPInitializationError';
+    this.name = "MCPInitializationError";
   }
 }

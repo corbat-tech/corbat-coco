@@ -96,9 +96,7 @@ describe("readJsonFile", () => {
 
     const { readJsonFile } = await import("./files.js");
 
-    await expect(readJsonFile("/test/file.json")).rejects.toThrow(
-      /Failed to read JSON file/
-    );
+    await expect(readJsonFile("/test/file.json")).rejects.toThrow(/Failed to read JSON file/);
   });
 });
 
@@ -116,7 +114,7 @@ describe("writeJsonFile", () => {
     expect(mockFs.writeFile).toHaveBeenCalledWith(
       "/test/file.json",
       expect.stringContaining('"name": "test"'),
-      "utf-8"
+      "utf-8",
     );
   });
 
@@ -143,7 +141,7 @@ describe("writeJsonFile", () => {
     const { writeJsonFile } = await import("./files.js");
 
     await expect(writeJsonFile("/test/file.json", { name: "test" })).rejects.toThrow(
-      /Failed to write JSON file/
+      /Failed to write JSON file/,
     );
   });
 });
@@ -333,7 +331,7 @@ describe("writeTextFile", () => {
     expect(mockFs.writeFile).toHaveBeenCalledWith(
       "/test/file.txt",
       "content",
-      expect.objectContaining({ encoding: "utf-8" })
+      expect.objectContaining({ encoding: "utf-8" }),
     );
   });
 
@@ -353,7 +351,7 @@ describe("writeTextFile", () => {
     expect(mockFs.writeFile).toHaveBeenCalledWith(
       "/test/script.sh",
       "#!/bin/bash",
-      expect.objectContaining({ mode: 0o755 })
+      expect.objectContaining({ mode: 0o755 }),
     );
   });
 
@@ -362,7 +360,9 @@ describe("writeTextFile", () => {
 
     const { writeTextFile } = await import("./files.js");
 
-    await expect(writeTextFile("/test/file.txt", "content")).rejects.toThrow(/Failed to write file/);
+    await expect(writeTextFile("/test/file.txt", "content")).rejects.toThrow(
+      /Failed to write file/,
+    );
   });
 });
 
@@ -376,11 +376,7 @@ describe("appendTextFile", () => {
 
     await appendTextFile("/test/file.txt", "appended content");
 
-    expect(mockFs.appendFile).toHaveBeenCalledWith(
-      "/test/file.txt",
-      "appended content",
-      "utf-8"
-    );
+    expect(mockFs.appendFile).toHaveBeenCalledWith("/test/file.txt", "appended content", "utf-8");
   });
 
   it("should skip ensuring directory when option is false", async () => {
@@ -522,7 +518,7 @@ describe("atomicWriteFile", () => {
     expect(mockFs.writeFile).toHaveBeenCalledWith(
       expect.stringContaining(".tmp"),
       "content",
-      "utf-8"
+      "utf-8",
     );
     expect(mockFs.rename).toHaveBeenCalled();
   });

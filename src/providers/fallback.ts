@@ -15,11 +15,7 @@ import type {
   ChatWithToolsResponse,
   StreamChunk,
 } from "./types.js";
-import {
-  CircuitBreaker,
-  CircuitOpenError,
-  type CircuitBreakerConfig,
-} from "./circuit-breaker.js";
+import { CircuitBreaker, CircuitOpenError, type CircuitBreakerConfig } from "./circuit-breaker.js";
 import { ProviderError } from "../utils/errors.js";
 
 /**
@@ -102,7 +98,7 @@ export class ProviderFallback implements LLMProvider {
   async initialize(config: ProviderConfig): Promise<void> {
     // Initialize all providers
     const results = await Promise.allSettled(
-      this.providers.map((p) => p.provider.initialize(config))
+      this.providers.map((p) => p.provider.initialize(config)),
     );
 
     // At least one provider must initialize successfully
@@ -116,7 +112,6 @@ export class ProviderFallback implements LLMProvider {
         provider: "fallback",
       });
     }
-
   }
 
   /**
@@ -131,9 +126,7 @@ export class ProviderFallback implements LLMProvider {
    * @throws ProviderError if all providers fail
    */
   async chat(messages: Message[], options?: ChatOptions): Promise<ChatResponse> {
-    return this.executeWithFallback((provider) =>
-      provider.chat(messages, options)
-    );
+    return this.executeWithFallback((provider) => provider.chat(messages, options));
   }
 
   /**
@@ -149,11 +142,9 @@ export class ProviderFallback implements LLMProvider {
    */
   async chatWithTools(
     messages: Message[],
-    options: ChatWithToolsOptions
+    options: ChatWithToolsOptions,
   ): Promise<ChatWithToolsResponse> {
-    return this.executeWithFallback((provider) =>
-      provider.chatWithTools(messages, options)
-    );
+    return this.executeWithFallback((provider) => provider.chatWithTools(messages, options));
   }
 
   /**
@@ -162,10 +153,7 @@ export class ProviderFallback implements LLMProvider {
    * Note: Streaming with fallback will restart from the beginning
    * if a provider fails mid-stream.
    */
-  async *stream(
-    messages: Message[],
-    options?: ChatOptions
-  ): AsyncIterable<StreamChunk> {
+  async *stream(messages: Message[], options?: ChatOptions): AsyncIterable<StreamChunk> {
     const providers = this.getAvailableProviders();
 
     for (const { provider, breaker } of providers) {
@@ -196,7 +184,7 @@ export class ProviderFallback implements LLMProvider {
    */
   async *streamWithTools(
     messages: Message[],
-    options: ChatWithToolsOptions
+    options: ChatWithToolsOptions,
   ): AsyncIterable<StreamChunk> {
     const providers = this.getAvailableProviders();
 
@@ -263,7 +251,7 @@ export class ProviderFallback implements LLMProvider {
           return false;
         }
         return p.provider.isAvailable();
-      })
+      }),
     );
     return results.some((available) => available);
   }
@@ -321,9 +309,7 @@ export class ProviderFallback implements LLMProvider {
   /**
    * Execute a function with provider fallback
    */
-  private async executeWithFallback<T>(
-    fn: (provider: LLMProvider) => Promise<T>
-  ): Promise<T> {
+  private async executeWithFallback<T>(fn: (provider: LLMProvider) => Promise<T>): Promise<T> {
     const providers = this.getAvailableProviders();
     const errors: Array<{ provider: string; error: unknown }> = [];
 
@@ -385,7 +371,7 @@ export class ProviderFallback implements LLMProvider {
  */
 export function createProviderFallback(
   providers: LLMProvider[],
-  config?: ProviderFallbackConfig
+  config?: ProviderFallbackConfig,
 ): ProviderFallback {
   return new ProviderFallback(providers, config);
 }

@@ -78,10 +78,7 @@ export function createDefaultReplConfig(): ReplConfig {
 /**
  * Create a new REPL session
  */
-export function createSession(
-  projectPath: string,
-  config?: Partial<ReplConfig>
-): ReplSession {
+export function createSession(projectPath: string, config?: Partial<ReplConfig>): ReplSession {
   const defaultConfig = createDefaultReplConfig();
   return {
     id: randomUUID(),
@@ -122,10 +119,7 @@ export function getConversationContext(session: ReplSession): Message[] {
     systemPrompt = `${systemPrompt}\n\n# Project Instructions (from COCO.md/CLAUDE.md)\n\n${session.memoryContext.combinedContent}`;
   }
 
-  return [
-    { role: "system", content: systemPrompt },
-    ...session.messages,
-  ];
+  return [{ role: "system", content: systemPrompt }, ...session.messages];
 }
 
 /**
@@ -194,7 +188,7 @@ export async function loadTrustedTools(projectPath: string): Promise<Set<string>
 export async function saveTrustedTool(
   toolName: string,
   projectPath: string,
-  global: boolean = false
+  global: boolean = false,
 ): Promise<void> {
   const settings = await loadTrustSettings();
 
@@ -223,16 +217,16 @@ export async function saveTrustedTool(
 export async function removeTrustedTool(
   toolName: string,
   projectPath: string,
-  global: boolean = false
+  global: boolean = false,
 ): Promise<void> {
   const settings = await loadTrustSettings();
 
   if (global) {
-    settings.globalTrusted = settings.globalTrusted.filter(t => t !== toolName);
+    settings.globalTrusted = settings.globalTrusted.filter((t) => t !== toolName);
   } else {
     const projectTrusted = settings.projectTrusted[projectPath];
     if (projectTrusted) {
-      settings.projectTrusted[projectPath] = projectTrusted.filter(t => t !== toolName);
+      settings.projectTrusted[projectPath] = projectTrusted.filter((t) => t !== toolName);
     }
   }
 
@@ -266,10 +260,7 @@ export async function initializeSessionTrust(session: ReplSession): Promise<void
 /**
  * Initialize context manager for the session
  */
-export function initializeContextManager(
-  session: ReplSession,
-  provider: LLMProvider
-): void {
+export function initializeContextManager(session: ReplSession, provider: LLMProvider): void {
   const contextWindow = provider.getContextWindow();
   session.contextManager = createContextManager(contextWindow, {
     compactionThreshold: 0.8,
@@ -280,10 +271,7 @@ export function initializeContextManager(
 /**
  * Update context token count after a turn
  */
-export function updateContextTokens(
-  session: ReplSession,
-  provider: LLMProvider
-): void {
+export function updateContextTokens(session: ReplSession, provider: LLMProvider): void {
   if (!session.contextManager) return;
 
   // Calculate total tokens from all messages
@@ -294,9 +282,8 @@ export function updateContextTokens(
 
   // Include all messages
   for (const message of session.messages) {
-    const content = typeof message.content === "string"
-      ? message.content
-      : JSON.stringify(message.content);
+    const content =
+      typeof message.content === "string" ? message.content : JSON.stringify(message.content);
     totalTokens += provider.countTokens(content);
   }
 
@@ -309,7 +296,7 @@ export function updateContextTokens(
  */
 export async function checkAndCompactContext(
   session: ReplSession,
-  provider: LLMProvider
+  provider: LLMProvider,
 ): Promise<CompactionResult | null> {
   if (!session.contextManager) {
     initializeContextManager(session, provider);
@@ -334,7 +321,7 @@ export async function checkAndCompactContext(
   if (result.wasCompacted) {
     // Update session messages with compacted version
     // Extract non-system messages from compacted result
-    const compactedNonSystem = result.messages.filter(m => m.role !== "system");
+    const compactedNonSystem = result.messages.filter((m) => m.role !== "system");
     session.messages = compactedNonSystem;
 
     // Update token count
@@ -377,12 +364,14 @@ export async function initializeSessionMemory(session: ReplSession): Promise<voi
       files: [],
       combinedContent: "",
       totalSize: 0,
-      errors: [{
-        file: session.projectPath,
-        level: "project",
-        error: error instanceof Error ? error.message : String(error),
-        recoverable: true,
-      }],
+      errors: [
+        {
+          file: session.projectPath,
+          level: "project",
+          error: error instanceof Error ? error.message : String(error),
+          recoverable: true,
+        },
+      ],
     };
   }
 }

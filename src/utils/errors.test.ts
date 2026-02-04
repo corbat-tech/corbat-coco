@@ -373,7 +373,9 @@ describe("isCocoError", () => {
     expect(isCocoError(new QualityError("Test", { score: 50, threshold: 80 }))).toBe(true);
     expect(isCocoError(new RecoveryError("Test"))).toBe(true);
     expect(isCocoError(new ToolError("Test", { tool: "test" }))).toBe(true);
-    expect(isCocoError(new TimeoutError("Test", { timeoutMs: 1000, operation: "test" }))).toBe(true);
+    expect(isCocoError(new TimeoutError("Test", { timeoutMs: 1000, operation: "test" }))).toBe(
+      true,
+    );
   });
 
   it("should return false for regular errors", () => {
@@ -520,8 +522,9 @@ describe("withRetry", () => {
       throw new CocoError("Always fail", { code: "FAIL", recoverable: true });
     };
 
-    await expect(withRetry(fn, { maxAttempts: 2, initialDelayMs: 10 }))
-      .rejects.toThrow("Always fail");
+    await expect(withRetry(fn, { maxAttempts: 2, initialDelayMs: 10 })).rejects.toThrow(
+      "Always fail",
+    );
   });
 
   it("should not retry non-recoverable errors", async () => {
@@ -531,8 +534,9 @@ describe("withRetry", () => {
       throw new CocoError("Non-recoverable", { code: "FAIL", recoverable: false });
     };
 
-    await expect(withRetry(fn, { maxAttempts: 3, initialDelayMs: 10 }))
-      .rejects.toThrow("Non-recoverable");
+    await expect(withRetry(fn, { maxAttempts: 3, initialDelayMs: 10 })).rejects.toThrow(
+      "Non-recoverable",
+    );
     expect(calls).toBe(1);
   });
 
@@ -543,11 +547,13 @@ describe("withRetry", () => {
       throw new Error("Custom error");
     };
 
-    await expect(withRetry(fn, {
-      maxAttempts: 3,
-      initialDelayMs: 10,
-      shouldRetry: () => true,
-    })).rejects.toThrow("Custom error");
+    await expect(
+      withRetry(fn, {
+        maxAttempts: 3,
+        initialDelayMs: 10,
+        shouldRetry: () => true,
+      }),
+    ).rejects.toThrow("Custom error");
 
     expect(calls).toBe(3);
   });
@@ -579,8 +585,7 @@ describe("withRetry", () => {
       throw new Error("Regular");
     };
 
-    await expect(withRetry(fn, { maxAttempts: 3, initialDelayMs: 10 }))
-      .rejects.toThrow("Regular");
+    await expect(withRetry(fn, { maxAttempts: 3, initialDelayMs: 10 })).rejects.toThrow("Regular");
     expect(calls).toBe(1);
   });
 });

@@ -170,7 +170,7 @@ export class ContextManager {
  */
 export function createContextManager(
   maxTokens: number,
-  config?: Partial<Omit<ContextManagerConfig, "maxTokens">>
+  config?: Partial<Omit<ContextManagerConfig, "maxTokens">>,
 ): ContextManager {
   return new ContextManager({
     maxTokens,

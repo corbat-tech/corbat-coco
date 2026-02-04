@@ -484,7 +484,8 @@ describe("LLMIntentClassifier", () => {
     it("should extract JSON from wrapped response", async () => {
       const mockResponse: ChatResponse = {
         id: "msg-1",
-        content: 'Based on the input, here is the classification: {"intent": "build", "confidence": 0.9} as requested.',
+        content:
+          'Based on the input, here is the classification: {"intent": "build", "confidence": 0.9} as requested.',
         stopReason: "end_turn",
         usage: { inputTokens: 50, outputTokens: 20 },
         model: "claude-sonnet-4-20250514",
@@ -539,7 +540,7 @@ describe("LLMIntentClassifier", () => {
           system: expect.stringContaining("intent classifier"),
           maxTokens: 100,
           temperature: 0,
-        })
+        }),
       );
     });
 

@@ -7,19 +7,21 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 // Mock fs/promises
 const mockMkdir = vi.fn().mockResolvedValue(undefined);
 const mockWriteFile = vi.fn().mockResolvedValue(undefined);
-const mockReadFile = vi.fn().mockResolvedValue(JSON.stringify({
-  name: "test-project",
-  description: "A test project",
-  version: "1.0.0",
-  author: "Test Author",
-  license: "MIT",
-  repository: { url: "https://github.com/test/test-project" },
-  scripts: {
-    test: "vitest",
-    build: "tsup",
-    start: "node dist/index.js",
-  },
-}));
+const mockReadFile = vi.fn().mockResolvedValue(
+  JSON.stringify({
+    name: "test-project",
+    description: "A test project",
+    version: "1.0.0",
+    author: "Test Author",
+    license: "MIT",
+    repository: { url: "https://github.com/test/test-project" },
+    scripts: {
+      test: "vitest",
+      build: "tsup",
+      start: "node dist/index.js",
+    },
+  }),
+);
 const mockAccess = vi.fn();
 
 vi.mock("node:fs/promises", async () => {
@@ -183,7 +185,7 @@ describe("OutputExecutor", () => {
       expect(result.success).toBe(true);
 
       // Should have Dockerfile, .dockerignore, and docker-compose.yml
-      const dockerArtifacts = result.artifacts.filter(a => a.type === "deployment");
+      const dockerArtifacts = result.artifacts.filter((a) => a.type === "deployment");
       expect(dockerArtifacts.length).toBeGreaterThanOrEqual(2);
     });
 
@@ -203,7 +205,7 @@ describe("OutputExecutor", () => {
       } as any);
 
       expect(result.success).toBe(true);
-      const readmeArtifact = result.artifacts.find(a => a.path.includes("README.md"));
+      const readmeArtifact = result.artifacts.find((a) => a.path.includes("README.md"));
       expect(readmeArtifact).toBeDefined();
     });
 
@@ -223,7 +225,7 @@ describe("OutputExecutor", () => {
       } as any);
 
       expect(result.success).toBe(true);
-      const contributingArtifact = result.artifacts.find(a => a.path.includes("CONTRIBUTING.md"));
+      const contributingArtifact = result.artifacts.find((a) => a.path.includes("CONTRIBUTING.md"));
       expect(contributingArtifact).toBeDefined();
     });
 
@@ -243,7 +245,7 @@ describe("OutputExecutor", () => {
       } as any);
 
       expect(result.success).toBe(true);
-      const changelogArtifact = result.artifacts.find(a => a.path.includes("CHANGELOG.md"));
+      const changelogArtifact = result.artifacts.find((a) => a.path.includes("CHANGELOG.md"));
       expect(changelogArtifact).toBeDefined();
     });
 
@@ -263,7 +265,7 @@ describe("OutputExecutor", () => {
       } as any);
 
       expect(result.success).toBe(true);
-      const apiArtifact = result.artifacts.find(a => a.path.includes("api.md"));
+      const apiArtifact = result.artifacts.find((a) => a.path.includes("api.md"));
       expect(apiArtifact).toBeDefined();
     });
 
@@ -283,7 +285,7 @@ describe("OutputExecutor", () => {
       } as any);
 
       expect(result.success).toBe(true);
-      const deployArtifact = result.artifacts.find(a => a.path.includes("deployment.md"));
+      const deployArtifact = result.artifacts.find((a) => a.path.includes("deployment.md"));
       expect(deployArtifact).toBeDefined();
     });
 
@@ -303,7 +305,7 @@ describe("OutputExecutor", () => {
       } as any);
 
       expect(result.success).toBe(true);
-      const devArtifact = result.artifacts.find(a => a.path.includes("development.md"));
+      const devArtifact = result.artifacts.find((a) => a.path.includes("development.md"));
       expect(devArtifact).toBeDefined();
     });
 
@@ -430,11 +432,13 @@ describe("OutputExecutor", () => {
     it("should handle repository as string in package.json", async () => {
       const { OutputExecutor } = await import("./executor.js");
 
-      mockReadFile.mockResolvedValueOnce(JSON.stringify({
-        name: "test-project",
-        description: "Test",
-        repository: "https://github.com/test/repo",
-      }));
+      mockReadFile.mockResolvedValueOnce(
+        JSON.stringify({
+          name: "test-project",
+          description: "Test",
+          repository: "https://github.com/test/repo",
+        }),
+      );
 
       const executor = new OutputExecutor({
         docker: { enabled: false },
@@ -488,7 +492,7 @@ describe("OutputExecutor", () => {
       } as any);
 
       expect(result.success).toBe(true);
-      expect(result.artifacts.some(a => a.type === "cicd")).toBe(true);
+      expect(result.artifacts.some((a) => a.type === "cicd")).toBe(true);
     });
 
     it("should generate all documentation types", async () => {
@@ -508,7 +512,7 @@ describe("OutputExecutor", () => {
 
       expect(result.success).toBe(true);
 
-      const docArtifacts = result.artifacts.filter(a => a.type === "documentation");
+      const docArtifacts = result.artifacts.filter((a) => a.type === "documentation");
       expect(docArtifacts.length).toBeGreaterThanOrEqual(5); // README, CONTRIBUTING, CHANGELOG, api, deployment, development
     });
 
@@ -529,9 +533,9 @@ describe("OutputExecutor", () => {
 
       expect(result.success).toBe(true);
 
-      const dockerArtifacts = result.artifacts.filter(a => a.type === "deployment");
+      const dockerArtifacts = result.artifacts.filter((a) => a.type === "deployment");
       // Should have Dockerfile and .dockerignore but NOT docker-compose.yml
-      const hasCompose = dockerArtifacts.some(a => a.path.includes("docker-compose"));
+      const hasCompose = dockerArtifacts.some((a) => a.path.includes("docker-compose"));
       expect(hasCompose).toBe(false);
     });
   });

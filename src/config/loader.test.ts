@@ -3,7 +3,16 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { loadConfig, saveConfig, createDefaultConfig, findConfigPath, configExists, getConfigValue, setConfigValue, mergeWithDefaults } from "./loader.js";
+import {
+  loadConfig,
+  saveConfig,
+  createDefaultConfig,
+  findConfigPath,
+  configExists,
+  getConfigValue,
+  setConfigValue,
+  mergeWithDefaults,
+} from "./loader.js";
 import { ConfigError } from "../utils/errors.js";
 
 // Mock fs/promises with default export
@@ -108,8 +117,20 @@ describe("saveConfig", () => {
     const config = {
       project: { name: "test-project", version: "0.1.0" },
       provider: { type: "anthropic" as const, model: "claude-sonnet-4-20250514" },
-      quality: { minScore: 85, minCoverage: 80, maxIterations: 10, minIterations: 2, convergenceThreshold: 2, securityThreshold: 100 },
-      persistence: { checkpointInterval: 300000, maxCheckpoints: 50, retentionDays: 7, compressOldCheckpoints: true },
+      quality: {
+        minScore: 85,
+        minCoverage: 80,
+        maxIterations: 10,
+        minIterations: 2,
+        convergenceThreshold: 2,
+        securityThreshold: 100,
+      },
+      persistence: {
+        checkpointInterval: 300000,
+        maxCheckpoints: 50,
+        retentionDays: 7,
+        compressOldCheckpoints: true,
+      },
       stack: { language: "typescript" },
       integrations: {},
     };
@@ -123,7 +144,7 @@ describe("saveConfig", () => {
     expect(fs.default.writeFile).toHaveBeenCalledWith(
       "/path/to/.coco/config.json",
       expect.stringContaining('"name": "test-project"'),
-      "utf-8"
+      "utf-8",
     );
   });
 
@@ -314,7 +335,9 @@ describe("loadConfig edge cases", () => {
     vi.mocked(fs.default.readFile).mockRejectedValue(error);
 
     await expect(loadConfig("/path/to/config.json")).rejects.toBeInstanceOf(ConfigError);
-    await expect(loadConfig("/path/to/config.json")).rejects.toThrow("Failed to load configuration");
+    await expect(loadConfig("/path/to/config.json")).rejects.toThrow(
+      "Failed to load configuration",
+    );
   });
 
   it("should handle non-Error thrown values", async () => {
@@ -322,7 +345,9 @@ describe("loadConfig edge cases", () => {
     vi.mocked(fs.default.readFile).mockRejectedValue("string error");
 
     await expect(loadConfig("/path/to/config.json")).rejects.toBeInstanceOf(ConfigError);
-    await expect(loadConfig("/path/to/config.json")).rejects.toThrow("Failed to load configuration");
+    await expect(loadConfig("/path/to/config.json")).rejects.toThrow(
+      "Failed to load configuration",
+    );
   });
 
   it("should use COCO_CONFIG_PATH env variable via findConfigPathSync", async () => {
@@ -360,8 +385,12 @@ describe("saveConfig edge cases", () => {
       project: { name: "" }, // empty name is invalid
     } as any;
 
-    await expect(saveConfig(invalidConfig, "/path/to/config.json")).rejects.toBeInstanceOf(ConfigError);
-    await expect(saveConfig(invalidConfig, "/path/to/config.json")).rejects.toThrow("Cannot save invalid configuration");
+    await expect(saveConfig(invalidConfig, "/path/to/config.json")).rejects.toBeInstanceOf(
+      ConfigError,
+    );
+    await expect(saveConfig(invalidConfig, "/path/to/config.json")).rejects.toThrow(
+      "Cannot save invalid configuration",
+    );
   });
 
   it("should throw ConfigError for invalid config with explicit path", async () => {
@@ -412,7 +441,7 @@ describe("saveConfig edge cases", () => {
     expect(fs.default.writeFile).toHaveBeenCalledWith(
       "/env/save/config.json",
       expect.any(String),
-      "utf-8"
+      "utf-8",
     );
 
     process.env.COCO_CONFIG_PATH = originalEnv;

@@ -64,7 +64,7 @@ program
         return;
       }
     }
-    
+
     const providerType = (options.provider as ProviderType) ?? getDefaultProvider();
     await startRepl({
       projectPath: options.path,

@@ -72,11 +72,7 @@ export type MemoryLevel = "user" | "project" | "local";
  * Array of all memory levels in order of precedence (lowest to highest).
  * Used for iterating through levels in the correct order.
  */
-export const MEMORY_LEVELS: readonly MemoryLevel[] = [
-  "user",
-  "project",
-  "local",
-] as const;
+export const MEMORY_LEVELS: readonly MemoryLevel[] = ["user", "project", "local"] as const;
 
 // ============================================================================
 // Memory Section
@@ -421,9 +417,7 @@ export interface MemoryConfig {
  * // { maxImportDepth: 3, maxTotalSize: 100000, ... }
  * ```
  */
-export function createDefaultMemoryConfig(
-  overrides?: Partial<MemoryConfig>
-): MemoryConfig {
+export function createDefaultMemoryConfig(overrides?: Partial<MemoryConfig>): MemoryConfig {
   return {
     maxImportDepth: MEMORY_DEFAULTS.maxImportDepth,
     maxTotalSize: MEMORY_DEFAULTS.maxTotalSize,
@@ -466,10 +460,7 @@ export function createEmptyMemoryContext(): MemoryContext {
  * // { path: "/project/COCO.md", level: "project", exists: false, ... }
  * ```
  */
-export function createMissingMemoryFile(
-  path: string,
-  level: MemoryLevel
-): MemoryFile {
+export function createMissingMemoryFile(path: string, level: MemoryLevel): MemoryFile {
   return {
     path,
     level,
@@ -499,7 +490,7 @@ export function createMemorySection(
   title: string,
   content: string,
   startLine: number,
-  endLine: number
+  endLine: number,
 ): MemorySection {
   return {
     title,

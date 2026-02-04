@@ -8,11 +8,7 @@ import chalk from "chalk";
 import * as p from "@clack/prompts";
 import { execSync } from "node:child_process";
 import type { Skill, SkillContext, SkillResult } from "../types.js";
-import {
-  getStateManager,
-  formatStateStatus,
-  getStateSummary,
-} from "../../state/index.js";
+import { getStateManager, formatStateStatus, getStateSummary } from "../../state/index.js";
 import { createTrustStore } from "../../trust-store.js";
 import { getContextUsageFormatted } from "../../session.js";
 
@@ -69,14 +65,11 @@ function getGitStatus(projectPath: string): {
     let ahead = 0;
     let behind = 0;
     try {
-      const upstream = execSync(
-        "git rev-list --left-right --count HEAD...@{upstream}",
-        {
-          cwd: projectPath,
-          stdio: "pipe",
-          encoding: "utf-8",
-        }
-      ).trim();
+      const upstream = execSync("git rev-list --left-right --count HEAD...@{upstream}", {
+        cwd: projectPath,
+        stdio: "pipe",
+        encoding: "utf-8",
+      }).trim();
       const [a, b] = upstream.split("\t").map(Number);
       ahead = a || 0;
       behind = b || 0;
@@ -142,9 +135,7 @@ export const statusSkill: Skill = {
     p.log.message(`    ${summary.implementation ? "ok" : "--"} Implementation`);
 
     // Suggestion
-    const suggestion = await stateManager.getSuggestion(
-      context.session.projectPath
-    );
+    const suggestion = await stateManager.getSuggestion(context.session.projectPath);
     p.log.message("");
     p.log.info(`Tip: ${suggestion}`);
 
@@ -153,12 +144,7 @@ export const statusSkill: Skill = {
     p.log.step("Trust");
     const trustLevel = trustStore.getLevel(context.session.projectPath);
     if (trustLevel) {
-      const levelStr =
-        trustLevel === "full"
-          ? "full"
-          : trustLevel === "write"
-            ? "write"
-            : "read";
+      const levelStr = trustLevel === "full" ? "full" : trustLevel === "write" ? "write" : "read";
       p.log.message(`  [${levelStr}] access`);
     } else {
       p.log.message(`  [!] Not trusted`);
@@ -198,9 +184,7 @@ export const statusSkill: Skill = {
     p.log.message("");
     p.log.step("Session");
     p.log.message(`  Path: ${context.session.projectPath}`);
-    p.log.message(
-      `  Provider: ${context.config.provider.type} / ${context.config.provider.model}`
-    );
+    p.log.message(`  Provider: ${context.config.provider.type} / ${context.config.provider.model}`);
 
     // Context usage
     const contextUsage = getContextUsageFormatted(context.session);

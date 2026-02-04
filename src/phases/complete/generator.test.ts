@@ -31,9 +31,7 @@ describe("CodeGenerator", () => {
       const mockLLM = {
         chat: vi.fn().mockResolvedValue({
           content: JSON.stringify({
-            files: [
-              { path: "src/user.ts", content: "export class User {}", action: "create" },
-            ],
+            files: [{ path: "src/user.ts", content: "export class User {}", action: "create" }],
             explanation: "Created User class",
             confidence: 85,
           }),
@@ -90,7 +88,7 @@ describe("CodeGenerator", () => {
         expect.arrayContaining([
           expect.objectContaining({ role: "system" }),
           expect.objectContaining({ role: "user" }),
-        ])
+        ]),
       );
     });
   });
@@ -102,9 +100,7 @@ describe("CodeGenerator", () => {
       const mockLLM = {
         chat: vi.fn().mockResolvedValue({
           content: JSON.stringify({
-            files: [
-              { path: "src/user.ts", content: "improved code", action: "modify" },
-            ],
+            files: [{ path: "src/user.ts", content: "improved code", action: "modify" }],
             changesApplied: ["Added validation", "Fixed error handling"],
             confidence: 90,
           }),
@@ -114,18 +110,14 @@ describe("CodeGenerator", () => {
       const generator = new CodeGenerator(mockLLM as any);
       const response = await generator.improve(
         "export class User {}",
-        [
-          { severity: "major", message: "Missing validation", suggestion: "Add email validation" },
-        ],
-        [
-          { description: "Add input sanitization", priority: "high" },
-        ],
+        [{ severity: "major", message: "Missing validation", suggestion: "Add email validation" }],
+        [{ description: "Add input sanitization", priority: "high" }],
         {
           task: { id: "task-1", title: "Fix User", description: "Fix", type: "fix", files: [] },
           context: "TypeScript",
           previousCode: "export class User {}",
           iteration: 2,
-        } as any
+        } as any,
       );
 
       expect(response.files).toBeDefined();
@@ -141,7 +133,10 @@ describe("CodeGenerator", () => {
         chat: vi.fn().mockResolvedValue({
           content: JSON.stringify({
             testFiles: [
-              { path: "src/user.test.ts", content: "describe('User', () => { it('works', () => {}) })" },
+              {
+                path: "src/user.test.ts",
+                content: "describe('User', () => { it('works', () => {}) })",
+              },
             ],
           }),
         }),
@@ -151,7 +146,7 @@ describe("CodeGenerator", () => {
       const tests = await generator.generateTests(
         "export class User { constructor(public name: string) {} }",
         80,
-        { lines: 50, branches: 40, functions: 60 }
+        { lines: 50, branches: 40, functions: 60 },
       );
 
       expect(tests).toBeDefined();
@@ -169,7 +164,11 @@ describe("CodeGenerator", () => {
       };
 
       const generator = new CodeGenerator(mockLLM as any);
-      const tests = await generator.generateTests("code", 80, { lines: 0, branches: 0, functions: 0 });
+      const tests = await generator.generateTests("code", 80, {
+        lines: 0,
+        branches: 0,
+        functions: 0,
+      });
 
       expect(tests).toEqual([]);
     });

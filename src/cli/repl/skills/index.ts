@@ -6,33 +6,17 @@
  */
 
 // Export types
-export type {
-  Skill,
-  SkillContext,
-  SkillResult,
-  SkillCategory,
-  SkillInfo,
-} from "./types.js";
+export type { Skill, SkillContext, SkillResult, SkillCategory, SkillInfo } from "./types.js";
 
 // Export registry
 export { SkillRegistry, createSkillRegistry } from "./registry.js";
 
 // Export builtin skills
-export {
-  createHelpSkill,
-  clearSkill,
-  statusSkill,
-  compactSkill,
-} from "./builtin/index.js";
+export { createHelpSkill, clearSkill, statusSkill, compactSkill } from "./builtin/index.js";
 
 // Import for factory function
 import { SkillRegistry } from "./registry.js";
-import {
-  createHelpSkill,
-  clearSkill,
-  statusSkill,
-  compactSkill,
-} from "./builtin/index.js";
+import { createHelpSkill, clearSkill, statusSkill, compactSkill } from "./builtin/index.js";
 
 /**
  * Create a skill registry with all built-in skills registered

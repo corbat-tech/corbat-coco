@@ -8,7 +8,7 @@ import type { LLMProvider, Message } from "../../../providers/types.js";
 // Create mock provider
 function createMockProvider(
   chatResponse: string = "Summary of conversation",
-  tokenCount: number = 100
+  tokenCount: number = 100,
 ): LLMProvider {
   return {
     id: "mock",
@@ -37,17 +37,13 @@ describe("ContextCompactor", () => {
 
   describe("constructor", () => {
     it("should create with default config", async () => {
-      const { ContextCompactor, DEFAULT_COMPACTOR_CONFIG } = await import(
-        "./compactor.js"
-      );
+      const { ContextCompactor, DEFAULT_COMPACTOR_CONFIG } = await import("./compactor.js");
 
       const compactor = new ContextCompactor();
       const config = compactor.getConfig();
 
       expect(config.preserveLastN).toBe(DEFAULT_COMPACTOR_CONFIG.preserveLastN);
-      expect(config.summaryMaxTokens).toBe(
-        DEFAULT_COMPACTOR_CONFIG.summaryMaxTokens
-      );
+      expect(config.summaryMaxTokens).toBe(DEFAULT_COMPACTOR_CONFIG.summaryMaxTokens);
     });
 
     it("should create with custom config", async () => {
@@ -197,7 +193,8 @@ describe("ContextCompactor", () => {
             {
               type: "tool_result",
               tool_use_id: "tool-1",
-              content: "File contents here with a very long result that should be truncated in the summary...",
+              content:
+                "File contents here with a very long result that should be truncated in the summary...",
             },
           ],
         },
@@ -230,9 +227,7 @@ describe("ContextCompactor", () => {
       ];
 
       const failingProvider = createMockProvider();
-      failingProvider.chat = vi
-        .fn()
-        .mockRejectedValue(new Error("API error"));
+      failingProvider.chat = vi.fn().mockRejectedValue(new Error("API error"));
 
       const result = await compactor.compact(messages, failingProvider);
 
@@ -301,9 +296,7 @@ describe("ContextCompactor", () => {
 
 describe("createContextCompactor", () => {
   it("should create compactor with default config", async () => {
-    const { createContextCompactor, DEFAULT_COMPACTOR_CONFIG } = await import(
-      "./compactor.js"
-    );
+    const { createContextCompactor, DEFAULT_COMPACTOR_CONFIG } = await import("./compactor.js");
 
     const compactor = createContextCompactor();
     const config = compactor.getConfig();

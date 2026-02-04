@@ -82,7 +82,7 @@ function deepCompare(
   path: string,
   options: DiffOptions,
   depth: number,
-  entries: DiffEntry[]
+  entries: DiffEntry[],
 ): void {
   // Check max depth
   if (options.maxDepth !== undefined && depth > options.maxDepth) {
@@ -147,7 +147,12 @@ function deepCompare(
         deepCompare(oldItem, newItem, itemPath, options, depth + 1, entries);
         arrayChanged = true;
       } else if (options.includeUnchanged) {
-        entries.push({ path: itemPath, operation: "unchanged", oldValue: oldItem, newValue: newItem });
+        entries.push({
+          path: itemPath,
+          operation: "unchanged",
+          oldValue: oldItem,
+          newValue: newItem,
+        });
       }
     }
 
@@ -194,7 +199,7 @@ function deepCompare(
 export function diffConfigs(
   oldConfig: Record<string, unknown>,
   newConfig: Record<string, unknown>,
-  options: DiffOptions = {}
+  options: DiffOptions = {},
 ): DiffResult {
   const entries: DiffEntry[] = [];
 
@@ -202,9 +207,9 @@ export function diffConfigs(
   deepCompare(oldConfig, newConfig, "", options, 0, entries);
 
   // Calculate stats
-  const added = entries.filter(e => e.operation === "added").length;
-  const removed = entries.filter(e => e.operation === "removed").length;
-  const changed = entries.filter(e => e.operation === "changed").length;
+  const added = entries.filter((e) => e.operation === "added").length;
+  const removed = entries.filter((e) => e.operation === "removed").length;
+  const changed = entries.filter((e) => e.operation === "changed").length;
   const identical = added === 0 && removed === 0 && changed === 0;
 
   // Generate summary
@@ -286,7 +291,7 @@ export function formatDiff(result: DiffResult, colorize: boolean = false): strin
  */
 export function hasBreakingChanges(
   result: DiffResult,
-  requiredPaths: string[] = []
+  requiredPaths: string[] = [],
 ): { breaking: boolean; paths: string[] } {
   const breakingPaths: string[] = [];
 
@@ -294,7 +299,7 @@ export function hasBreakingChanges(
     // Removals of required paths are breaking
     if (entry.operation === "removed") {
       const isRequired = requiredPaths.some(
-        rp => entry.path === rp || entry.path.startsWith(`${rp}.`)
+        (rp) => entry.path === rp || entry.path.startsWith(`${rp}.`),
       );
       if (isRequired) {
         breakingPaths.push(entry.path);
@@ -307,7 +312,7 @@ export function hasBreakingChanges(
       const newType = typeof entry.newValue;
       if (oldType !== newType) {
         const isRequired = requiredPaths.some(
-          rp => entry.path === rp || entry.path.startsWith(`${rp}.`)
+          (rp) => entry.path === rp || entry.path.startsWith(`${rp}.`),
         );
         if (isRequired) {
           breakingPaths.push(entry.path);

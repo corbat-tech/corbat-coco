@@ -252,9 +252,7 @@ describe("manager.ts", () => {
 
   describe("getCheckpointManager() singleton", () => {
     it("should return the same instance on multiple calls", async () => {
-      const { getCheckpointManager, resetCheckpointManager } = await import(
-        "./manager.js"
-      );
+      const { getCheckpointManager, resetCheckpointManager } = await import("./manager.js");
 
       resetCheckpointManager();
 
@@ -265,9 +263,7 @@ describe("manager.ts", () => {
     });
 
     it("should create instance with default config", async () => {
-      const { getCheckpointManager, resetCheckpointManager } = await import(
-        "./manager.js"
-      );
+      const { getCheckpointManager, resetCheckpointManager } = await import("./manager.js");
 
       resetCheckpointManager();
 
@@ -280,9 +276,7 @@ describe("manager.ts", () => {
 
   describe("resetCheckpointManager()", () => {
     it("should clear the singleton instance", async () => {
-      const { getCheckpointManager, resetCheckpointManager } = await import(
-        "./manager.js"
-      );
+      const { getCheckpointManager, resetCheckpointManager } = await import("./manager.js");
 
       const manager1 = getCheckpointManager();
       resetCheckpointManager();
@@ -303,7 +297,7 @@ describe("manager.ts", () => {
         "session_1",
         "/path/to/file.ts",
         "edit_file",
-        "tool_123"
+        "tool_123",
       );
 
       expect(checkpoint.originalContent).toBe("existing content");
@@ -319,7 +313,7 @@ describe("manager.ts", () => {
       const checkpoint = await manager.createFileCheckpoint(
         "session_1",
         "/path/to/file.ts",
-        "write_file"
+        "write_file",
       );
 
       expect(checkpoint.id).toMatch(/^file_\d+_[a-f0-9]+$/);
@@ -335,7 +329,7 @@ describe("manager.ts", () => {
       const checkpoint = await manager.createFileCheckpoint(
         "session_1",
         "/path/to/file.ts",
-        "edit_file"
+        "edit_file",
       );
 
       expect(checkpoint.originalContent).toBe(originalContent);
@@ -352,7 +346,7 @@ describe("manager.ts", () => {
         "session_1",
         "/path/to/file.ts",
         "delete_file",
-        "tool_abc"
+        "tool_abc",
       );
 
       expect(checkpoint.triggeredBy).toBe("delete_file");
@@ -368,7 +362,7 @@ describe("manager.ts", () => {
       const checkpoint = await manager.createFileCheckpoint(
         "session_1",
         "/path/to/new-file.ts",
-        "write_file"
+        "write_file",
       );
 
       expect(checkpoint.originalContent).toBe("");
@@ -384,7 +378,7 @@ describe("manager.ts", () => {
       const checkpoint = await manager.createFileCheckpoint(
         "session_1",
         "./relative/path.ts",
-        "write_file"
+        "write_file",
       );
 
       expect(path.isAbsolute(checkpoint.filePath)).toBe(true);
@@ -404,7 +398,7 @@ describe("manager.ts", () => {
       const checkpoint = await manager.createConversationCheckpoint(
         "session_1",
         messages,
-        "Test checkpoint"
+        "Test checkpoint",
       );
 
       expect(checkpoint.messages).toHaveLength(2);
@@ -422,10 +416,7 @@ describe("manager.ts", () => {
         { role: "user" as const, content: "Three" },
       ];
 
-      const checkpoint = await manager.createConversationCheckpoint(
-        "session_1",
-        messages
-      );
+      const checkpoint = await manager.createConversationCheckpoint("session_1", messages);
 
       expect(checkpoint.messageCount).toBe(3);
     });
@@ -434,10 +425,7 @@ describe("manager.ts", () => {
       const { createCheckpointManager } = await import("./manager.js");
       const manager = createCheckpointManager();
 
-      const checkpoint = await manager.createConversationCheckpoint(
-        "session_1",
-        []
-      );
+      const checkpoint = await manager.createConversationCheckpoint("session_1", []);
 
       expect(checkpoint.messages).toHaveLength(0);
       expect(checkpoint.messageCount).toBe(0);
@@ -447,10 +435,7 @@ describe("manager.ts", () => {
       const { createCheckpointManager } = await import("./manager.js");
       const manager = createCheckpointManager();
 
-      const checkpoint = await manager.createConversationCheckpoint(
-        "session_1",
-        []
-      );
+      const checkpoint = await manager.createConversationCheckpoint("session_1", []);
 
       expect(checkpoint.id).toMatch(/^conv_\d+_[a-f0-9]+$/);
     });
@@ -459,10 +444,7 @@ describe("manager.ts", () => {
       const { createCheckpointManager } = await import("./manager.js");
       const manager = createCheckpointManager();
 
-      const checkpoint = await manager.createConversationCheckpoint(
-        "my-session-123",
-        []
-      );
+      const checkpoint = await manager.createConversationCheckpoint("my-session-123", []);
 
       expect(checkpoint.sessionId).toBe("my-session-123");
     });
@@ -477,7 +459,7 @@ describe("manager.ts", () => {
               sessionId: "session_1",
               checkpoints: [],
               lastUpdated: new Date().toISOString(),
-            })
+            }),
           );
         }
         return Promise.resolve("file content");
@@ -486,11 +468,7 @@ describe("manager.ts", () => {
       const { createCheckpointManager } = await import("./manager.js");
       const manager = createCheckpointManager();
 
-      const checkpoint = await manager.createCheckpoint(
-        "session_1",
-        "file",
-        ["/path/to/file.ts"]
-      );
+      const checkpoint = await manager.createCheckpoint("session_1", "file", ["/path/to/file.ts"]);
 
       expect(checkpoint.type).toBe("file");
       expect(checkpoint.files.length).toBe(1);
@@ -503,7 +481,7 @@ describe("manager.ts", () => {
           sessionId: "session_1",
           checkpoints: [],
           lastUpdated: new Date().toISOString(),
-        })
+        }),
       );
 
       const { createCheckpointManager } = await import("./manager.js");
@@ -514,7 +492,7 @@ describe("manager.ts", () => {
         "session_1",
         "conversation",
         undefined,
-        messages
+        messages,
       );
 
       expect(checkpoint.type).toBe("conversation");
@@ -531,7 +509,7 @@ describe("manager.ts", () => {
               sessionId: "session_1",
               checkpoints: [],
               lastUpdated: new Date().toISOString(),
-            })
+            }),
           );
         }
         return Promise.resolve("file content");
@@ -545,7 +523,7 @@ describe("manager.ts", () => {
         "session_1",
         "combined",
         ["/path/file.ts"],
-        messages
+        messages,
       );
 
       expect(checkpoint.type).toBe("combined");
@@ -559,18 +537,13 @@ describe("manager.ts", () => {
           sessionId: "session_1",
           checkpoints: [],
           lastUpdated: new Date().toISOString(),
-        })
+        }),
       );
 
       const { createCheckpointManager } = await import("./manager.js");
       const manager = createCheckpointManager();
 
-      const checkpoint = await manager.createCheckpoint(
-        "session_1",
-        "conversation",
-        undefined,
-        []
-      );
+      const checkpoint = await manager.createCheckpoint("session_1", "conversation", undefined, []);
 
       expect(checkpoint.automatic).toBe(false);
     });
@@ -581,7 +554,7 @@ describe("manager.ts", () => {
           sessionId: "session_1",
           checkpoints: [],
           lastUpdated: new Date().toISOString(),
-        })
+        }),
       );
 
       const { createCheckpointManager } = await import("./manager.js");
@@ -592,7 +565,7 @@ describe("manager.ts", () => {
         "conversation",
         undefined,
         [],
-        "My important checkpoint"
+        "My important checkpoint",
       );
 
       expect(checkpoint.label).toBe("My important checkpoint");
@@ -625,7 +598,7 @@ describe("manager.ts", () => {
                 },
               ],
               lastUpdated: new Date().toISOString(),
-            })
+            }),
           );
         }
         return Promise.resolve(JSON.stringify(storedCheckpoint));
@@ -676,7 +649,7 @@ describe("manager.ts", () => {
                 },
               ],
               lastUpdated: new Date().toISOString(),
-            })
+            }),
           );
         }
         if (filePath.includes("ckpt_old")) {
@@ -688,7 +661,7 @@ describe("manager.ts", () => {
               createdAt: new Date(now - 10000).toISOString(),
               automatic: true,
               files: [],
-            })
+            }),
           );
         }
         return Promise.resolve(
@@ -699,7 +672,7 @@ describe("manager.ts", () => {
             createdAt: new Date(now).toISOString(),
             automatic: true,
             files: [],
-          })
+          }),
         );
       });
 
@@ -724,9 +697,7 @@ describe("manager.ts", () => {
         files: [],
       };
 
-      mockFs.readdir.mockResolvedValue([
-        { name: "session_1", isDirectory: () => true },
-      ]);
+      mockFs.readdir.mockResolvedValue([{ name: "session_1", isDirectory: () => true }]);
       mockFs.readFile.mockResolvedValue(JSON.stringify(storedCheckpoint));
 
       const { createCheckpointManager } = await import("./manager.js");
@@ -770,9 +741,7 @@ describe("manager.ts", () => {
         ],
       };
 
-      mockFs.readdir.mockResolvedValue([
-        { name: "session_1", isDirectory: () => true },
-      ]);
+      mockFs.readdir.mockResolvedValue([{ name: "session_1", isDirectory: () => true }]);
       mockFs.readFile.mockImplementation((filePath: string) => {
         if (filePath.endsWith("ckpt_1.json")) {
           return Promise.resolve(JSON.stringify(storedCheckpoint));
@@ -796,7 +765,7 @@ describe("manager.ts", () => {
       expect(mockFs.writeFile).toHaveBeenCalledWith(
         "/path/to/file.ts",
         "original content here",
-        "utf-8"
+        "utf-8",
       );
     });
 
@@ -827,9 +796,7 @@ describe("manager.ts", () => {
         ],
       };
 
-      mockFs.readdir.mockResolvedValue([
-        { name: "session_1", isDirectory: () => true },
-      ]);
+      mockFs.readdir.mockResolvedValue([{ name: "session_1", isDirectory: () => true }]);
       mockFs.readFile.mockImplementation((filePath: string) => {
         if (filePath.endsWith("ckpt_1.json")) {
           return Promise.resolve(JSON.stringify(storedCheckpoint));
@@ -876,9 +843,7 @@ describe("manager.ts", () => {
         ],
       };
 
-      mockFs.readdir.mockResolvedValue([
-        { name: "session_1", isDirectory: () => true },
-      ]);
+      mockFs.readdir.mockResolvedValue([{ name: "session_1", isDirectory: () => true }]);
       mockFs.readFile.mockImplementation((filePath: string) => {
         if (filePath.endsWith("ckpt_1.json")) {
           return Promise.resolve(JSON.stringify(storedCheckpoint));
@@ -903,7 +868,7 @@ describe("manager.ts", () => {
       expect(mockFs.writeFile).not.toHaveBeenCalledWith(
         "/path/file.ts",
         expect.anything(),
-        expect.anything()
+        expect.anything(),
       );
     });
 
@@ -924,9 +889,7 @@ describe("manager.ts", () => {
         },
       };
 
-      mockFs.readdir.mockResolvedValue([
-        { name: "session_1", isDirectory: () => true },
-      ]);
+      mockFs.readdir.mockResolvedValue([{ name: "session_1", isDirectory: () => true }]);
       mockFs.readFile.mockResolvedValue(JSON.stringify(storedCheckpoint));
 
       const { createCheckpointManager } = await import("./manager.js");
@@ -969,9 +932,7 @@ describe("manager.ts", () => {
         ],
       };
 
-      mockFs.readdir.mockResolvedValue([
-        { name: "session_1", isDirectory: () => true },
-      ]);
+      mockFs.readdir.mockResolvedValue([{ name: "session_1", isDirectory: () => true }]);
       mockFs.readFile.mockImplementation((filePath: string) => {
         if (filePath.endsWith("ckpt_1.json")) {
           return Promise.resolve(JSON.stringify(storedCheckpoint));
@@ -1019,9 +980,7 @@ describe("manager.ts", () => {
         ],
       };
 
-      mockFs.readdir.mockResolvedValue([
-        { name: "session_1", isDirectory: () => true },
-      ]);
+      mockFs.readdir.mockResolvedValue([{ name: "session_1", isDirectory: () => true }]);
       mockFs.readFile.mockImplementation((filePath: string) => {
         if (filePath.endsWith("ckpt_1.json")) {
           return Promise.resolve(JSON.stringify(storedCheckpoint));
@@ -1058,7 +1017,7 @@ describe("manager.ts", () => {
           checkpointId: "nonexistent",
           restoreFiles: true,
           restoreConversation: false,
-        })
+        }),
       ).rejects.toThrow("Checkpoint not found");
     });
   });
@@ -1073,12 +1032,30 @@ describe("manager.ts", () => {
             JSON.stringify({
               sessionId: "session_1",
               checkpoints: [
-                { id: "ckpt_1", type: "file", createdAt: new Date(now - 3000).toISOString(), automatic: true, fileCount: 0 },
-                { id: "ckpt_2", type: "file", createdAt: new Date(now - 2000).toISOString(), automatic: true, fileCount: 0 },
-                { id: "ckpt_3", type: "file", createdAt: new Date(now - 1000).toISOString(), automatic: true, fileCount: 0 },
+                {
+                  id: "ckpt_1",
+                  type: "file",
+                  createdAt: new Date(now - 3000).toISOString(),
+                  automatic: true,
+                  fileCount: 0,
+                },
+                {
+                  id: "ckpt_2",
+                  type: "file",
+                  createdAt: new Date(now - 2000).toISOString(),
+                  automatic: true,
+                  fileCount: 0,
+                },
+                {
+                  id: "ckpt_3",
+                  type: "file",
+                  createdAt: new Date(now - 1000).toISOString(),
+                  automatic: true,
+                  fileCount: 0,
+                },
               ],
               lastUpdated: new Date().toISOString(),
-            })
+            }),
           );
         }
         return Promise.resolve("{}");
@@ -1102,13 +1079,37 @@ describe("manager.ts", () => {
             JSON.stringify({
               sessionId: "session_1",
               checkpoints: [
-                { id: "ckpt_old1", type: "file", createdAt: new Date(now - 5000).toISOString(), automatic: true, fileCount: 0 },
-                { id: "ckpt_old2", type: "file", createdAt: new Date(now - 4000).toISOString(), automatic: true, fileCount: 0 },
-                { id: "ckpt_new1", type: "file", createdAt: new Date(now - 1000).toISOString(), automatic: true, fileCount: 0 },
-                { id: "ckpt_new2", type: "file", createdAt: new Date(now).toISOString(), automatic: true, fileCount: 0 },
+                {
+                  id: "ckpt_old1",
+                  type: "file",
+                  createdAt: new Date(now - 5000).toISOString(),
+                  automatic: true,
+                  fileCount: 0,
+                },
+                {
+                  id: "ckpt_old2",
+                  type: "file",
+                  createdAt: new Date(now - 4000).toISOString(),
+                  automatic: true,
+                  fileCount: 0,
+                },
+                {
+                  id: "ckpt_new1",
+                  type: "file",
+                  createdAt: new Date(now - 1000).toISOString(),
+                  automatic: true,
+                  fileCount: 0,
+                },
+                {
+                  id: "ckpt_new2",
+                  type: "file",
+                  createdAt: new Date(now).toISOString(),
+                  automatic: true,
+                  fileCount: 0,
+                },
               ],
               lastUpdated: new Date().toISOString(),
-            })
+            }),
           );
         }
         return Promise.resolve("{}");
@@ -1128,10 +1129,16 @@ describe("manager.ts", () => {
         JSON.stringify({
           sessionId: "session_1",
           checkpoints: [
-            { id: "ckpt_1", type: "file", createdAt: new Date().toISOString(), automatic: true, fileCount: 0 },
+            {
+              id: "ckpt_1",
+              type: "file",
+              createdAt: new Date().toISOString(),
+              automatic: true,
+              fileCount: 0,
+            },
           ],
           lastUpdated: new Date().toISOString(),
-        })
+        }),
       );
 
       const { createCheckpointManager } = await import("./manager.js");
@@ -1151,10 +1158,10 @@ describe("manager.ts", () => {
 
       await manager.clearCheckpoints("session_1");
 
-      expect(mockFs.rm).toHaveBeenCalledWith(
-        expect.stringContaining("session_1"),
-        { recursive: true, force: true }
-      );
+      expect(mockFs.rm).toHaveBeenCalledWith(expect.stringContaining("session_1"), {
+        recursive: true,
+        force: true,
+      });
     });
 
     it("should not throw if session directory does not exist", async () => {
@@ -1163,9 +1170,7 @@ describe("manager.ts", () => {
       const { createCheckpointManager } = await import("./manager.js");
       const manager = createCheckpointManager();
 
-      await expect(
-        manager.clearCheckpoints("nonexistent_session")
-      ).resolves.not.toThrow();
+      await expect(manager.clearCheckpoints("nonexistent_session")).resolves.not.toThrow();
     });
   });
 
@@ -1179,11 +1184,23 @@ describe("manager.ts", () => {
             JSON.stringify({
               sessionId: "session_1",
               checkpoints: [
-                { id: "ckpt_old", type: "file", createdAt: new Date(now - 10000).toISOString(), automatic: true, fileCount: 0 },
-                { id: "ckpt_new", type: "file", createdAt: new Date(now).toISOString(), automatic: true, fileCount: 0 },
+                {
+                  id: "ckpt_old",
+                  type: "file",
+                  createdAt: new Date(now - 10000).toISOString(),
+                  automatic: true,
+                  fileCount: 0,
+                },
+                {
+                  id: "ckpt_new",
+                  type: "file",
+                  createdAt: new Date(now).toISOString(),
+                  automatic: true,
+                  fileCount: 0,
+                },
               ],
               lastUpdated: new Date().toISOString(),
-            })
+            }),
           );
         }
         if (filePath.includes("ckpt_new")) {
@@ -1195,7 +1212,7 @@ describe("manager.ts", () => {
               createdAt: new Date(now).toISOString(),
               automatic: true,
               files: [],
-            })
+            }),
           );
         }
         return Promise.resolve("{}");
@@ -1229,11 +1246,23 @@ describe("manager.ts", () => {
             JSON.stringify({
               sessionId: "session_1",
               checkpoints: [
-                { id: "ckpt_1", type: "file", createdAt: new Date().toISOString(), automatic: true, fileCount: 2 },
-                { id: "ckpt_2", type: "file", createdAt: new Date().toISOString(), automatic: true, fileCount: 1 },
+                {
+                  id: "ckpt_1",
+                  type: "file",
+                  createdAt: new Date().toISOString(),
+                  automatic: true,
+                  fileCount: 2,
+                },
+                {
+                  id: "ckpt_2",
+                  type: "file",
+                  createdAt: new Date().toISOString(),
+                  automatic: true,
+                  fileCount: 1,
+                },
               ],
               lastUpdated: new Date().toISOString(),
-            })
+            }),
           );
         }
         if (filePath.includes("ckpt_1")) {
@@ -1245,10 +1274,24 @@ describe("manager.ts", () => {
               createdAt: new Date().toISOString(),
               automatic: true,
               files: [
-                { id: "f1", filePath: "/path/a.ts", contentHash: "h1", createdAt: new Date().toISOString(), triggeredBy: "edit", size: 10 },
-                { id: "f2", filePath: "/path/b.ts", contentHash: "h2", createdAt: new Date().toISOString(), triggeredBy: "edit", size: 10 },
+                {
+                  id: "f1",
+                  filePath: "/path/a.ts",
+                  contentHash: "h1",
+                  createdAt: new Date().toISOString(),
+                  triggeredBy: "edit",
+                  size: 10,
+                },
+                {
+                  id: "f2",
+                  filePath: "/path/b.ts",
+                  contentHash: "h2",
+                  createdAt: new Date().toISOString(),
+                  triggeredBy: "edit",
+                  size: 10,
+                },
               ],
-            })
+            }),
           );
         }
         if (filePath.includes("ckpt_2")) {
@@ -1260,9 +1303,16 @@ describe("manager.ts", () => {
               createdAt: new Date().toISOString(),
               automatic: true,
               files: [
-                { id: "f3", filePath: "/path/a.ts", contentHash: "h3", createdAt: new Date().toISOString(), triggeredBy: "edit", size: 10 },
+                {
+                  id: "f3",
+                  filePath: "/path/a.ts",
+                  contentHash: "h3",
+                  createdAt: new Date().toISOString(),
+                  triggeredBy: "edit",
+                  size: 10,
+                },
               ],
-            })
+            }),
           );
         }
         if (filePath.includes("h1.txt")) return Promise.resolve("content1");
@@ -1303,7 +1353,7 @@ describe("manager.ts", () => {
               sessionId: "session_1",
               checkpoints: [],
               lastUpdated: new Date().toISOString(),
-            })
+            }),
           );
         }
         return Promise.resolve("file content");
@@ -1318,7 +1368,7 @@ describe("manager.ts", () => {
       expect(mockFs.writeFile).toHaveBeenCalledWith(
         expect.stringMatching(/ckpt_\d+_[a-f0-9]+\.json$/),
         expect.any(String),
-        "utf-8"
+        "utf-8",
       );
     });
 
@@ -1330,7 +1380,7 @@ describe("manager.ts", () => {
               sessionId: "session_1",
               checkpoints: [],
               lastUpdated: new Date().toISOString(),
-            })
+            }),
           );
         }
         return Promise.resolve("same content");
@@ -1345,8 +1395,8 @@ describe("manager.ts", () => {
 
       // Content should be stored by hash, so duplicate content is not written twice
       // The hash file should only be written once (when it doesn't exist)
-      const contentWrites = mockFs.writeFile.mock.calls.filter(
-        ([path]: [string]) => path.includes("/files/")
+      const contentWrites = mockFs.writeFile.mock.calls.filter(([path]: [string]) =>
+        path.includes("/files/"),
       );
       // Since mockFs.access resolves (file exists), no content writes should happen
       expect(contentWrites.length).toBe(0);
@@ -1360,7 +1410,7 @@ describe("manager.ts", () => {
               sessionId: "session_1",
               checkpoints: [],
               lastUpdated: new Date().toISOString(),
-            })
+            }),
           );
         }
         return Promise.resolve("unique content");
@@ -1374,8 +1424,8 @@ describe("manager.ts", () => {
       await manager.createCheckpoint("session_1", "file", ["/path/file.ts"]);
 
       // Content should be written to hash-named file
-      const contentWrites = mockFs.writeFile.mock.calls.filter(
-        ([path]: [string]) => path.includes("/files/")
+      const contentWrites = mockFs.writeFile.mock.calls.filter(([path]: [string]) =>
+        path.includes("/files/"),
       );
       expect(contentWrites.length).toBeGreaterThan(0);
     });
@@ -1405,7 +1455,7 @@ describe("manager.ts", () => {
                 },
               ],
               lastUpdated: new Date().toISOString(),
-            })
+            }),
           );
         }
         return Promise.resolve(JSON.stringify(storedCheckpoint));
@@ -1431,7 +1481,7 @@ describe("manager.ts", () => {
               sessionId: "session_1",
               checkpoints: [],
               lastUpdated: new Date().toISOString(),
-            })
+            }),
           );
         }
         return Promise.resolve("content");
@@ -1450,10 +1500,7 @@ describe("manager.ts", () => {
         size: 8,
       };
 
-      const checkpoint = await manager.storeAutoFileCheckpoint(
-        "session_1",
-        fileCheckpoint
-      );
+      const checkpoint = await manager.storeAutoFileCheckpoint("session_1", fileCheckpoint);
 
       expect(checkpoint.automatic).toBe(true);
       expect(checkpoint.type).toBe("file");
@@ -1479,7 +1526,7 @@ describe("manager.ts", () => {
               sessionId: "session_1",
               checkpoints: existingCheckpoints,
               lastUpdated: new Date().toISOString(),
-            })
+            }),
           );
         }
         return Promise.resolve("content");
@@ -1543,10 +1590,7 @@ describe("manager.ts", () => {
         size: 8,
       };
 
-      const updated = manager.updateFileCheckpointWithNewContent(
-        original,
-        "new content here"
-      );
+      const updated = manager.updateFileCheckpointWithNewContent(original, "new content here");
 
       expect(updated.newContent).toBe("new content here");
       expect(updated.originalContent).toBe("original");

@@ -5,12 +5,7 @@
  */
 
 import { randomUUID } from "node:crypto";
-import type {
-  ADR,
-  ADRStatus,
-  ArchitectureDoc,
-  OrchestrateConfig,
-} from "./types.js";
+import type { ADR, ADRStatus, ArchitectureDoc, OrchestrateConfig } from "./types.js";
 import type { Specification } from "../converge/types.js";
 import type { LLMProvider } from "../../providers/types.js";
 import { ARCHITECT_SYSTEM_PROMPT, GENERATE_ADRS_PROMPT, fillPrompt } from "./prompts.js";
@@ -31,10 +26,7 @@ export class ADRGenerator {
   /**
    * Generate ADRs from architecture and specification
    */
-  async generate(
-    architecture: ArchitectureDoc,
-    specification: Specification
-  ): Promise<ADR[]> {
+  async generate(architecture: ArchitectureDoc, specification: Specification): Promise<ADR[]> {
     const prompt = fillPrompt(GENERATE_ADRS_PROMPT, {
       architecture: JSON.stringify({
         overview: architecture.overview,
@@ -113,7 +105,7 @@ export class ADRGenerator {
       }>;
       references?: string[];
     },
-    index: number
+    index: number,
   ): ADR {
     return {
       id: randomUUID(),
@@ -247,7 +239,9 @@ export function generateADRIndexMarkdown(adrs: ADR[]): string {
 
   sections.push("# Architecture Decision Records");
   sections.push("");
-  sections.push("This directory contains all Architecture Decision Records (ADRs) for this project.");
+  sections.push(
+    "This directory contains all Architecture Decision Records (ADRs) for this project.",
+  );
   sections.push("");
   sections.push("## Index");
   sections.push("");
@@ -258,9 +252,7 @@ export function generateADRIndexMarkdown(adrs: ADR[]): string {
     const paddedNumber = String(adr.number).padStart(3, "0");
     const filename = `${paddedNumber}-${slugify(adr.title)}.md`;
     const dateStr = adr.date.toISOString().split("T")[0];
-    sections.push(
-      `| ${adr.number} | [${adr.title}](./${filename}) | ${adr.status} | ${dateStr} |`
-    );
+    sections.push(`| ${adr.number} | [${adr.title}](./${filename}) | ${adr.status} | ${dateStr} |`);
   }
 
   sections.push("");
@@ -301,10 +293,7 @@ function slugify(str: string): string {
 /**
  * Create an ADR generator
  */
-export function createADRGenerator(
-  llm: LLMProvider,
-  config: OrchestrateConfig
-): ADRGenerator {
+export function createADRGenerator(llm: LLMProvider, config: OrchestrateConfig): ADRGenerator {
   return new ADRGenerator(llm, config);
 }
 
@@ -316,35 +305,26 @@ export const ADR_TEMPLATES = {
     title: "Core Architecture Pattern",
     contextTemplate:
       "We need to choose an architectural pattern that supports our requirements for {{requirements}}.",
-    decisionTemplate:
-      "We will use {{pattern}} architecture because {{rationale}}.",
+    decisionTemplate: "We will use {{pattern}} architecture because {{rationale}}.",
   },
   language: {
     title: "Programming Language",
-    contextTemplate:
-      "We need to choose a programming language for {{component}}.",
-    decisionTemplate:
-      "We will use {{language}} because {{rationale}}.",
+    contextTemplate: "We need to choose a programming language for {{component}}.",
+    decisionTemplate: "We will use {{language}} because {{rationale}}.",
   },
   database: {
     title: "Database Selection",
-    contextTemplate:
-      "We need to choose a database system for {{dataType}} data.",
-    decisionTemplate:
-      "We will use {{database}} because {{rationale}}.",
+    contextTemplate: "We need to choose a database system for {{dataType}} data.",
+    decisionTemplate: "We will use {{database}} because {{rationale}}.",
   },
   testing: {
     title: "Testing Strategy",
-    contextTemplate:
-      "We need to establish a testing strategy to ensure quality.",
-    decisionTemplate:
-      "We will use {{testFramework}} with {{approach}} because {{rationale}}.",
+    contextTemplate: "We need to establish a testing strategy to ensure quality.",
+    decisionTemplate: "We will use {{testFramework}} with {{approach}} because {{rationale}}.",
   },
   deployment: {
     title: "Deployment Strategy",
-    contextTemplate:
-      "We need to determine how the application will be deployed.",
-    decisionTemplate:
-      "We will deploy using {{strategy}} because {{rationale}}.",
+    contextTemplate: "We need to determine how the application will be deployed.",
+    decisionTemplate: "We will deploy using {{strategy}} because {{rationale}}.",
   },
 };

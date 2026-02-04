@@ -98,7 +98,10 @@ Examples:
   parameters: z.object({
     script: z.string().describe("Script name from package.json"),
     cwd: z.string().optional().describe("Working directory"),
-    packageManager: z.enum(["npm", "pnpm", "yarn", "bun"]).optional().describe("Package manager to use"),
+    packageManager: z
+      .enum(["npm", "pnpm", "yarn", "bun"])
+      .optional()
+      .describe("Package manager to use"),
     args: z.array(z.string()).optional().describe("Additional arguments"),
     env: z.record(z.string()).optional().describe("Environment variables"),
     timeout: z.number().optional().describe("Timeout in milliseconds"),
@@ -110,7 +113,7 @@ Examples:
 
     try {
       // Detect or use provided package manager
-      const pm = packageManager ?? await detectPackageManager(projectDir);
+      const pm = packageManager ?? (await detectPackageManager(projectDir));
 
       // Build command
       const cmdArgs = ["run", script];
@@ -146,7 +149,7 @@ Examples:
 
       throw new ToolError(
         `Failed to run script '${script}': ${error instanceof Error ? error.message : String(error)}`,
-        { tool: "run_script", cause: error instanceof Error ? error : undefined }
+        { tool: "run_script", cause: error instanceof Error ? error : undefined },
       );
     }
   },
@@ -189,7 +192,7 @@ Examples:
     const timeoutMs = timeout ?? DEFAULT_TIMEOUT_MS;
 
     try {
-      const pm = packageManager ?? await detectPackageManager(projectDir);
+      const pm = packageManager ?? (await detectPackageManager(projectDir));
 
       // Build command based on package manager
       let cmdArgs: string[];
@@ -257,7 +260,7 @@ Examples:
 
       throw new ToolError(
         `Failed to install dependencies: ${error instanceof Error ? error.message : String(error)}`,
-        { tool: "install_deps", cause: error instanceof Error ? error : undefined }
+        { tool: "install_deps", cause: error instanceof Error ? error : undefined },
       );
     }
   },
@@ -343,7 +346,7 @@ Examples:
 
       throw new ToolError(
         `Make failed: ${error instanceof Error ? error.message : String(error)}`,
-        { tool: "make", cause: error instanceof Error ? error : undefined }
+        { tool: "make", cause: error instanceof Error ? error : undefined },
       );
     }
   },
@@ -427,7 +430,7 @@ Examples:
 
       throw new ToolError(
         `TypeScript compile failed: ${error instanceof Error ? error.message : String(error)}`,
-        { tool: "tsc", cause: error instanceof Error ? error : undefined }
+        { tool: "tsc", cause: error instanceof Error ? error : undefined },
       );
     }
   },
@@ -436,9 +439,4 @@ Examples:
 /**
  * All build tools
  */
-export const buildTools = [
-  runScriptTool,
-  installDepsTool,
-  makeTool,
-  tscTool,
-];
+export const buildTools = [runScriptTool, installDepsTool, makeTool, tscTool];

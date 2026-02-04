@@ -84,9 +84,7 @@ function findCompletions(line: string): Array<{ cmd: string; desc: string }> {
   const commands = getSlashCommands();
   const lowerLine = line.toLowerCase();
 
-  return commands.filter(({ cmd }) =>
-    cmd.toLowerCase().startsWith(lowerLine)
-  );
+  return commands.filter(({ cmd }) => cmd.toLowerCase().startsWith(lowerLine));
 }
 
 /**
@@ -142,7 +140,8 @@ export function createInputHandler(session: ReplSession): InputHandler {
     }
 
     // Draw dropdown menu if we have completions
-    const showMenu = completions.length > 0 && currentLine.startsWith("/") && currentLine.length >= 1;
+    const showMenu =
+      completions.length > 0 && currentLine.startsWith("/") && currentLine.length >= 1;
 
     if (showMenu) {
       const cols = getColumnCount();
@@ -279,7 +278,11 @@ export function createInputHandler(session: ReplSession): InputHandler {
           // Enter - submit line or accept completion
           if (key === "\r" || key === "\n") {
             // If we have a completion and user typed a partial command, accept it
-            if (completions.length > 0 && completions[selectedCompletion] && currentLine.startsWith("/")) {
+            if (
+              completions.length > 0 &&
+              completions[selectedCompletion] &&
+              currentLine.startsWith("/")
+            ) {
               currentLine = completions[selectedCompletion]!.cmd;
             }
 
@@ -397,7 +400,8 @@ export function createInputHandler(session: ReplSession): InputHandler {
           if (key === "\x1b[D") {
             if (completions.length > 1) {
               // Navigate completions horizontally (move left one column)
-              selectedCompletion = (selectedCompletion - 1 + completions.length) % completions.length;
+              selectedCompletion =
+                (selectedCompletion - 1 + completions.length) % completions.length;
               render();
             }
             return;

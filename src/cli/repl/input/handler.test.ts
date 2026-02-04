@@ -54,9 +54,7 @@ describe("Input Handler", () => {
       const commands = ["/help", "/history", "/exit", "/model"];
       const prefix = "/h";
 
-      const matches = commands.filter((cmd) =>
-        cmd.toLowerCase().startsWith(prefix.toLowerCase())
-      );
+      const matches = commands.filter((cmd) => cmd.toLowerCase().startsWith(prefix.toLowerCase()));
 
       expect(matches).toEqual(["/help", "/history"]);
     });
@@ -65,9 +63,7 @@ describe("Input Handler", () => {
       const commands = ["/Help", "/HISTORY", "/exit"];
       const prefix = "/h";
 
-      const matches = commands.filter((cmd) =>
-        cmd.toLowerCase().startsWith(prefix.toLowerCase())
-      );
+      const matches = commands.filter((cmd) => cmd.toLowerCase().startsWith(prefix.toLowerCase()));
 
       expect(matches).toEqual(["/Help", "/HISTORY"]);
     });
@@ -83,9 +79,7 @@ describe("Input Handler", () => {
       const commands = ["/help", "/exit", "/model"];
       const prefix = "/";
 
-      const matches = commands.filter((cmd) =>
-        cmd.toLowerCase().startsWith(prefix.toLowerCase())
-      );
+      const matches = commands.filter((cmd) => cmd.toLowerCase().startsWith(prefix.toLowerCase()));
 
       expect(matches).toEqual(commands);
     });

@@ -83,7 +83,7 @@ export class ParallelToolExecutor {
   async executeParallel(
     toolCalls: ToolCall[],
     registry: ToolRegistry,
-    options: ParallelExecutorOptions = {}
+    options: ParallelExecutorOptions = {},
   ): Promise<ParallelExecutionResult> {
     const {
       maxConcurrency = this.defaultMaxConcurrency,
@@ -148,11 +148,7 @@ export class ParallelToolExecutor {
       }
 
       // Find next unstarted task
-      while (
-        nextTaskIndex < tasks.length &&
-        activeCount < maxConcurrency &&
-        !aborted
-      ) {
+      while (nextTaskIndex < tasks.length && activeCount < maxConcurrency && !aborted) {
         const task = tasks[nextTaskIndex];
         if (!task) {
           nextTaskIndex++;
@@ -170,7 +166,7 @@ export class ParallelToolExecutor {
           registry,
           onToolStart,
           onToolEnd,
-          signal
+          signal,
         ).then((result) => {
           task.result = result;
           task.completed = true;
@@ -218,7 +214,7 @@ export class ParallelToolExecutor {
     registry: ToolRegistry,
     onToolStart?: (toolCall: ToolCall, index: number, total: number) => void,
     onToolEnd?: (result: ExecutedToolCall) => void,
-    signal?: AbortSignal
+    signal?: AbortSignal,
   ): Promise<ExecutedToolCall | null> {
     // Check for abort before starting
     if (signal?.aborted) {
@@ -228,16 +224,12 @@ export class ParallelToolExecutor {
     onToolStart?.(toolCall, index, total);
 
     const startTime = performance.now();
-    const result: ToolResult = await registry.execute(
-      toolCall.name,
-      toolCall.input,
-      { signal }
-    );
+    const result: ToolResult = await registry.execute(toolCall.name, toolCall.input, { signal });
     const duration = performance.now() - startTime;
 
     const output = result.success
       ? JSON.stringify(result.data, null, 2)
-      : result.error ?? "Unknown error";
+      : (result.error ?? "Unknown error");
 
     const executedCall: ExecutedToolCall = {
       id: toolCall.id,
@@ -264,7 +256,7 @@ export class ParallelToolExecutor {
     index: number,
     total: number,
     registry: ToolRegistry,
-    options: ParallelExecutorOptions
+    options: ParallelExecutorOptions,
   ): Promise<{ executed: ExecutedToolCall | null; skipped: boolean; reason?: string }> {
     const {
       onToolStart,
@@ -317,16 +309,12 @@ export class ParallelToolExecutor {
     onToolStart?.(toolCall, index, total);
 
     const startTime = performance.now();
-    const result: ToolResult = await registry.execute(
-      toolCall.name,
-      toolCall.input,
-      { signal }
-    );
+    const result: ToolResult = await registry.execute(toolCall.name, toolCall.input, { signal });
     const duration = performance.now() - startTime;
 
     const output = result.success
       ? JSON.stringify(result.data, null, 2)
-      : result.error ?? "Unknown error";
+      : (result.error ?? "Unknown error");
 
     const executedCall: ExecutedToolCall = {
       id: toolCall.id,

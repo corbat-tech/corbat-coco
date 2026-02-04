@@ -4,13 +4,8 @@
  * Manages todo items for tracking task progress in the REPL.
  */
 
-import { randomUUID } from 'node:crypto';
-import type {
-  TodoItem,
-  TodoStatus,
-  ProgressState,
-  ProgressStats,
-} from './types.js';
+import { randomUUID } from "node:crypto";
+import type { TodoItem, TodoStatus, ProgressState, ProgressStats } from "./types.js";
 
 /**
  * Tracks progress of tasks via a todo list
@@ -42,7 +37,7 @@ export class ProgressTracker {
       id: randomUUID(),
       content,
       activeForm,
-      status: 'pending',
+      status: "pending",
       createdAt: now,
       updatedAt: now,
       parentId,
@@ -57,12 +52,8 @@ export class ProgressTracker {
    * @param items Array of { content, activeForm, parentId } objects
    * @returns Array of created todo items
    */
-  addTodos(
-    items: Array<{ content: string; activeForm: string; parentId?: string }>
-  ): TodoItem[] {
-    return items.map((item) =>
-      this.addTodo(item.content, item.activeForm, item.parentId)
-    );
+  addTodos(items: Array<{ content: string; activeForm: string; parentId?: string }>): TodoItem[] {
+    return items.map((item) => this.addTodo(item.content, item.activeForm, item.parentId));
   }
 
   /**
@@ -81,7 +72,7 @@ export class ProgressTracker {
     todo.updatedAt = new Date().toISOString();
 
     // Update current task tracking
-    if (status === 'in_progress') {
+    if (status === "in_progress") {
       this.currentTaskId = id;
     } else if (this.currentTaskId === id) {
       this.currentTaskId = undefined;
@@ -93,7 +84,7 @@ export class ProgressTracker {
    * @param id Todo ID
    */
   startTodo(id: string): void {
-    this.updateStatus(id, 'in_progress');
+    this.updateStatus(id, "in_progress");
   }
 
   /**
@@ -101,7 +92,7 @@ export class ProgressTracker {
    * @param id Todo ID
    */
   completeTodo(id: string): void {
-    this.updateStatus(id, 'completed');
+    this.updateStatus(id, "completed");
   }
 
   /**
@@ -109,7 +100,7 @@ export class ProgressTracker {
    * @param id Todo ID
    */
   failTodo(id: string): void {
-    this.updateStatus(id, 'failed');
+    this.updateStatus(id, "failed");
   }
 
   /**
@@ -156,7 +147,7 @@ export class ProgressTracker {
       return this.todos.get(this.currentTaskId);
     }
     // Fall back to first in_progress todo
-    return this.getTodosByStatus('in_progress')[0];
+    return this.getTodosByStatus("in_progress")[0];
   }
 
   /**
@@ -166,10 +157,10 @@ export class ProgressTracker {
   getStats(): ProgressStats {
     const todos = this.getTodos();
     const total = todos.length;
-    const pending = todos.filter((t) => t.status === 'pending').length;
-    const inProgress = todos.filter((t) => t.status === 'in_progress').length;
-    const completed = todos.filter((t) => t.status === 'completed').length;
-    const failed = todos.filter((t) => t.status === 'failed').length;
+    const pending = todos.filter((t) => t.status === "pending").length;
+    const inProgress = todos.filter((t) => t.status === "in_progress").length;
+    const completed = todos.filter((t) => t.status === "completed").length;
+    const failed = todos.filter((t) => t.status === "failed").length;
 
     const completionPercent = total > 0 ? (completed / total) * 100 : 0;
 
@@ -218,9 +209,7 @@ export class ProgressTracker {
   isComplete(): boolean {
     const todos = this.getTodos();
     if (todos.length === 0) return true;
-    return todos.every(
-      (t) => t.status === 'completed' || t.status === 'failed'
-    );
+    return todos.every((t) => t.status === "completed" || t.status === "failed");
   }
 
   /**
@@ -230,7 +219,7 @@ export class ProgressTracker {
   formatProgress(): string {
     const stats = this.getStats();
     if (stats.total === 0) {
-      return 'No tasks';
+      return "No tasks";
     }
 
     const parts: string[] = [];
@@ -243,7 +232,7 @@ export class ProgressTracker {
       parts.push(`${stats.failed} failed`);
     }
 
-    return `${parts.join(', ')} (${stats.completionPercent.toFixed(0)}%)`;
+    return `${parts.join(", ")} (${stats.completionPercent.toFixed(0)}%)`;
   }
 
   /**
@@ -275,8 +264,6 @@ export class ProgressTracker {
  * @param initialState Optional initial state
  * @returns New ProgressTracker instance
  */
-export function createProgressTracker(
-  initialState?: ProgressState
-): ProgressTracker {
+export function createProgressTracker(initialState?: ProgressState): ProgressTracker {
   return new ProgressTracker(initialState);
 }

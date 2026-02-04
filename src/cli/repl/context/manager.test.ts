@@ -11,17 +11,13 @@ describe("ContextManager", () => {
 
   describe("constructor", () => {
     it("should create with default config", async () => {
-      const { ContextManager, DEFAULT_CONTEXT_CONFIG } = await import(
-        "./manager.js"
-      );
+      const { ContextManager, DEFAULT_CONTEXT_CONFIG } = await import("./manager.js");
 
       const manager = new ContextManager();
       const config = manager.getConfig();
 
       expect(config.maxTokens).toBe(DEFAULT_CONTEXT_CONFIG.maxTokens);
-      expect(config.compactionThreshold).toBe(
-        DEFAULT_CONTEXT_CONFIG.compactionThreshold
-      );
+      expect(config.compactionThreshold).toBe(DEFAULT_CONTEXT_CONFIG.compactionThreshold);
       expect(config.reservedTokens).toBe(DEFAULT_CONTEXT_CONFIG.reservedTokens);
     });
 
@@ -41,9 +37,7 @@ describe("ContextManager", () => {
     });
 
     it("should merge partial config with defaults", async () => {
-      const { ContextManager, DEFAULT_CONTEXT_CONFIG } = await import(
-        "./manager.js"
-      );
+      const { ContextManager, DEFAULT_CONTEXT_CONFIG } = await import("./manager.js");
 
       const manager = new ContextManager({
         maxTokens: 50000,
@@ -51,9 +45,7 @@ describe("ContextManager", () => {
 
       const config = manager.getConfig();
       expect(config.maxTokens).toBe(50000);
-      expect(config.compactionThreshold).toBe(
-        DEFAULT_CONTEXT_CONFIG.compactionThreshold
-      );
+      expect(config.compactionThreshold).toBe(DEFAULT_CONTEXT_CONFIG.compactionThreshold);
     });
   });
 
@@ -83,9 +75,7 @@ describe("ContextManager", () => {
 
       const manager = new ContextManager();
 
-      expect(() => manager.addTokens(-100)).toThrow(
-        "Token count cannot be negative"
-      );
+      expect(() => manager.addTokens(-100)).toThrow("Token count cannot be negative");
     });
   });
 
@@ -115,9 +105,7 @@ describe("ContextManager", () => {
 
       const manager = new ContextManager();
 
-      expect(() => manager.removeTokens(-100)).toThrow(
-        "Token count cannot be negative"
-      );
+      expect(() => manager.removeTokens(-100)).toThrow("Token count cannot be negative");
     });
   });
 
@@ -136,9 +124,7 @@ describe("ContextManager", () => {
 
       const manager = new ContextManager();
 
-      expect(() => manager.setUsedTokens(-100)).toThrow(
-        "Token count cannot be negative"
-      );
+      expect(() => manager.setUsedTokens(-100)).toThrow("Token count cannot be negative");
     });
   });
 

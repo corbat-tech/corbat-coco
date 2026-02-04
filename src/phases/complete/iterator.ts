@@ -42,7 +42,7 @@ export class TaskIterator {
     context: TaskExecutionContext,
     runTests: () => Promise<TestExecutionResult>,
     saveFiles: (files: GeneratedFile[]) => Promise<void>,
-    onProgress?: (iteration: number, score: number) => void
+    onProgress?: (iteration: number, score: number) => void,
   ): Promise<TaskExecutionResult> {
     const versions: TaskVersion[] = [];
     let iteration = 0;
@@ -73,7 +73,7 @@ export class TaskIterator {
           context.task.title,
           context.task.description,
           currentFiles.map((f) => ({ path: f.path, content: f.content })),
-          testResults
+          testResults,
         );
 
         lastReview = review;
@@ -85,20 +85,11 @@ export class TaskIterator {
         }
 
         // Create version snapshot
-        const version = this.createVersion(
-          iteration,
-          currentFiles,
-          review,
-          testResults
-        );
+        const version = this.createVersion(iteration, currentFiles, review, testResults);
         versions.push(version);
 
         // Check if we should stop
-        const convergence = this.checkConvergence(
-          scoreHistory,
-          review,
-          iteration
-        );
+        const convergence = this.checkConvergence(scoreHistory, review, iteration);
 
         if (convergence.converged) {
           return {
@@ -141,7 +132,7 @@ export class TaskIterator {
             previousCode: this.filesToString(currentFiles),
             feedback: this.buildFeedback(review),
             iteration,
-          }
+          },
         );
 
         currentFiles = improved.files;
@@ -177,7 +168,7 @@ export class TaskIterator {
   checkConvergence(
     scoreHistory: number[],
     review: CodeReviewResult,
-    iteration: number
+    iteration: number,
   ): ConvergenceCheck {
     // Not enough iterations
     if (iteration < this.config.minConvergenceIterations) {
@@ -300,9 +291,7 @@ export class TaskIterator {
    * Convert files array to string
    */
   private filesToString(files: GeneratedFile[]): string {
-    return files
-      .map((f) => `### ${f.path}\n\`\`\`\n${f.content}\n\`\`\``)
-      .join("\n\n");
+    return files.map((f) => `### ${f.path}\n\`\`\`\n${f.content}\n\`\`\``).join("\n\n");
   }
 
   /**
@@ -333,7 +322,7 @@ export class TaskIterator {
     iteration: number,
     files: GeneratedFile[],
     review: CodeReviewResult,
-    testResults: TestExecutionResult
+    testResults: TestExecutionResult,
   ): TaskVersion {
     const changes: TaskChanges = {
       filesCreated: files.filter((f) => f.action === "create").map((f) => f.path),
@@ -391,9 +380,6 @@ export class TaskIterator {
 /**
  * Create a task iterator
  */
-export function createTaskIterator(
-  llm: LLMProvider,
-  config: QualityConfig
-): TaskIterator {
+export function createTaskIterator(llm: LLMProvider, config: QualityConfig): TaskIterator {
   return new TaskIterator(llm, config);
 }

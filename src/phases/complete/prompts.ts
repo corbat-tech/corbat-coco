@@ -325,7 +325,7 @@ Provide a concise context summary that will help generate consistent code.`;
  */
 export function fillPrompt(
   template: string,
-  variables: Record<string, string | number | unknown>
+  variables: Record<string, string | number | unknown>,
 ): string {
   let result = template;
 
@@ -365,7 +365,7 @@ ${previousCode}
  */
 export function buildFeedbackSection(
   feedback?: string,
-  issues?: Array<{ severity: string; message: string }>
+  issues?: Array<{ severity: string; message: string }>,
 ): string {
   if (!feedback && (!issues || issues.length === 0)) {
     return "";
