@@ -90,7 +90,7 @@ function findCompletions(line: string): Array<{ cmd: string; desc: string }> {
 /**
  * Create readline-based input handler with ghost-text completion and dropdown
  */
-export function createInputHandler(session: ReplSession): InputHandler {
+export function createInputHandler(_session: ReplSession): InputHandler {
   const savedHistory = loadHistory();
   const sessionHistory: string[] = [...savedHistory];
 
