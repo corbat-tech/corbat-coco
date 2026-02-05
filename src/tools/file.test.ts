@@ -735,11 +735,14 @@ describe("fileTools", () => {
     const { fileTools } = await import("./file.js");
 
     expect(fileTools).toBeDefined();
-    expect(fileTools.length).toBe(7);
+    expect(fileTools.length).toBe(10);
     expect(fileTools.some((t) => t.name === "read_file")).toBe(true);
     expect(fileTools.some((t) => t.name === "write_file")).toBe(true);
     expect(fileTools.some((t) => t.name === "edit_file")).toBe(true);
     expect(fileTools.some((t) => t.name === "glob")).toBe(true);
+    expect(fileTools.some((t) => t.name === "tree")).toBe(true);
+    expect(fileTools.some((t) => t.name === "copy_file")).toBe(true);
+    expect(fileTools.some((t) => t.name === "move_file")).toBe(true);
   });
 });
 
