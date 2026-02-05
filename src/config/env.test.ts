@@ -128,7 +128,7 @@ describe("getBaseUrl", () => {
 
     const url = getBaseUrl("kimi");
 
-    expect(url).toBe("https://api.moonshot.cn/v1");
+    expect(url).toBe("https://api.moonshot.ai/v1");
   });
 
   it("should return undefined for gemini provider", () => {
@@ -216,7 +216,7 @@ describe("getDefaultModel", () => {
 
     const model = getDefaultModel("kimi");
 
-    expect(model).toBe("moonshot-v1-8k");
+    expect(model).toBe("kimi-k2.5");
   });
 
   it("should return gpt-4o for unknown provider", () => {

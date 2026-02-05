@@ -6,15 +6,23 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { helpCommand } from "./help.js";
 import type { ReplSession } from "../types.js";
 
-// Mock chalk
-vi.mock("chalk", () => ({
-  default: {
-    dim: (s: string) => s,
-    cyan: { bold: (s: string) => s },
-    yellow: (s: string) => s,
-    bold: (s: string) => s,
-  },
-}));
+// Mock chalk - chalk functions can be chained
+vi.mock("chalk", () => {
+  const createChalkFn = () => {
+    const fn = (s: string) => s;
+    fn.dim = (s: string) => s;
+    fn.cyan = Object.assign((s: string) => s, { bold: (s: string) => s });
+    fn.yellow = Object.assign((s: string) => s, { bold: (s: string) => s });
+    fn.bold = Object.assign((s: string) => s, { cyan: (s: string) => s });
+    fn.green = (s: string) => s;
+    fn.red = (s: string) => s;
+    fn.blue = (s: string) => s;
+    fn.gray = (s: string) => s;
+    fn.white = (s: string) => s;
+    return fn;
+  };
+  return { default: createChalkFn() };
+});
 
 describe("helpCommand", () => {
   let mockSession: ReplSession;
@@ -55,7 +63,7 @@ describe("helpCommand", () => {
     });
 
     it("should have usage", () => {
-      expect(helpCommand.usage).toBe("/help");
+      expect(helpCommand.usage).toBe("/help [tools]");
     });
   });
 
