@@ -364,7 +364,10 @@ describe("plan command", () => {
       const { createProvider } = await import("../../providers/index.js");
 
       vi.mocked(findConfigPath).mockResolvedValue("/test/.coco/config.json");
-      vi.mocked(createProvider).mockRejectedValue(new Error("No API key"));
+      vi.mocked(createProvider).mockResolvedValue({
+        chat: vi.fn().mockResolvedValue({ content: "{}", usage: { inputTokens: 0, outputTokens: 0 } }),
+        chatWithTools: vi.fn().mockResolvedValue({ content: "{}", usage: { inputTokens: 0, outputTokens: 0 } }),
+      } as any);
 
       const { runPlan } = await import("./plan.js");
       // Should not throw, should use mock LLM
@@ -1031,7 +1034,10 @@ describe("plan command", () => {
         provider: { type: "anthropic" },
         quality: { minScore: 85 },
       });
-      vi.mocked(createProvider).mockRejectedValue(new Error("No API key"));
+      vi.mocked(createProvider).mockResolvedValue({
+        chat: vi.fn().mockResolvedValue({ content: "{}", usage: { inputTokens: 0, outputTokens: 0 } }),
+        chatWithTools: vi.fn().mockResolvedValue({ content: "{}", usage: { inputTokens: 0, outputTokens: 0 } }),
+      } as any);
 
       // Create a temp file to read
       const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "plan-test-"));
@@ -1075,7 +1081,10 @@ describe("plan command", () => {
         provider: { type: "anthropic" },
         quality: { minScore: 85 },
       });
-      vi.mocked(createProvider).mockRejectedValue(new Error("No API key"));
+      vi.mocked(createProvider).mockResolvedValue({
+        chat: vi.fn().mockResolvedValue({ content: "{}", usage: { inputTokens: 0, outputTokens: 0 } }),
+        chatWithTools: vi.fn().mockResolvedValue({ content: "{}", usage: { inputTokens: 0, outputTokens: 0 } }),
+      } as any);
 
       const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "plan-test-"));
       const testFile = path.join(tmpDir, "subdir", "output.txt");
@@ -1118,7 +1127,10 @@ describe("plan command", () => {
         provider: { type: "anthropic" },
         quality: { minScore: 85 },
       });
-      vi.mocked(createProvider).mockRejectedValue(new Error("No API key"));
+      vi.mocked(createProvider).mockResolvedValue({
+        chat: vi.fn().mockResolvedValue({ content: "{}", usage: { inputTokens: 0, outputTokens: 0 } }),
+        chatWithTools: vi.fn().mockResolvedValue({ content: "{}", usage: { inputTokens: 0, outputTokens: 0 } }),
+      } as any);
 
       const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "plan-test-"));
       const testFile = path.join(tmpDir, "exists.txt");
@@ -1158,7 +1170,10 @@ describe("plan command", () => {
         provider: { type: "anthropic" },
         quality: { minScore: 85 },
       });
-      vi.mocked(createProvider).mockRejectedValue(new Error("No API key"));
+      vi.mocked(createProvider).mockResolvedValue({
+        chat: vi.fn().mockResolvedValue({ content: "{}", usage: { inputTokens: 0, outputTokens: 0 } }),
+        chatWithTools: vi.fn().mockResolvedValue({ content: "{}", usage: { inputTokens: 0, outputTokens: 0 } }),
+      } as any);
 
       vi.mocked(createConvergeExecutor).mockImplementation(() => {
         return {
@@ -1194,7 +1209,10 @@ describe("plan command", () => {
         provider: { type: "anthropic" },
         quality: { minScore: 85 },
       });
-      vi.mocked(createProvider).mockRejectedValue(new Error("No API key"));
+      vi.mocked(createProvider).mockResolvedValue({
+        chat: vi.fn().mockResolvedValue({ content: "{}", usage: { inputTokens: 0, outputTokens: 0 } }),
+        chatWithTools: vi.fn().mockResolvedValue({ content: "{}", usage: { inputTokens: 0, outputTokens: 0 } }),
+      } as any);
 
       const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "plan-test-"));
       await fs.writeFile(path.join(tmpDir, "file1.ts"), "content1", "utf-8");
@@ -1234,7 +1252,10 @@ describe("plan command", () => {
         provider: { type: "anthropic" },
         quality: { minScore: 85 },
       });
-      vi.mocked(createProvider).mockRejectedValue(new Error("No API key"));
+      vi.mocked(createProvider).mockResolvedValue({
+        chat: vi.fn().mockResolvedValue({ content: "{}", usage: { inputTokens: 0, outputTokens: 0 } }),
+        chatWithTools: vi.fn().mockResolvedValue({ content: "{}", usage: { inputTokens: 0, outputTokens: 0 } }),
+      } as any);
 
       vi.mocked(createConvergeExecutor).mockImplementation(() => {
         return {
@@ -1268,7 +1289,10 @@ describe("plan command", () => {
         provider: { type: "anthropic" },
         quality: { minScore: 85 },
       });
-      vi.mocked(createProvider).mockRejectedValue(new Error("No API key"));
+      vi.mocked(createProvider).mockResolvedValue({
+        chat: vi.fn().mockResolvedValue({ content: "{}", usage: { inputTokens: 0, outputTokens: 0 } }),
+        chatWithTools: vi.fn().mockResolvedValue({ content: "{}", usage: { inputTokens: 0, outputTokens: 0 } }),
+      } as any);
 
       vi.mocked(createConvergeExecutor).mockImplementation(() => {
         return {
@@ -1304,7 +1328,10 @@ describe("plan command", () => {
         provider: { type: "anthropic" },
         quality: { minScore: 85 },
       });
-      vi.mocked(createProvider).mockRejectedValue(new Error("No API key"));
+      vi.mocked(createProvider).mockResolvedValue({
+        chat: vi.fn().mockResolvedValue({ content: "{}", usage: { inputTokens: 0, outputTokens: 0 } }),
+        chatWithTools: vi.fn().mockResolvedValue({ content: "{}", usage: { inputTokens: 0, outputTokens: 0 } }),
+      } as any);
 
       const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "plan-test-"));
 
@@ -1347,7 +1374,10 @@ describe("plan command", () => {
         provider: { type: "anthropic" },
         quality: { minScore: 85 },
       });
-      vi.mocked(createProvider).mockRejectedValue(new Error("No API key"));
+      vi.mocked(createProvider).mockResolvedValue({
+        chat: vi.fn().mockResolvedValue({ content: "{}", usage: { inputTokens: 0, outputTokens: 0 } }),
+        chatWithTools: vi.fn().mockResolvedValue({ content: "{}", usage: { inputTokens: 0, outputTokens: 0 } }),
+      } as any);
 
       vi.mocked(createConvergeExecutor).mockImplementation(() => {
         return {
@@ -1385,7 +1415,10 @@ describe("plan command", () => {
         provider: { type: "anthropic" },
         quality: { minScore: 85 },
       });
-      vi.mocked(createProvider).mockRejectedValue(new Error("No API key"));
+      vi.mocked(createProvider).mockResolvedValue({
+        chat: vi.fn().mockResolvedValue({ content: "{}", usage: { inputTokens: 0, outputTokens: 0 } }),
+        chatWithTools: vi.fn().mockResolvedValue({ content: "{}", usage: { inputTokens: 0, outputTokens: 0 } }),
+      } as any);
 
       vi.mocked(createConvergeExecutor).mockImplementation(() => {
         return {
@@ -1423,7 +1456,10 @@ describe("plan command", () => {
         provider: { type: "anthropic" },
         quality: { minScore: 85 },
       });
-      vi.mocked(createProvider).mockRejectedValue(new Error("No API key"));
+      vi.mocked(createProvider).mockResolvedValue({
+        chat: vi.fn().mockResolvedValue({ content: "{}", usage: { inputTokens: 0, outputTokens: 0 } }),
+        chatWithTools: vi.fn().mockResolvedValue({ content: "{}", usage: { inputTokens: 0, outputTokens: 0 } }),
+      } as any);
 
       vi.mocked(createConvergeExecutor).mockImplementation(() => {
         return {
