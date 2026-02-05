@@ -22,6 +22,9 @@ export {
   fileExistsTool,
   listDirTool,
   deleteFileTool,
+  copyFileTool,
+  moveFileTool,
+  treeTool,
   fileTools,
 } from "./file.js";
 
@@ -83,12 +86,7 @@ export {
 } from "./search.js";
 
 // HTTP tools
-export {
-  httpFetchTool,
-  httpJsonTool,
-  httpTools,
-  type HttpResponse,
-} from "./http.js";
+export { httpFetchTool, httpJsonTool, httpTools, type HttpResponse } from "./http.js";
 
 // Build tools
 export {

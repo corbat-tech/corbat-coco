@@ -233,7 +233,7 @@ describe("gitCommitTool", () => {
     const { gitCommitTool } = await import("./git.js");
 
     await expect(
-      gitCommitTool.execute({ cwd: "/project", message: "empty commit" })
+      gitCommitTool.execute({ cwd: "/project", message: "empty commit" }),
     ).rejects.toThrow();
   });
 });
@@ -506,9 +506,7 @@ describe("gitStatusTool error handling", () => {
 
     const { gitStatusTool } = await import("./git.js");
 
-    await expect(gitStatusTool.execute({ cwd: "/invalid" })).rejects.toThrow(
-      "Git status failed"
-    );
+    await expect(gitStatusTool.execute({ cwd: "/invalid" })).rejects.toThrow("Git status failed");
   });
 
   it("should handle non-Error exceptions", async () => {
@@ -526,9 +524,7 @@ describe("gitDiffTool error handling", () => {
 
     const { gitDiffTool } = await import("./git.js");
 
-    await expect(gitDiffTool.execute({ cwd: "/invalid" })).rejects.toThrow(
-      "Git diff failed"
-    );
+    await expect(gitDiffTool.execute({ cwd: "/invalid" })).rejects.toThrow("Git diff failed");
   });
 });
 
@@ -538,9 +534,9 @@ describe("gitAddTool error handling", () => {
 
     const { gitAddTool } = await import("./git.js");
 
-    await expect(
-      gitAddTool.execute({ cwd: "/project", files: ["missing.ts"] })
-    ).rejects.toThrow("Git add failed");
+    await expect(gitAddTool.execute({ cwd: "/project", files: ["missing.ts"] })).rejects.toThrow(
+      "Git add failed",
+    );
   });
 });
 
@@ -550,9 +546,7 @@ describe("gitLogTool with file filter", () => {
 
     await gitLogTool.execute({ cwd: "/project", file: "src/index.ts" });
 
-    expect(mockLog).toHaveBeenCalledWith(
-      expect.objectContaining({ file: "src/index.ts" })
-    );
+    expect(mockLog).toHaveBeenCalledWith(expect.objectContaining({ file: "src/index.ts" }));
   });
 
   it("should handle log errors", async () => {
@@ -560,9 +554,7 @@ describe("gitLogTool with file filter", () => {
 
     const { gitLogTool } = await import("./git.js");
 
-    await expect(gitLogTool.execute({ cwd: "/project" })).rejects.toThrow(
-      "Git log failed"
-    );
+    await expect(gitLogTool.execute({ cwd: "/project" })).rejects.toThrow("Git log failed");
   });
 });
 
@@ -617,9 +609,7 @@ describe("gitBranchTool operations", () => {
 
     const { gitBranchTool } = await import("./git.js");
 
-    await expect(gitBranchTool.execute({ cwd: "/project" })).rejects.toThrow(
-      "Git branch failed"
-    );
+    await expect(gitBranchTool.execute({ cwd: "/project" })).rejects.toThrow("Git branch failed");
   });
 });
 
@@ -630,7 +620,7 @@ describe("gitCheckoutTool error handling", () => {
     const { gitCheckoutTool } = await import("./git.js");
 
     await expect(
-      gitCheckoutTool.execute({ cwd: "/project", branch: "nonexistent" })
+      gitCheckoutTool.execute({ cwd: "/project", branch: "nonexistent" }),
     ).rejects.toThrow("Git checkout failed");
   });
 });
@@ -681,9 +671,7 @@ describe("gitInitTool error handling", () => {
 
     const { gitInitTool } = await import("./git.js");
 
-    await expect(gitInitTool.execute({ cwd: "/restricted" })).rejects.toThrow(
-      "Git init failed"
-    );
+    await expect(gitInitTool.execute({ cwd: "/restricted" })).rejects.toThrow("Git init failed");
   });
 });
 

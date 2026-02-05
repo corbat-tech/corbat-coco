@@ -22,20 +22,20 @@ const MAX_OUTPUT_SIZE = 1024 * 1024;
  * Dangerous commands that should be blocked or warned
  */
 const DANGEROUS_PATTERNS = [
-  /\brm\s+-rf\s+\/(?!\w)/,   // rm -rf / (root)
-  /\bsudo\s+rm\s+-rf/,       // sudo rm -rf
-  /\b:?\(\)\s*\{.*\}/,       // Fork bomb pattern
-  /\bdd\s+if=.*of=\/dev\//,  // dd to device
-  /\bmkfs\./,                // Format filesystem
-  /\bformat\s+/,             // Windows format
-  /`[^`]+`/,                 // Backtick command substitution
-  /\$\([^)]+\)/,             // $() command substitution
-  /\beval\s+/,               // eval command
-  /\bsource\s+/,             // source command (can execute arbitrary scripts)
-  />\s*\/etc\//,             // Write to /etc
-  />\s*\/root\//,            // Write to /root
-  /\bchmod\s+777/,           // Overly permissive chmod
-  /\bchown\s+root/,          // chown to root
+  /\brm\s+-rf\s+\/(?!\w)/, // rm -rf / (root)
+  /\bsudo\s+rm\s+-rf/, // sudo rm -rf
+  /\b:?\(\)\s*\{.*\}/, // Fork bomb pattern
+  /\bdd\s+if=.*of=\/dev\//, // dd to device
+  /\bmkfs\./, // Format filesystem
+  /\bformat\s+/, // Windows format
+  /`[^`]+`/, // Backtick command substitution
+  /\$\([^)]+\)/, // $() command substitution
+  /\beval\s+/, // eval command
+  /\bsource\s+/, // source command (can execute arbitrary scripts)
+  />\s*\/etc\//, // Write to /etc
+  />\s*\/root\//, // Write to /root
+  /\bchmod\s+777/, // Overly permissive chmod
+  /\bchown\s+root/, // chown to root
   /\bcurl\s+.*\|\s*(ba)?sh/, // curl | sh pattern
   /\bwget\s+.*\|\s*(ba)?sh/, // wget | sh pattern
 ];
@@ -133,10 +133,9 @@ Examples:
     // Check for dangerous commands
     for (const pattern of DANGEROUS_PATTERNS) {
       if (pattern.test(command)) {
-        throw new ToolError(
-          `Potentially dangerous command blocked: ${command.slice(0, 100)}`,
-          { tool: "bash_exec" }
-        );
+        throw new ToolError(`Potentially dangerous command blocked: ${command.slice(0, 100)}`, {
+          tool: "bash_exec",
+        });
       }
     }
 
@@ -156,8 +155,12 @@ Examples:
       const result = await execa(command, options);
 
       return {
-        stdout: truncateOutput(typeof result.stdout === "string" ? result.stdout : String(result.stdout ?? "")),
-        stderr: truncateOutput(typeof result.stderr === "string" ? result.stderr : String(result.stderr ?? "")),
+        stdout: truncateOutput(
+          typeof result.stdout === "string" ? result.stdout : String(result.stdout ?? ""),
+        ),
+        stderr: truncateOutput(
+          typeof result.stderr === "string" ? result.stderr : String(result.stderr ?? ""),
+        ),
         exitCode: result.exitCode ?? 0,
         duration: performance.now() - startTime,
       };
@@ -171,7 +174,7 @@ Examples:
 
       throw new ToolError(
         `Command execution failed: ${error instanceof Error ? error.message : String(error)}`,
-        { tool: "bash_exec", cause: error instanceof Error ? error : undefined }
+        { tool: "bash_exec", cause: error instanceof Error ? error : undefined },
       );
     }
   },
@@ -208,10 +211,9 @@ Examples:
     // Check for dangerous commands
     for (const pattern of DANGEROUS_PATTERNS) {
       if (pattern.test(command)) {
-        throw new ToolError(
-          `Potentially dangerous command blocked: ${command.slice(0, 100)}`,
-          { tool: "bash_background" }
-        );
+        throw new ToolError(`Potentially dangerous command blocked: ${command.slice(0, 100)}`, {
+          tool: "bash_background",
+        });
       }
     }
 
@@ -242,7 +244,7 @@ Examples:
     } catch (error) {
       throw new ToolError(
         `Failed to start background command: ${error instanceof Error ? error.message : String(error)}`,
-        { tool: "bash_background", cause: error instanceof Error ? error : undefined }
+        { tool: "bash_background", cause: error instanceof Error ? error : undefined },
       );
     }
   },
@@ -344,12 +346,7 @@ Examples:
 /**
  * All bash tools
  */
-export const bashTools = [
-  bashExecTool,
-  bashBackgroundTool,
-  commandExistsTool,
-  getEnvTool,
-];
+export const bashTools = [bashExecTool, bashBackgroundTool, commandExistsTool, getEnvTool];
 
 /**
  * Truncate output if too long

@@ -95,9 +95,7 @@ describe("grepTool", () => {
       isFile: () => true,
       isDirectory: () => false,
     });
-    mockFs.readFile.mockResolvedValue(
-      "line 1\nline 2\nmatch here\nline 4\nline 5"
-    );
+    mockFs.readFile.mockResolvedValue("line 1\nline 2\nmatch here\nline 4\nline 5");
 
     const { grepTool } = await import("./search.js");
 
@@ -116,9 +114,7 @@ describe("grepTool", () => {
       isFile: () => true,
       isDirectory: () => false,
     });
-    mockFs.readFile.mockResolvedValue(
-      "test 1\ntest 2\ntest 3\ntest 4\ntest 5\ntest 6"
-    );
+    mockFs.readFile.mockResolvedValue("test 1\ntest 2\ntest 3\ntest 4\ntest 5\ntest 6");
 
     const { grepTool } = await import("./search.js");
 
@@ -180,7 +176,7 @@ describe("grepTool", () => {
       grepTool.execute({
         pattern: "[invalid",
         path: "/test/file.ts",
-      })
+      }),
     ).rejects.toThrow(/Invalid regex/);
   });
 
@@ -240,9 +236,7 @@ describe("findInFileTool", () => {
   });
 
   it("should find matches in file", async () => {
-    mockFs.readFile.mockResolvedValue(
-      "line 1\ntest match\nline 3\ntest again\nline 5"
-    );
+    mockFs.readFile.mockResolvedValue("line 1\ntest match\nline 3\ntest again\nline 5");
 
     const { findInFileTool } = await import("./search.js");
 
@@ -279,7 +273,7 @@ describe("findInFileTool", () => {
       findInFileTool.execute({
         file: "/missing/file.ts",
         pattern: "test",
-      })
+      }),
     ).rejects.toThrow(/Find in file failed/);
   });
 
@@ -298,9 +292,7 @@ describe("findInFileTool", () => {
   });
 
   it("should support regex patterns", async () => {
-    mockFs.readFile.mockResolvedValue(
-      "function foo() {}\nconst bar = 123;\nfunction baz() {}"
-    );
+    mockFs.readFile.mockResolvedValue("function foo() {}\nconst bar = 123;\nfunction baz() {}");
 
     const { findInFileTool } = await import("./search.js");
 

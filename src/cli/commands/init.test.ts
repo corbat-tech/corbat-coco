@@ -86,9 +86,7 @@ describe("registerInitCommand", () => {
 
     registerInitCommand(mockProgram as any);
 
-    expect(mockProgram.description).toHaveBeenCalledWith(
-      "Initialize a new Corbat-Coco project"
-    );
+    expect(mockProgram.description).toHaveBeenCalledWith("Initialize a new Corbat-Coco project");
   });
 
   it("should accept path argument", async () => {
@@ -104,11 +102,7 @@ describe("registerInitCommand", () => {
 
     registerInitCommand(mockProgram as any);
 
-    expect(mockProgram.argument).toHaveBeenCalledWith(
-      "[path]",
-      "Project directory path",
-      "."
-    );
+    expect(mockProgram.argument).toHaveBeenCalledWith("[path]", "Project directory path", ".");
   });
 
   it("should have template option", async () => {
@@ -126,7 +120,7 @@ describe("registerInitCommand", () => {
 
     expect(mockProgram.option).toHaveBeenCalledWith(
       "-t, --template <template>",
-      "Project template to use"
+      "Project template to use",
     );
   });
 
@@ -143,10 +137,7 @@ describe("registerInitCommand", () => {
 
     registerInitCommand(mockProgram as any);
 
-    expect(mockProgram.option).toHaveBeenCalledWith(
-      "-y, --yes",
-      "Skip prompts and use defaults"
-    );
+    expect(mockProgram.option).toHaveBeenCalledWith("-y, --yes", "Skip prompts and use defaults");
   });
 
   it("should have skip-discovery option", async () => {
@@ -164,7 +155,7 @@ describe("registerInitCommand", () => {
 
     expect(mockProgram.option).toHaveBeenCalledWith(
       "--skip-discovery",
-      "Skip the discovery phase (use existing spec)"
+      "Skip the discovery phase (use existing spec)",
     );
   });
 
@@ -207,7 +198,12 @@ describe("registerInitCommand", () => {
 });
 
 describe("init action handler - runInit", () => {
-  let actionHandler: ((path: string, options: { template?: string; yes?: boolean; skipDiscovery?: boolean }) => Promise<void>) | null = null;
+  let actionHandler:
+    | ((
+        path: string,
+        options: { template?: string; yes?: boolean; skipDiscovery?: boolean },
+      ) => Promise<void>)
+    | null = null;
 
   function setupDefaultMocks() {
     // Reset all mocks first
@@ -462,7 +458,7 @@ describe("init action handler - runInit", () => {
     vi.mocked(p.text).mockImplementation(async () => {
       textCallCount++;
       if (textCallCount === 1) return "my-project";
-      return "";  // Empty description
+      return ""; // Empty description
     });
     vi.mocked(p.select).mockResolvedValue("go");
     vi.mocked(p.isCancel).mockReturnValue(false);
@@ -486,13 +482,13 @@ describe("init action handler - runInit", () => {
       expect.objectContaining({
         message: "What is your project name?",
         validate: expect.any(Function),
-      })
+      }),
     );
 
     // Get the validation function and test it
     const textCalls = vi.mocked(p.text).mock.calls;
-    const projectNameCall = textCalls.find(call =>
-      call[0].message === "What is your project name?"
+    const projectNameCall = textCalls.find(
+      (call) => call[0].message === "What is your project name?",
     );
     expect(projectNameCall).toBeDefined();
 
@@ -515,7 +511,7 @@ describe("init action handler - runInit", () => {
         options: expect.arrayContaining([
           expect.objectContaining({ value: "typescript", hint: "Recommended" }),
         ]),
-      })
+      }),
     );
   });
 });
@@ -544,11 +540,7 @@ describe("init command integration", () => {
     registerInitCommand(mockProgram as any);
 
     // Third argument should be the default value "."
-    expect(mockProgram.argument).toHaveBeenCalledWith(
-      "[path]",
-      expect.any(String),
-      "."
-    );
+    expect(mockProgram.argument).toHaveBeenCalledWith("[path]", expect.any(String), ".");
   });
 
   it("should register command before description", async () => {

@@ -40,7 +40,7 @@ export class CodeReviewer {
     taskTitle: string,
     taskDescription: string,
     files: Array<{ path: string; content: string }>,
-    testResults: TestExecutionResult
+    testResults: TestExecutionResult,
   ): Promise<CodeReviewResult> {
     const filesToReview = files
       .map((f) => `### ${f.path}\n\`\`\`\n${f.content}\n\`\`\``)
@@ -66,13 +66,15 @@ export class CodeReviewer {
    */
   async analyzeFailures(
     failures: Array<{ name: string; message: string; stack?: string }>,
-    sourceCode: string
-  ): Promise<Array<{
-    testName: string;
-    rootCause: string;
-    suggestedFix: string;
-    confidence: number;
-  }>> {
+    sourceCode: string,
+  ): Promise<
+    Array<{
+      testName: string;
+      rootCause: string;
+      suggestedFix: string;
+      confidence: number;
+    }>
+  > {
     const prompt = fillPrompt(ANALYZE_FAILURES_PROMPT, {
       failures: JSON.stringify(failures),
       sourceCode,
@@ -137,10 +139,7 @@ export class CodeReviewer {
   /**
    * Parse review response from LLM
    */
-  private parseReviewResponse(
-    content: string,
-    testResults: TestExecutionResult
-  ): CodeReviewResult {
+  private parseReviewResponse(content: string, testResults: TestExecutionResult): CodeReviewResult {
     try {
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
@@ -177,9 +176,7 @@ export class CodeReviewer {
       };
 
       const issues = (parsed.issues || []).map((i) => this.normalizeIssue(i));
-      const suggestions = (parsed.suggestions || []).map((s) =>
-        this.normalizeSuggestion(s)
-      );
+      const suggestions = (parsed.suggestions || []).map((s) => this.normalizeSuggestion(s));
 
       // Override testCoverage with actual coverage
       if (testResults.coverage) {
@@ -204,9 +201,7 @@ export class CodeReviewer {
   /**
    * Normalize dimension scores
    */
-  private normalizeDimensions(
-    data: Partial<QualityDimensions>
-  ): QualityDimensions {
+  private normalizeDimensions(data: Partial<QualityDimensions>): QualityDimensions {
     return {
       correctness: this.normalizeScore(data.correctness),
       completeness: this.normalizeScore(data.completeness),
@@ -237,13 +232,13 @@ export class CodeReviewer {
   private calculateOverallScore(dimensions: QualityDimensions): number {
     const weights: QualityDimensions = {
       correctness: 0.15,
-      completeness: 0.10,
-      robustness: 0.10,
-      readability: 0.10,
-      maintainability: 0.10,
+      completeness: 0.1,
+      robustness: 0.1,
+      readability: 0.1,
+      maintainability: 0.1,
       complexity: 0.08,
       duplication: 0.07,
-      testCoverage: 0.10,
+      testCoverage: 0.1,
       testQuality: 0.05,
       security: 0.08,
       documentation: 0.04,
@@ -299,9 +294,7 @@ export class CodeReviewer {
   /**
    * Normalize severity
    */
-  private normalizeSeverity(
-    value?: string
-  ): "critical" | "major" | "minor" | "info" {
+  private normalizeSeverity(value?: string): "critical" | "major" | "minor" | "info" {
     const normalized = value?.toLowerCase();
     if (normalized === "critical") return "critical";
     if (normalized === "major") return "major";
@@ -340,7 +333,7 @@ export class CodeReviewer {
    * Normalize suggestion type
    */
   private normalizeSuggestionType(
-    value?: string
+    value?: string,
   ): "improvement" | "refactor" | "test" | "documentation" {
     const normalized = value?.toLowerCase();
     if (normalized === "improvement") return "improvement";
@@ -401,9 +394,6 @@ export class CodeReviewer {
 /**
  * Create a code reviewer
  */
-export function createCodeReviewer(
-  llm: LLMProvider,
-  config: QualityConfig
-): CodeReviewer {
+export function createCodeReviewer(llm: LLMProvider, config: QualityConfig): CodeReviewer {
   return new CodeReviewer(llm, config);
 }

@@ -20,7 +20,7 @@ export class CocoError extends Error {
       recoverable?: boolean;
       suggestion?: string;
       cause?: Error;
-    }
+    },
   ) {
     super(message, { cause: options.cause });
     this.name = "CocoError";
@@ -60,7 +60,7 @@ export class FileSystemError extends CocoError {
       path: string;
       operation: "read" | "write" | "delete" | "exists" | "glob";
       cause?: Error;
-    }
+    },
   ) {
     super(message, {
       code: "FILESYSTEM_ERROR",
@@ -87,7 +87,7 @@ export class ProviderError extends CocoError {
       statusCode?: number;
       retryable?: boolean;
       cause?: Error;
-    }
+    },
   ) {
     super(message, {
       code: "PROVIDER_ERROR",
@@ -116,7 +116,7 @@ export class ConfigError extends CocoError {
       issues?: ConfigIssue[];
       configPath?: string;
       cause?: Error;
-    } = {}
+    } = {},
   ) {
     super(message, {
       code: "CONFIG_ERROR",
@@ -156,7 +156,7 @@ export class ValidationError extends CocoError {
       field?: string;
       issues?: ValidationIssue[];
       cause?: Error;
-    } = {}
+    } = {},
   ) {
     super(message, {
       code: "VALIDATION_ERROR",
@@ -189,7 +189,7 @@ export class PhaseError extends CocoError {
       phase: string;
       recoverable?: boolean;
       cause?: Error;
-    }
+    },
   ) {
     super(message, {
       code: "PHASE_ERROR",
@@ -217,7 +217,7 @@ export class TaskError extends CocoError {
       iteration?: number;
       recoverable?: boolean;
       cause?: Error;
-    }
+    },
   ) {
     super(message, {
       code: "TASK_ERROR",
@@ -246,7 +246,7 @@ export class QualityError extends CocoError {
       score: number;
       threshold: number;
       dimension?: string;
-    }
+    },
   ) {
     super(message, {
       code: "QUALITY_ERROR",
@@ -276,7 +276,7 @@ export class RecoveryError extends CocoError {
     options: {
       checkpointId?: string;
       cause?: Error;
-    } = {}
+    } = {},
   ) {
     super(message, {
       code: "RECOVERY_ERROR",
@@ -301,7 +301,7 @@ export class ToolError extends CocoError {
     options: {
       tool: string;
       cause?: Error;
-    }
+    },
   ) {
     super(message, {
       code: "TOOL_ERROR",
@@ -327,7 +327,7 @@ export class TimeoutError extends CocoError {
     options: {
       timeoutMs: number;
       operation: string;
-    }
+    },
   ) {
     super(message, {
       code: "TIMEOUT_ERROR",
@@ -372,7 +372,7 @@ export function formatError(error: unknown): string {
  */
 export async function withErrorHandling<T>(
   fn: () => Promise<T>,
-  context: { operation: string; recoverable?: boolean }
+  context: { operation: string; recoverable?: boolean },
 ): Promise<T> {
   try {
     return await fn();
@@ -381,15 +381,12 @@ export async function withErrorHandling<T>(
       throw error;
     }
 
-    throw new CocoError(
-      error instanceof Error ? error.message : String(error),
-      {
-        code: "UNEXPECTED_ERROR",
-        context: { operation: context.operation },
-        recoverable: context.recoverable ?? false,
-        cause: error instanceof Error ? error : undefined,
-      }
-    );
+    throw new CocoError(error instanceof Error ? error.message : String(error), {
+      code: "UNEXPECTED_ERROR",
+      context: { operation: context.operation },
+      recoverable: context.recoverable ?? false,
+      cause: error instanceof Error ? error : undefined,
+    });
   }
 }
 
@@ -403,17 +400,19 @@ export async function withRetry<T>(
     initialDelayMs?: number;
     maxDelayMs?: number;
     shouldRetry?: (error: unknown) => boolean;
-  } = {}
+  } = {},
 ): Promise<T> {
   const maxAttempts = options.maxAttempts ?? 3;
   const initialDelayMs = options.initialDelayMs ?? 1000;
   const maxDelayMs = options.maxDelayMs ?? 30000;
-  const shouldRetry = options.shouldRetry ?? ((error) => {
-    if (error instanceof CocoError) {
-      return error.recoverable;
-    }
-    return false;
-  });
+  const shouldRetry =
+    options.shouldRetry ??
+    ((error) => {
+      if (error instanceof CocoError) {
+        return error.recoverable;
+      }
+      return false;
+    });
 
   let lastError: unknown;
   let delay = initialDelayMs;

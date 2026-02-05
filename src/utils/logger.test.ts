@@ -65,7 +65,7 @@ describe("createLogger", () => {
       expect.objectContaining({
         name: "custom",
         minLevel: 2, // debug level
-      })
+      }),
     );
   });
 
@@ -191,7 +191,7 @@ describe("logEvent", () => {
       expect.objectContaining({
         event: "test_event",
         key: "value",
-      })
+      }),
     );
   });
 });
@@ -208,7 +208,7 @@ describe("logTiming", () => {
       expect.objectContaining({
         operation: "test_op",
         status: "success",
-      })
+      }),
     );
   });
 
@@ -221,14 +221,14 @@ describe("logTiming", () => {
     await expect(
       logTiming(logger, "failing_op", async () => {
         throw error;
-      })
+      }),
     ).rejects.toThrow("Operation failed");
 
     expect(logger.error).toHaveBeenCalledWith(
       expect.objectContaining({
         operation: "failing_op",
         status: "error",
-      })
+      }),
     );
   });
 });

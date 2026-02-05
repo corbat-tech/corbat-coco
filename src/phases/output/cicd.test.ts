@@ -14,7 +14,7 @@ describe("CICDGenerator", () => {
         {
           provider: "github_actions",
           features: { tests: true, lint: true, coverage: true, build: true },
-        } as any
+        } as any,
       );
 
       const files = generator.generate();
@@ -28,7 +28,7 @@ describe("CICDGenerator", () => {
 
       const generator = new CICDGenerator(
         { name: "test", language: "typescript", packageManager: "npm" } as any,
-        { provider: "gitlab_ci", features: {} } as any
+        { provider: "gitlab_ci", features: {} } as any,
       );
 
       const files = generator.generate();
@@ -42,7 +42,7 @@ describe("CICDGenerator", () => {
 
       const generator = new CICDGenerator(
         { name: "test", language: "typescript", packageManager: "npm" } as any,
-        { provider: "github_actions", features: { release: true } } as any
+        { provider: "github_actions", features: { release: true } } as any,
       );
 
       const files = generator.generate();
@@ -55,7 +55,7 @@ describe("CICDGenerator", () => {
 
       const generator = new CICDGenerator(
         { name: "test", language: "typescript", packageManager: "npm" } as any,
-        { provider: "github_actions", features: { dependabot: true } } as any
+        { provider: "github_actions", features: { dependabot: true } } as any,
       );
 
       const files = generator.generate();
@@ -68,7 +68,7 @@ describe("CICDGenerator", () => {
 
       const generator = new CICDGenerator(
         { name: "test", language: "typescript", packageManager: "pnpm" } as any,
-        { provider: "github_actions", features: { tests: true } } as any
+        { provider: "github_actions", features: { tests: true } } as any,
       );
 
       const files = generator.generate();
@@ -82,7 +82,7 @@ describe("CICDGenerator", () => {
 
       const generator = new CICDGenerator(
         { name: "test", language: "typescript", packageManager: "npm" } as any,
-        { provider: "github_actions", features: { tests: true } } as any
+        { provider: "github_actions", features: { tests: true } } as any,
       );
 
       const files = generator.generate();
@@ -97,7 +97,7 @@ describe("CICDGenerator", () => {
 
       const generator = new CICDGenerator(
         { name: "test", language: "typescript", packageManager: "npm" } as any,
-        { provider: "github_actions", features: { lint: true } } as any
+        { provider: "github_actions", features: { lint: true } } as any,
       );
 
       const files = generator.generate();
@@ -111,7 +111,7 @@ describe("CICDGenerator", () => {
 
       const generator = new CICDGenerator(
         { name: "test", language: "typescript", packageManager: "npm" } as any,
-        { provider: "github_actions", features: { security: true } } as any
+        { provider: "github_actions", features: { security: true } } as any,
       );
 
       const files = generator.generate();
@@ -147,10 +147,7 @@ describe("createCICDGenerator", () => {
   it("should create a CICDGenerator instance", async () => {
     const { createCICDGenerator, createDefaultCICDConfig } = await import("./cicd.js");
 
-    const generator = createCICDGenerator(
-      { name: "test" } as any,
-      createDefaultCICDConfig()
-    );
+    const generator = createCICDGenerator({ name: "test" } as any, createDefaultCICDConfig());
 
     expect(generator).toBeDefined();
   });

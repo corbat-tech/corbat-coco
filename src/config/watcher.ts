@@ -141,7 +141,7 @@ export class ConfigWatcher extends EventEmitter {
  */
 export function createConfigWatcher(
   configPath: string,
-  options?: ConfigWatcherOptions
+  options?: ConfigWatcherOptions,
 ): ConfigWatcher {
   return new ConfigWatcher(configPath, options);
 }
@@ -152,7 +152,7 @@ export function createConfigWatcher(
 export async function watchConfig(
   configPath: string,
   onChange: (config: CocoConfig) => void,
-  onError?: (error: Error) => void
+  onError?: (error: Error) => void,
 ): Promise<() => void> {
   const watcher = createConfigWatcher(configPath);
 

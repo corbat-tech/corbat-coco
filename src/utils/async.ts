@@ -17,16 +17,18 @@ export function sleep(ms: number): Promise<void> {
 export async function timeout<T>(
   promise: Promise<T>,
   ms: number,
-  operation: string = "Operation"
+  operation: string = "Operation",
 ): Promise<T> {
   let timeoutId: ReturnType<typeof setTimeout>;
 
   const timeoutPromise = new Promise<never>((_, reject) => {
     timeoutId = setTimeout(() => {
-      reject(new TimeoutError(`${operation} timed out after ${ms}ms`, {
-        timeoutMs: ms,
-        operation,
-      }));
+      reject(
+        new TimeoutError(`${operation} timed out after ${ms}ms`, {
+          timeoutMs: ms,
+          operation,
+        }),
+      );
     }, ms);
   });
 
@@ -45,7 +47,7 @@ export async function timeout<T>(
  */
 export function debounce<T extends (...args: unknown[]) => unknown>(
   fn: T,
-  ms: number
+  ms: number,
 ): (...args: Parameters<T>) => void {
   let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
@@ -65,7 +67,7 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
  */
 export function throttle<T extends (...args: unknown[]) => unknown>(
   fn: T,
-  ms: number
+  ms: number,
 ): (...args: Parameters<T>) => void {
   let lastCall = 0;
   let timeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -98,7 +100,7 @@ export async function retry<T>(
     maxDelay?: number;
     factor?: number;
     onRetry?: (error: unknown, attempt: number) => void;
-  } = {}
+  } = {},
 ): Promise<T> {
   const maxAttempts = options.maxAttempts ?? 3;
   const initialDelay = options.initialDelay ?? 1000;
@@ -135,7 +137,7 @@ export async function retry<T>(
 export async function parallel<T, R>(
   items: T[],
   fn: (item: T, index: number) => Promise<R>,
-  concurrency: number = 5
+  concurrency: number = 5,
 ): Promise<R[]> {
   const results: R[] = new Array(items.length);
   const executing = new Map<number, Promise<void>>();
@@ -172,7 +174,7 @@ export async function parallel<T, R>(
  */
 export async function sequential<T, R>(
   items: T[],
-  fn: (item: T, index: number) => Promise<R>
+  fn: (item: T, index: number) => Promise<R>,
 ): Promise<R[]> {
   const results: R[] = [];
 

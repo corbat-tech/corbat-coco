@@ -201,9 +201,7 @@ describe("executeSlashCommand", () => {
     const mockSession = { id: "test", messages: [] } as any;
     const result = await executeSlashCommand("unknown", [], mockSession);
 
-    expect(renderError).toHaveBeenCalledWith(
-      expect.stringContaining("Unknown command")
-    );
+    expect(renderError).toHaveBeenCalledWith(expect.stringContaining("Unknown command"));
     expect(result).toBe(false);
   });
 });

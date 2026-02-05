@@ -5,6 +5,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import {
   renderStreamChunk,
+  renderStreamChunkImmediate,
   renderToolStart,
   renderToolEnd,
   renderUsageStats,
@@ -13,6 +14,8 @@ import {
   renderSuccess,
   renderWarning,
   highlightCode,
+  resetTypewriter,
+  getTypewriter,
 } from "./renderer.js";
 import type { StreamChunk } from "../../../providers/types.js";
 import type { ExecutedToolCall } from "../types.js";
@@ -42,23 +45,41 @@ describe("renderStreamChunk", () => {
   let stdoutWriteSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
+    resetTypewriter(); // Reset typewriter state before each test
     stdoutWriteSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
   });
 
   afterEach(() => {
+    resetTypewriter();
     vi.restoreAllMocks();
   });
 
-  it("should write text chunks to stdout", () => {
-    const chunk: StreamChunk = { type: "text", text: "Hello world" };
+  it("should write text chunks to stdout via line buffer", async () => {
+    const chunk: StreamChunk = { type: "text", text: "Hello\n" };
 
     renderStreamChunk(chunk);
 
-    expect(stdoutWriteSpy).toHaveBeenCalledWith("Hello world");
+    // Line buffer outputs complete lines
+    expect(stdoutWriteSpy).toHaveBeenCalled();
+    const allWrites = stdoutWriteSpy.mock.calls.map((call) => call[0]).join("");
+    expect(allWrites).toBe("Hello\n");
+  });
+
+  it("should flush on done chunk", () => {
+    resetTypewriter(); // Clear any previous buffer
+    const textChunk: StreamChunk = { type: "text", text: "Test" };
+    const doneChunk: StreamChunk = { type: "done" };
+
+    renderStreamChunk(textChunk);
+    renderStreamChunk(doneChunk);
+
+    // Should have written all text after flush
+    const allWrites = stdoutWriteSpy.mock.calls.map((call) => call[0]).join("");
+    expect(allWrites).toBe("Test");
   });
 
   it("should not write non-text chunks", () => {
-    const chunk: StreamChunk = { type: "tool_use" as any };
+    const chunk: StreamChunk = { type: "tool_use_start" };
 
     renderStreamChunk(chunk);
 
@@ -69,6 +90,34 @@ describe("renderStreamChunk", () => {
     const chunk: StreamChunk = { type: "text", text: "" };
 
     renderStreamChunk(chunk);
+
+    expect(stdoutWriteSpy).not.toHaveBeenCalled();
+  });
+});
+
+describe("renderStreamChunkImmediate", () => {
+  let stdoutWriteSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    stdoutWriteSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("should write text chunks immediately without typewriter", () => {
+    const chunk: StreamChunk = { type: "text", text: "Hello world" };
+
+    renderStreamChunkImmediate(chunk);
+
+    expect(stdoutWriteSpy).toHaveBeenCalledWith("Hello world");
+  });
+
+  it("should not write non-text chunks", () => {
+    const chunk: StreamChunk = { type: "tool_use_start" };
+
+    renderStreamChunkImmediate(chunk);
 
     expect(stdoutWriteSpy).not.toHaveBeenCalled();
   });
@@ -394,7 +443,10 @@ describe("renderToolEnd with formatResultPreview edge cases", () => {
       id: "1",
       name: "bash_exec",
       input: { command: "ls" },
-      result: { success: true, output: '{"exitCode": 0, "stdout": "file1.txt\\nfile2.txt\\nfile3.txt"}' },
+      result: {
+        success: true,
+        output: '{"exitCode": 0, "stdout": "file1.txt\\nfile2.txt\\nfile3.txt"}',
+      },
       duration: 10,
     };
 
@@ -602,7 +654,7 @@ describe("renderToolStart with formatToolSummary edge cases", () => {
     renderToolStart("custom_tool", {
       nullVal: null,
       undefinedVal: undefined,
-      normalVal: "test"
+      normalVal: "test",
     });
 
     const output = consoleLogSpy.mock.calls[0][0];
@@ -613,7 +665,7 @@ describe("renderToolStart with formatToolSummary edge cases", () => {
 
   it("should handle object values in input", () => {
     renderToolStart("custom_tool", {
-      nested: { key: "value" }
+      nested: { key: "value" },
     });
 
     const output = consoleLogSpy.mock.calls[0][0];

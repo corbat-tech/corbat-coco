@@ -14,28 +14,20 @@ import { FileSystemError, ToolError } from "../utils/errors.js";
  * Sensitive file patterns that should be protected
  */
 const SENSITIVE_PATTERNS = [
-  /\.env(?:\.\w+)?$/,        // .env, .env.local, etc.
-  /credentials\.\w+$/i,      // credentials.json, etc.
-  /secrets?\.\w+$/i,         // secret.json, secrets.yaml
-  /\.pem$/,                  // Private keys
-  /\.key$/,                  // Private keys
-  /id_rsa(?:\.pub)?$/,       // SSH keys
-  /\.npmrc$/,                // npm auth
-  /\.pypirc$/,               // PyPI auth
+  /\.env(?:\.\w+)?$/, // .env, .env.local, etc.
+  /credentials\.\w+$/i, // credentials.json, etc.
+  /secrets?\.\w+$/i, // secret.json, secrets.yaml
+  /\.pem$/, // Private keys
+  /\.key$/, // Private keys
+  /id_rsa(?:\.pub)?$/, // SSH keys
+  /\.npmrc$/, // npm auth
+  /\.pypirc$/, // PyPI auth
 ];
 
 /**
  * System paths that should be blocked
  */
-const BLOCKED_PATHS = [
-  "/etc",
-  "/var",
-  "/usr",
-  "/root",
-  "/sys",
-  "/proc",
-  "/boot",
-];
+const BLOCKED_PATHS = ["/etc", "/var", "/usr", "/root", "/sys", "/proc", "/boot"];
 
 /**
  * Validate encoding is safe
@@ -67,7 +59,10 @@ function normalizePath(filePath: string): string {
 /**
  * Check if a path is allowed for file operations
  */
-function isPathAllowed(filePath: string, operation: "read" | "write" | "delete"): { allowed: boolean; reason?: string } {
+function isPathAllowed(
+  filePath: string,
+  operation: "read" | "write" | "delete",
+): { allowed: boolean; reason?: string } {
   // Check for null bytes (path injection)
   if (hasNullByte(filePath)) {
     return { allowed: false, reason: "Path contains invalid characters" };
@@ -98,10 +93,16 @@ function isPathAllowed(filePath: string, operation: "read" | "write" | "delete")
         const basename = path.basename(absolute);
         // Block .npmrc, .pypirc as they may contain auth tokens
         if (!allowedHomeReads.includes(basename)) {
-          return { allowed: false, reason: "Reading files outside project directory is not allowed" };
+          return {
+            allowed: false,
+            reason: "Reading files outside project directory is not allowed",
+          };
         }
       } else {
-        return { allowed: false, reason: `${operation} operations outside project directory are not allowed` };
+        return {
+          allowed: false,
+          reason: `${operation} operations outside project directory are not allowed`,
+        };
       }
     }
   }
@@ -111,7 +112,10 @@ function isPathAllowed(filePath: string, operation: "read" | "write" | "delete")
     const basename = path.basename(absolute);
     for (const pattern of SENSITIVE_PATTERNS) {
       if (pattern.test(basename)) {
-        return { allowed: false, reason: `Operation on sensitive file '${basename}' requires explicit confirmation` };
+        return {
+          allowed: false,
+          reason: `Operation on sensitive file '${basename}' requires explicit confirmation`,
+        };
       }
     }
   }
@@ -123,7 +127,10 @@ function isPathAllowed(filePath: string, operation: "read" | "write" | "delete")
  * Resolve path safely, following symlinks and verifying final destination
  * @internal Reserved for future use with symlink validation
  */
-export async function resolvePathSecurely(filePath: string, operation: "read" | "write" | "delete"): Promise<string> {
+export async function resolvePathSecurely(
+  filePath: string,
+  operation: "read" | "write" | "delete",
+): Promise<string> {
   const normalized = normalizePath(filePath);
   const absolute = path.resolve(normalized);
 
@@ -140,10 +147,9 @@ export async function resolvePathSecurely(filePath: string, operation: "read" | 
       // Path was a symlink - verify the target is also allowed
       const postCheck = isPathAllowed(realPath, operation);
       if (!postCheck.allowed) {
-        throw new ToolError(
-          `Symlink target '${realPath}' is not allowed: ${postCheck.reason}`,
-          { tool: `file_${operation}` }
-        );
+        throw new ToolError(`Symlink target '${realPath}' is not allowed: ${postCheck.reason}`, {
+          tool: `file_${operation}`,
+        });
       }
     }
     return realPath;
@@ -172,9 +178,12 @@ function validatePath(filePath: string, operation: "read" | "write" | "delete"):
  */
 export function validateEncoding(encoding: string): void {
   if (!isEncodingSafe(encoding)) {
-    throw new ToolError(`Unsupported encoding: ${encoding}. Use one of: ${[...SAFE_ENCODINGS].join(", ")}`, {
-      tool: "file_read",
-    });
+    throw new ToolError(
+      `Unsupported encoding: ${encoding}. Use one of: ${[...SAFE_ENCODINGS].join(", ")}`,
+      {
+        tool: "file_read",
+      },
+    );
   }
 }
 
@@ -261,8 +270,16 @@ Examples:
   parameters: z.object({
     path: z.string().describe("Absolute or relative path to the file"),
     content: z.string().describe("Content to write"),
-    createDirs: z.boolean().optional().default(true).describe("Create parent directories if needed"),
-    dryRun: z.boolean().optional().default(false).describe("Preview operation without making changes"),
+    createDirs: z
+      .boolean()
+      .optional()
+      .default(true)
+      .describe("Create parent directories if needed"),
+    dryRun: z
+      .boolean()
+      .optional()
+      .default(false)
+      .describe("Preview operation without making changes"),
   }),
   async execute({ path: filePath, content, createDirs, dryRun }) {
     validatePath(filePath, "write");
@@ -546,7 +563,7 @@ Examples:
     if (confirm !== true) {
       throw new ToolError(
         "Deletion requires explicit confirmation. Set confirm: true to proceed.",
-        { tool: "delete_file" }
+        { tool: "delete_file" },
       );
     }
 
@@ -558,10 +575,9 @@ Examples:
 
       if (stats.isDirectory()) {
         if (!recursive) {
-          throw new ToolError(
-            "Cannot delete directory without recursive: true",
-            { tool: "delete_file" }
-          );
+          throw new ToolError("Cannot delete directory without recursive: true", {
+            tool: "delete_file",
+          });
         }
         await fs.rm(absolutePath, { recursive: true });
       } else {
@@ -584,6 +600,224 @@ Examples:
 });
 
 /**
+ * Copy file tool
+ */
+export const copyFileTool: ToolDefinition<
+  { source: string; destination: string; overwrite?: boolean },
+  { source: string; destination: string; size: number }
+> = defineTool({
+  name: "copy_file",
+  description: `Copy a file or directory to a new location.
+
+Examples:
+- Copy file: { "source": "config.json", "destination": "config.backup.json" }
+- Copy to dir: { "source": "src/utils.ts", "destination": "backup/utils.ts" }
+- Overwrite: { "source": "new.txt", "destination": "old.txt", "overwrite": true }`,
+  category: "file",
+  parameters: z.object({
+    source: z.string().describe("Source file path"),
+    destination: z.string().describe("Destination file path"),
+    overwrite: z.boolean().optional().default(false).describe("Overwrite if destination exists"),
+  }),
+  async execute({ source, destination, overwrite }) {
+    validatePath(source, "read");
+    validatePath(destination, "write");
+    try {
+      const srcPath = path.resolve(source);
+      const destPath = path.resolve(destination);
+
+      // Check if destination exists
+      if (!overwrite) {
+        try {
+          await fs.access(destPath);
+          throw new ToolError(
+            `Destination already exists: ${destination}. Use overwrite: true to replace.`,
+            {
+              tool: "copy_file",
+            },
+          );
+        } catch (error) {
+          if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+            throw error;
+          }
+        }
+      }
+
+      // Create destination directory if needed
+      await fs.mkdir(path.dirname(destPath), { recursive: true });
+
+      // Copy file
+      await fs.copyFile(srcPath, destPath);
+      const stats = await fs.stat(destPath);
+
+      return {
+        source: srcPath,
+        destination: destPath,
+        size: stats.size,
+      };
+    } catch (error) {
+      if (error instanceof ToolError) throw error;
+      throw new FileSystemError(`Failed to copy file: ${source} -> ${destination}`, {
+        path: source,
+        operation: "read",
+        cause: error instanceof Error ? error : undefined,
+      });
+    }
+  },
+});
+
+/**
+ * Move/rename file tool
+ */
+export const moveFileTool: ToolDefinition<
+  { source: string; destination: string; overwrite?: boolean },
+  { source: string; destination: string }
+> = defineTool({
+  name: "move_file",
+  description: `Move or rename a file or directory.
+
+Examples:
+- Rename: { "source": "old.ts", "destination": "new.ts" }
+- Move to dir: { "source": "src/utils.ts", "destination": "lib/utils.ts" }
+- Overwrite: { "source": "new.txt", "destination": "old.txt", "overwrite": true }`,
+  category: "file",
+  parameters: z.object({
+    source: z.string().describe("Source file path"),
+    destination: z.string().describe("Destination file path"),
+    overwrite: z.boolean().optional().default(false).describe("Overwrite if destination exists"),
+  }),
+  async execute({ source, destination, overwrite }) {
+    validatePath(source, "delete");
+    validatePath(destination, "write");
+    try {
+      const srcPath = path.resolve(source);
+      const destPath = path.resolve(destination);
+
+      // Check if destination exists
+      if (!overwrite) {
+        try {
+          await fs.access(destPath);
+          throw new ToolError(
+            `Destination already exists: ${destination}. Use overwrite: true to replace.`,
+            {
+              tool: "move_file",
+            },
+          );
+        } catch (error) {
+          if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+            throw error;
+          }
+        }
+      }
+
+      // Create destination directory if needed
+      await fs.mkdir(path.dirname(destPath), { recursive: true });
+
+      // Move file
+      await fs.rename(srcPath, destPath);
+
+      return {
+        source: srcPath,
+        destination: destPath,
+      };
+    } catch (error) {
+      if (error instanceof ToolError) throw error;
+      throw new FileSystemError(`Failed to move file: ${source} -> ${destination}`, {
+        path: source,
+        operation: "write",
+        cause: error instanceof Error ? error : undefined,
+      });
+    }
+  },
+});
+
+/**
+ * Tree tool - visualize directory structure
+ */
+export const treeTool: ToolDefinition<
+  { path?: string; depth?: number; showHidden?: boolean; dirsOnly?: boolean },
+  { tree: string; totalFiles: number; totalDirs: number }
+> = defineTool({
+  name: "tree",
+  description: `Display directory structure as a tree.
+
+Examples:
+- Current dir: { }
+- Specific dir: { "path": "src" }
+- Limited depth: { "path": ".", "depth": 2 }
+- Directories only: { "path": ".", "dirsOnly": true }
+- Show hidden: { "path": ".", "showHidden": true }`,
+  category: "file",
+  parameters: z.object({
+    path: z.string().optional().default(".").describe("Directory path (default: current)"),
+    depth: z.number().optional().default(4).describe("Maximum depth (default: 4)"),
+    showHidden: z.boolean().optional().default(false).describe("Show hidden files"),
+    dirsOnly: z.boolean().optional().default(false).describe("Show only directories"),
+  }),
+  async execute({ path: dirPath, depth, showHidden, dirsOnly }) {
+    try {
+      const absolutePath = path.resolve(dirPath ?? ".");
+      let totalFiles = 0;
+      let totalDirs = 0;
+      const lines: string[] = [path.basename(absolutePath) + "/"];
+
+      async function buildTree(dir: string, prefix: string, currentDepth: number) {
+        if (currentDepth > (depth ?? 4)) return;
+
+        let items = await fs.readdir(dir, { withFileTypes: true });
+
+        // Filter hidden files
+        if (!showHidden) {
+          items = items.filter((item) => !item.name.startsWith("."));
+        }
+
+        // Filter to directories only if requested
+        if (dirsOnly) {
+          items = items.filter((item) => item.isDirectory());
+        }
+
+        // Sort: directories first, then alphabetically
+        items.sort((a, b) => {
+          if (a.isDirectory() && !b.isDirectory()) return -1;
+          if (!a.isDirectory() && b.isDirectory()) return 1;
+          return a.name.localeCompare(b.name);
+        });
+
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i]!;
+          const isLast = i === items.length - 1;
+          const connector = isLast ? "└── " : "├── ";
+          const childPrefix = isLast ? "    " : "│   ";
+
+          if (item.isDirectory()) {
+            totalDirs++;
+            lines.push(`${prefix}${connector}${item.name}/`);
+            await buildTree(path.join(dir, item.name), prefix + childPrefix, currentDepth + 1);
+          } else {
+            totalFiles++;
+            lines.push(`${prefix}${connector}${item.name}`);
+          }
+        }
+      }
+
+      await buildTree(absolutePath, "", 1);
+
+      return {
+        tree: lines.join("\n"),
+        totalFiles,
+        totalDirs,
+      };
+    } catch (error) {
+      throw new FileSystemError(`Failed to generate tree: ${dirPath}`, {
+        path: dirPath ?? ".",
+        operation: "read",
+        cause: error instanceof Error ? error : undefined,
+      });
+    }
+  },
+});
+
+/**
  * All file tools
  */
 export const fileTools = [
@@ -594,6 +828,9 @@ export const fileTools = [
   fileExistsTool,
   listDirTool,
   deleteFileTool,
+  copyFileTool,
+  moveFileTool,
+  treeTool,
 ];
 
 /**

@@ -22,13 +22,13 @@ export interface ToolDefinition<TInput = unknown, TOutput = unknown> {
  * Tool categories
  */
 export type ToolCategory =
-  | "file"      // File operations
-  | "bash"      // Shell commands
-  | "git"       // Version control
-  | "test"      // Testing
-  | "quality"   // Code quality
-  | "build"     // Build tools
-  | "deploy";   // Deployment
+  | "file" // File operations
+  | "bash" // Shell commands
+  | "git" // Version control
+  | "test" // Testing
+  | "quality" // Code quality
+  | "build" // Build tools
+  | "deploy"; // Deployment
 
 /**
  * Tool execution result
@@ -104,7 +104,7 @@ export class ToolRegistry {
    * Get a tool by name
    */
   get<TInput = unknown, TOutput = unknown>(
-    name: string
+    name: string,
   ): ToolDefinition<TInput, TOutput> | undefined {
     return this.tools.get(name) as ToolDefinition<TInput, TOutput> | undefined;
   }
@@ -136,7 +136,7 @@ export class ToolRegistry {
   async execute<TInput, TOutput>(
     name: string,
     params: TInput,
-    options?: ExecuteOptions
+    options?: ExecuteOptions,
   ): Promise<ToolResult<TOutput>> {
     const startTime = performance.now();
     const tool = this.get<TInput, TOutput>(name);
@@ -321,7 +321,7 @@ export function createToolRegistry(): ToolRegistry {
  * Helper to create a tool definition with type safety
  */
 export function defineTool<TInput, TOutput>(
-  definition: ToolDefinition<TInput, TOutput>
+  definition: ToolDefinition<TInput, TOutput>,
 ): ToolDefinition<TInput, TOutput> {
   return definition;
 }

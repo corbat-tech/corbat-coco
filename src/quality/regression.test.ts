@@ -12,7 +12,10 @@ import {
 import type { QualityScores, QualityDimensions } from "./types.js";
 
 // Helper to create mock quality scores
-function createScores(overall: number, dimensionOverrides: Partial<QualityDimensions> = {}): QualityScores {
+function createScores(
+  overall: number,
+  dimensionOverrides: Partial<QualityDimensions> = {},
+): QualityScores {
   const base = overall;
   return {
     overall,
@@ -38,7 +41,7 @@ describe("detectRegression", () => {
     const result = detectRegression(previous, current);
 
     expect(result.hasRegression).toBe(true);
-    expect(result.regressions.some(r => r.dimension === "correctness")).toBe(true);
+    expect(result.regressions.some((r) => r.dimension === "correctness")).toBe(true);
   });
 
   it("should detect overall score regression", () => {
@@ -125,7 +128,7 @@ describe("detectRegression", () => {
 
     const result = detectRegression(previous, current, { ignoreDimensions: ["security"] });
 
-    expect(result.regressions.some(r => r.dimension === "security")).toBe(false);
+    expect(result.regressions.some((r) => r.dimension === "security")).toBe(false);
   });
 
   it("should generate a summary", () => {
@@ -144,7 +147,14 @@ describe("isRegressionAcceptable", () => {
     const result = {
       hasRegression: true,
       regressions: [
-        { dimension: "correctness" as const, previousScore: 90, currentScore: 88, delta: -2, percentChange: -2.2, severity: "minor" as const },
+        {
+          dimension: "correctness" as const,
+          previousScore: 90,
+          currentScore: 88,
+          delta: -2,
+          percentChange: -2.2,
+          severity: "minor" as const,
+        },
       ],
       overallDelta: -2,
       overallRegressed: false,
@@ -159,7 +169,14 @@ describe("isRegressionAcceptable", () => {
     const result = {
       hasRegression: true,
       regressions: [
-        { dimension: "correctness" as const, previousScore: 90, currentScore: 70, delta: -20, percentChange: -22, severity: "severe" as const },
+        {
+          dimension: "correctness" as const,
+          previousScore: 90,
+          currentScore: 70,
+          delta: -20,
+          percentChange: -22,
+          severity: "severe" as const,
+        },
       ],
       overallDelta: -20,
       overallRegressed: true,
@@ -174,7 +191,14 @@ describe("isRegressionAcceptable", () => {
     const result = {
       hasRegression: true,
       regressions: [
-        { dimension: "correctness" as const, previousScore: 90, currentScore: 82, delta: -8, percentChange: -8.8, severity: "moderate" as const },
+        {
+          dimension: "correctness" as const,
+          previousScore: 90,
+          currentScore: 82,
+          delta: -8,
+          percentChange: -8.8,
+          severity: "moderate" as const,
+        },
       ],
       overallDelta: -8,
       overallRegressed: true,
@@ -189,7 +213,14 @@ describe("isRegressionAcceptable", () => {
     const result = {
       hasRegression: true,
       regressions: [
-        { dimension: "correctness" as const, previousScore: 90, currentScore: 82, delta: -8, percentChange: -8.8, severity: "moderate" as const },
+        {
+          dimension: "correctness" as const,
+          previousScore: 90,
+          currentScore: 82,
+          delta: -8,
+          percentChange: -8.8,
+          severity: "moderate" as const,
+        },
       ],
       overallDelta: -8,
       overallRegressed: true,
@@ -217,9 +248,30 @@ describe("isRegressionAcceptable", () => {
     const result = {
       hasRegression: true,
       regressions: [
-        { dimension: "correctness" as const, previousScore: 90, currentScore: 88, delta: -2, percentChange: -2.2, severity: "minor" as const },
-        { dimension: "robustness" as const, previousScore: 90, currentScore: 88, delta: -2, percentChange: -2.2, severity: "minor" as const },
-        { dimension: "readability" as const, previousScore: 90, currentScore: 88, delta: -2, percentChange: -2.2, severity: "minor" as const },
+        {
+          dimension: "correctness" as const,
+          previousScore: 90,
+          currentScore: 88,
+          delta: -2,
+          percentChange: -2.2,
+          severity: "minor" as const,
+        },
+        {
+          dimension: "robustness" as const,
+          previousScore: 90,
+          currentScore: 88,
+          delta: -2,
+          percentChange: -2.2,
+          severity: "minor" as const,
+        },
+        {
+          dimension: "readability" as const,
+          previousScore: 90,
+          currentScore: 88,
+          delta: -2,
+          percentChange: -2.2,
+          severity: "minor" as const,
+        },
       ],
       overallDelta: -2,
       overallRegressed: false,
@@ -251,7 +303,14 @@ describe("formatRegression", () => {
     const result = {
       hasRegression: true,
       regressions: [
-        { dimension: "correctness" as const, previousScore: 90, currentScore: 80, delta: -10, percentChange: -11.1, severity: "moderate" as const },
+        {
+          dimension: "correctness" as const,
+          previousScore: 90,
+          currentScore: 80,
+          delta: -10,
+          percentChange: -11.1,
+          severity: "moderate" as const,
+        },
       ],
       overallDelta: -10,
       overallRegressed: true,
@@ -270,7 +329,14 @@ describe("formatRegression", () => {
     const result = {
       hasRegression: true,
       regressions: [
-        { dimension: "correctness" as const, previousScore: 90, currentScore: 70, delta: -20, percentChange: -22, severity: "severe" as const },
+        {
+          dimension: "correctness" as const,
+          previousScore: 90,
+          currentScore: 70,
+          delta: -20,
+          percentChange: -22,
+          severity: "severe" as const,
+        },
       ],
       overallDelta: -20,
       overallRegressed: true,
@@ -287,7 +353,14 @@ describe("formatRegression", () => {
     const result = {
       hasRegression: true,
       regressions: [
-        { dimension: "correctness" as const, previousScore: 90, currentScore: 80, delta: -10, percentChange: -11, severity: "moderate" as const },
+        {
+          dimension: "correctness" as const,
+          previousScore: 90,
+          currentScore: 80,
+          delta: -10,
+          percentChange: -11,
+          severity: "moderate" as const,
+        },
       ],
       overallDelta: -10,
       overallRegressed: true,

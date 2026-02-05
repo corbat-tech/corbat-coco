@@ -83,9 +83,7 @@ Coverage:    ${coverage ?? 85}%
     const issueCount = issues ?? 0;
     this.register("oxlint", {
       result: {
-        stdout: issueCount === 0
-          ? "No issues found"
-          : `Found ${issueCount} issues`,
+        stdout: issueCount === 0 ? "No issues found" : `Found ${issueCount} issues`,
         stderr: "",
         exitCode: issueCount > 0 ? 1 : 0,
         failed: issueCount > 0,
@@ -94,9 +92,7 @@ Coverage:    ${coverage ?? 85}%
 
     this.register("eslint", {
       result: {
-        stdout: issueCount === 0
-          ? "✔ No problems found"
-          : `✖ ${issueCount} problems`,
+        stdout: issueCount === 0 ? "✔ No problems found" : `✖ ${issueCount} problems`,
         stderr: "",
         exitCode: issueCount > 0 ? 1 : 0,
         failed: issueCount > 0,

@@ -54,6 +54,23 @@ export {
   type CostEstimate,
 } from "./pricing.js";
 
+// Circuit breaker
+export {
+  CircuitBreaker,
+  CircuitOpenError,
+  createCircuitBreaker,
+  DEFAULT_CIRCUIT_BREAKER_CONFIG,
+  type CircuitState,
+  type CircuitBreakerConfig,
+} from "./circuit-breaker.js";
+
+// Provider fallback
+export {
+  ProviderFallback,
+  createProviderFallback,
+  type ProviderFallbackConfig,
+} from "./fallback.js";
+
 // Provider registry
 import type { LLMProvider, ProviderConfig } from "./types.js";
 import { AnthropicProvider } from "./anthropic.js";
@@ -72,7 +89,7 @@ export type ProviderType = "anthropic" | "openai" | "gemini" | "kimi";
  */
 export async function createProvider(
   type: ProviderType,
-  config: ProviderConfig = {}
+  config: ProviderConfig = {},
 ): Promise<LLMProvider> {
   let provider: LLMProvider;
 
@@ -117,9 +134,7 @@ export async function createProvider(
 /**
  * Get default provider (from environment or Anthropic)
  */
-export async function getDefaultProvider(
-  config: ProviderConfig = {}
-): Promise<LLMProvider> {
+export async function getDefaultProvider(config: ProviderConfig = {}): Promise<LLMProvider> {
   const { getDefaultProvider: getEnvProvider } = await import("../config/env.js");
   const providerType = getEnvProvider();
   return createProvider(providerType, config);

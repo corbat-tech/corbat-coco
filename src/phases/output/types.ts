@@ -17,12 +17,7 @@ export interface CICDConfig {
 /**
  * CI/CD providers
  */
-export type CICDProvider =
-  | "github_actions"
-  | "gitlab_ci"
-  | "jenkins"
-  | "circleci"
-  | "azure_devops";
+export type CICDProvider = "github_actions" | "gitlab_ci" | "jenkins" | "circleci" | "azure_devops";
 
 /**
  * CI/CD features to enable
@@ -67,10 +62,7 @@ export interface Environment {
 /**
  * Environment types
  */
-export type EnvironmentType =
-  | "development"
-  | "staging"
-  | "production";
+export type EnvironmentType = "development" | "staging" | "production";
 
 /**
  * Secret reference

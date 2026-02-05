@@ -87,7 +87,7 @@ const mockProvider = {
   chatWithTools: vi.fn().mockResolvedValue({
     content: "{}",
     usage: { inputTokens: 20, outputTokens: 10 },
-    toolCalls: [{ name: "test_tool", input: { arg: "value" } }]
+    toolCalls: [{ name: "test_tool", input: { arg: "value" } }],
   }),
 };
 
@@ -136,11 +136,23 @@ describe("createOrchestrator", () => {
     vi.clearAllMocks();
     // Reset all executor mocks
     mockConvergeExecutor.canStart.mockReturnValue(true);
-    mockConvergeExecutor.execute.mockResolvedValue({ phase: "converge", success: true, artifacts: [] });
+    mockConvergeExecutor.execute.mockResolvedValue({
+      phase: "converge",
+      success: true,
+      artifacts: [],
+    });
     mockOrchestrateExecutor.canStart.mockReturnValue(true);
-    mockOrchestrateExecutor.execute.mockResolvedValue({ phase: "orchestrate", success: true, artifacts: [] });
+    mockOrchestrateExecutor.execute.mockResolvedValue({
+      phase: "orchestrate",
+      success: true,
+      artifacts: [],
+    });
     mockCompleteExecutor.canStart.mockReturnValue(true);
-    mockCompleteExecutor.execute.mockResolvedValue({ phase: "complete", success: true, artifacts: [] });
+    mockCompleteExecutor.execute.mockResolvedValue({
+      phase: "complete",
+      success: true,
+      artifacts: [],
+    });
     mockOutputExecutor.canStart.mockReturnValue(true);
     mockOutputExecutor.execute.mockResolvedValue({ phase: "output", success: true, artifacts: [] });
     // Reset fs mocks
@@ -181,7 +193,7 @@ describe("createOrchestrator", () => {
           lastScores: null,
           qualityHistory: [],
           lastCheckpoint: null,
-        })
+        }),
       );
 
       const { createOrchestrator } = await import("./orchestrator.js");
@@ -500,7 +512,7 @@ describe("createOrchestrator", () => {
           lastScores: null,
           qualityHistory: [],
           lastCheckpoint: null,
-        })
+        }),
       );
 
       const { createOrchestrator } = await import("./orchestrator.js");
@@ -540,7 +552,7 @@ describe("createOrchestrator", () => {
           lastScores: null,
           qualityHistory: [],
           lastCheckpoint: null,
-        })
+        }),
       );
 
       const { createOrchestrator } = await import("./orchestrator.js");
@@ -571,7 +583,7 @@ describe("createOrchestrator", () => {
           lastScores: null,
           qualityHistory: [],
           lastCheckpoint: null,
-        })
+        }),
       );
 
       const { createOrchestrator } = await import("./orchestrator.js");
@@ -840,7 +852,11 @@ describe("createOrchestrator", () => {
 
     it("should create working git.status tool", async () => {
       const { execa } = await import("execa");
-      vi.mocked(execa).mockResolvedValueOnce({ stdout: "## main...origin/main\n M file.ts", stderr: "", exitCode: 0 } as any);
+      vi.mocked(execa).mockResolvedValueOnce({
+        stdout: "## main...origin/main\n M file.ts",
+        stderr: "",
+        exitCode: 0,
+      } as any);
 
       const { createOrchestrator } = await import("./orchestrator.js");
 
@@ -871,8 +887,16 @@ describe("createOrchestrator", () => {
       const orchestrator = createOrchestrator(createTestConfig());
       await orchestrator.transitionTo("converge");
 
-      expect(execa).toHaveBeenCalledWith("git", ["add", "file1.ts", "file2.ts"], expect.any(Object));
-      expect(execa).toHaveBeenCalledWith("git", ["commit", "-m", "test commit"], expect.any(Object));
+      expect(execa).toHaveBeenCalledWith(
+        "git",
+        ["add", "file1.ts", "file2.ts"],
+        expect.any(Object),
+      );
+      expect(execa).toHaveBeenCalledWith(
+        "git",
+        ["commit", "-m", "test commit"],
+        expect.any(Object),
+      );
     });
 
     it("should create working git.commit tool without files", async () => {
@@ -1007,9 +1031,7 @@ describe("createOrchestrator", () => {
 
       // Make executor call the llm.chat method
       mockConvergeExecutor.execute.mockImplementationOnce(async (context) => {
-        const response = await context.llm.chat([
-          { role: "user", content: "Hello" }
-        ]);
+        const response = await context.llm.chat([{ role: "user", content: "Hello" }]);
         expect(response.content).toBe("{}");
         expect(response.usage.inputTokens).toBe(10);
         expect(response.usage.outputTokens).toBe(5);
@@ -1029,7 +1051,7 @@ describe("createOrchestrator", () => {
       mockConvergeExecutor.execute.mockImplementationOnce(async (context) => {
         const response = await context.llm.chatWithTools(
           [{ role: "user", content: "Call tool" }],
-          [{ name: "test_tool", description: "A test tool", parameters: {} }]
+          [{ name: "test_tool", description: "A test tool", parameters: {} }],
         );
         expect(response.content).toBe("{}");
         expect(response.toolCalls).toBeDefined();

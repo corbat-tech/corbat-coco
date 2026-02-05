@@ -111,13 +111,13 @@ export interface QualityWeights {
  */
 export const DEFAULT_QUALITY_WEIGHTS: QualityWeights = {
   correctness: 0.15,
-  completeness: 0.10,
-  robustness: 0.10,
-  readability: 0.10,
-  maintainability: 0.10,
+  completeness: 0.1,
+  robustness: 0.1,
+  readability: 0.1,
+  maintainability: 0.1,
   complexity: 0.08,
   duplication: 0.07,
-  testCoverage: 0.10,
+  testCoverage: 0.1,
   testQuality: 0.05,
   security: 0.08,
   documentation: 0.04,
@@ -249,8 +249,8 @@ export interface ConvergenceResult {
  * Reasons for convergence determination
  */
 export type ConvergenceReason =
-  | "score_converged"      // Score delta below threshold
-  | "target_reached"       // Reached target score
-  | "max_iterations"       // Hit max iterations limit
-  | "below_minimum"        // Below minimum after min iterations
-  | "not_converged";       // Still improving
+  | "score_converged" // Score delta below threshold
+  | "target_reached" // Reached target score
+  | "max_iterations" // Hit max iterations limit
+  | "below_minimum" // Below minimum after min iterations
+  | "not_converged"; // Still improving

@@ -157,7 +157,10 @@ describe("OpenAIProvider", () => {
     });
 
     it("should return false when API call fails", async () => {
+      // Both list and chat must fail for isAvailable to return false
+      // (isAvailable has a fallback to chat.completions.create)
       mockList.mockRejectedValue(new Error("Network error"));
+      mockCreate.mockRejectedValue(new Error("Network error"));
 
       const { OpenAIProvider } = await import("./openai.js");
 
@@ -174,9 +177,9 @@ describe("OpenAIProvider", () => {
 
       const provider = new OpenAIProvider();
 
-      await expect(
-        provider.chat([{ role: "user", content: "Hello" }])
-      ).rejects.toThrow(/not initialized/);
+      await expect(provider.chat([{ role: "user", content: "Hello" }])).rejects.toThrow(
+        /not initialized/,
+      );
     });
 
     it("should send chat message and return response", async () => {
@@ -243,18 +246,15 @@ describe("OpenAIProvider", () => {
       const provider = new OpenAIProvider();
       await provider.initialize({ apiKey: "test" });
 
-      const response = await provider.chatWithTools(
-        [{ role: "user", content: "Read test.txt" }],
-        {
-          tools: [
-            {
-              name: "read_file",
-              description: "Read a file",
-              input_schema: { type: "object", properties: { path: { type: "string" } } },
-            },
-          ],
-        }
-      );
+      const response = await provider.chatWithTools([{ role: "user", content: "Read test.txt" }], {
+        tools: [
+          {
+            name: "read_file",
+            description: "Read a file",
+            input_schema: { type: "object", properties: { path: { type: "string" } } },
+          },
+        ],
+      });
 
       expect(response.toolCalls.length).toBe(1);
       expect(response.toolCalls[0]?.name).toBe("read_file");
@@ -378,10 +378,8 @@ describe("message conversion", () => {
 
     expect(mockCreate).toHaveBeenCalledWith(
       expect.objectContaining({
-        messages: expect.arrayContaining([
-          expect.objectContaining({ role: "system" }),
-        ]),
-      })
+        messages: expect.arrayContaining([expect.objectContaining({ role: "system" })]),
+      }),
     );
   });
 
@@ -397,17 +395,14 @@ describe("message conversion", () => {
     const provider = new OpenAIProvider();
     await provider.initialize({ apiKey: "test" });
 
-    await provider.chat(
-      [{ role: "user", content: "Hello" }],
-      { system: "You are helpful" }
-    );
+    await provider.chat([{ role: "user", content: "Hello" }], { system: "You are helpful" });
 
     expect(mockCreate).toHaveBeenCalledWith(
       expect.objectContaining({
         messages: expect.arrayContaining([
           expect.objectContaining({ role: "system", content: "You are helpful" }),
         ]),
-      })
+      }),
     );
   });
 
@@ -423,9 +418,7 @@ describe("message conversion", () => {
     const provider = new OpenAIProvider();
     await provider.initialize({ apiKey: "test" });
 
-    await provider.chat([
-      { role: "user", content: [{ type: "text", text: "Hello" }] },
-    ]);
+    await provider.chat([{ role: "user", content: [{ type: "text", text: "Hello" }] }]);
 
     expect(mockCreate).toHaveBeenCalled();
   });
@@ -452,9 +445,7 @@ describe("message conversion", () => {
       },
       {
         role: "user",
-        content: [
-          { type: "tool_result", tool_use_id: "call_1", content: "file contents" },
-        ],
+        content: [{ type: "tool_result", tool_use_id: "call_1", content: "file contents" }],
       },
     ]);
 
@@ -463,7 +454,7 @@ describe("message conversion", () => {
         messages: expect.arrayContaining([
           expect.objectContaining({ role: "tool", tool_call_id: "call_1" }),
         ]),
-      })
+      }),
     );
   });
 
@@ -503,7 +494,7 @@ describe("message conversion", () => {
             ]),
           }),
         ]),
-      })
+      }),
     );
   });
 
@@ -543,15 +534,12 @@ describe("tool choice conversion", () => {
     const provider = new OpenAIProvider();
     await provider.initialize({ apiKey: "test" });
 
-    await provider.chatWithTools(
-      [{ role: "user", content: "Hello" }],
-      { tools: [] }
-    );
+    await provider.chatWithTools([{ role: "user", content: "Hello" }], { tools: [] });
 
     expect(mockCreate).toHaveBeenCalledWith(
       expect.objectContaining({
         tool_choice: undefined,
-      })
+      }),
     );
   });
 
@@ -567,15 +555,15 @@ describe("tool choice conversion", () => {
     const provider = new OpenAIProvider();
     await provider.initialize({ apiKey: "test" });
 
-    await provider.chatWithTools(
-      [{ role: "user", content: "Hello" }],
-      { tools: [], toolChoice: "auto" }
-    );
+    await provider.chatWithTools([{ role: "user", content: "Hello" }], {
+      tools: [],
+      toolChoice: "auto",
+    });
 
     expect(mockCreate).toHaveBeenCalledWith(
       expect.objectContaining({
         tool_choice: "auto",
-      })
+      }),
     );
   });
 
@@ -591,15 +579,15 @@ describe("tool choice conversion", () => {
     const provider = new OpenAIProvider();
     await provider.initialize({ apiKey: "test" });
 
-    await provider.chatWithTools(
-      [{ role: "user", content: "Hello" }],
-      { tools: [], toolChoice: "any" }
-    );
+    await provider.chatWithTools([{ role: "user", content: "Hello" }], {
+      tools: [],
+      toolChoice: "any",
+    });
 
     expect(mockCreate).toHaveBeenCalledWith(
       expect.objectContaining({
         tool_choice: "required",
-      })
+      }),
     );
   });
 
@@ -615,15 +603,15 @@ describe("tool choice conversion", () => {
     const provider = new OpenAIProvider();
     await provider.initialize({ apiKey: "test" });
 
-    await provider.chatWithTools(
-      [{ role: "user", content: "Hello" }],
-      { tools: [], toolChoice: { type: "tool", name: "readFile" } }
-    );
+    await provider.chatWithTools([{ role: "user", content: "Hello" }], {
+      tools: [],
+      toolChoice: { type: "tool", name: "readFile" },
+    });
 
     expect(mockCreate).toHaveBeenCalledWith(
       expect.objectContaining({
         tool_choice: { type: "function", function: { name: "readFile" } },
-      })
+      }),
     );
   });
 });
@@ -689,9 +677,7 @@ describe("error handling", () => {
     const provider = new OpenAIProvider();
     await provider.initialize({ apiKey: "test" });
 
-    await expect(
-      provider.chat([{ role: "user", content: "Hello" }])
-    ).rejects.toThrow();
+    await expect(provider.chat([{ role: "user", content: "Hello" }])).rejects.toThrow();
   });
 
   it("should handle OpenAI APIError with 500 status (retryable)", async () => {
@@ -701,9 +687,7 @@ describe("error handling", () => {
     const provider = new OpenAIProvider();
     await provider.initialize({ apiKey: "test" });
 
-    await expect(
-      provider.chat([{ role: "user", content: "Hello" }])
-    ).rejects.toThrow();
+    await expect(provider.chat([{ role: "user", content: "Hello" }])).rejects.toThrow();
   });
 
   it("should handle OpenAI APIError with undefined status", async () => {
@@ -713,9 +697,7 @@ describe("error handling", () => {
     const provider = new OpenAIProvider();
     await provider.initialize({ apiKey: "test" });
 
-    await expect(
-      provider.chat([{ role: "user", content: "Hello" }])
-    ).rejects.toThrow();
+    await expect(provider.chat([{ role: "user", content: "Hello" }])).rejects.toThrow();
   });
 
   it("should handle OpenAI APIError with 400 status (non-retryable)", async () => {
@@ -725,9 +707,7 @@ describe("error handling", () => {
     const provider = new OpenAIProvider();
     await provider.initialize({ apiKey: "test" });
 
-    await expect(
-      provider.chat([{ role: "user", content: "Hello" }])
-    ).rejects.toThrow();
+    await expect(provider.chat([{ role: "user", content: "Hello" }])).rejects.toThrow();
   });
 
   it("should handle non-Error thrown values", async () => {
@@ -737,9 +717,7 @@ describe("error handling", () => {
     const provider = new OpenAIProvider();
     await provider.initialize({ apiKey: "test" });
 
-    await expect(
-      provider.chat([{ role: "user", content: "Hello" }])
-    ).rejects.toThrow();
+    await expect(provider.chat([{ role: "user", content: "Hello" }])).rejects.toThrow();
   });
 
   it("should handle chatWithTools errors", async () => {
@@ -750,10 +728,7 @@ describe("error handling", () => {
     await provider.initialize({ apiKey: "test" });
 
     await expect(
-      provider.chatWithTools(
-        [{ role: "user", content: "Hello" }],
-        { tools: [] }
-      )
+      provider.chatWithTools([{ role: "user", content: "Hello" }], { tools: [] }),
     ).rejects.toThrow();
   });
 });
@@ -794,10 +769,9 @@ describe("tool call extraction", () => {
     const provider = new OpenAIProvider();
     await provider.initialize({ apiKey: "test" });
 
-    const response = await provider.chatWithTools(
-      [{ role: "user", content: "Hello" }],
-      { tools: [] }
-    );
+    const response = await provider.chatWithTools([{ role: "user", content: "Hello" }], {
+      tools: [],
+    });
 
     expect(response.toolCalls).toEqual([]);
   });
@@ -814,10 +788,9 @@ describe("tool call extraction", () => {
     const provider = new OpenAIProvider();
     await provider.initialize({ apiKey: "test" });
 
-    const response = await provider.chatWithTools(
-      [{ role: "user", content: "Hello" }],
-      { tools: [] }
-    );
+    const response = await provider.chatWithTools([{ role: "user", content: "Hello" }], {
+      tools: [],
+    });
 
     expect(response.toolCalls).toEqual([]);
   });
@@ -851,10 +824,9 @@ describe("tool call extraction", () => {
     const provider = new OpenAIProvider();
     await provider.initialize({ apiKey: "test" });
 
-    const response = await provider.chatWithTools(
-      [{ role: "user", content: "Hello" }],
-      { tools: [] }
-    );
+    const response = await provider.chatWithTools([{ role: "user", content: "Hello" }], {
+      tools: [],
+    });
 
     expect(response.toolCalls[0]?.input).toEqual({});
   });

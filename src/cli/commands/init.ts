@@ -67,9 +67,17 @@ async function runInit(projectPath: string, options: InitOptions): Promise<void>
   p.outro(chalk.green("Project initialized successfully!"));
 
   console.log("\nNext steps:");
-  console.log(chalk.dim("  1. ") + chalk.cyan("coco plan") + chalk.dim(" - Run discovery and create a development plan"));
-  console.log(chalk.dim("  2. ") + chalk.cyan("coco build") + chalk.dim(" - Start building the project"));
-  console.log(chalk.dim("  3. ") + chalk.cyan("coco status") + chalk.dim(" - Check current progress"));
+  console.log(
+    chalk.dim("  1. ") +
+      chalk.cyan("coco plan") +
+      chalk.dim(" - Run discovery and create a development plan"),
+  );
+  console.log(
+    chalk.dim("  2. ") + chalk.cyan("coco build") + chalk.dim(" - Start building the project"),
+  );
+  console.log(
+    chalk.dim("  3. ") + chalk.cyan("coco status") + chalk.dim(" - Check current progress"),
+  );
 }
 
 interface ProjectInfo {

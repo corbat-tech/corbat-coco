@@ -39,10 +39,10 @@ export interface DiscoverySession {
  * Discovery session status
  */
 export type DiscoveryStatus =
-  | "gathering"      // Still gathering requirements
-  | "clarifying"     // Asking follow-up questions
-  | "refining"       // Refining requirements
-  | "complete"       // Ready to generate spec
+  | "gathering" // Still gathering requirements
+  | "clarifying" // Asking follow-up questions
+  | "refining" // Refining requirements
+  | "complete" // Ready to generate spec
   | "spec_generated"; // Spec has been created
 
 /**
@@ -92,22 +92,22 @@ export interface Requirement {
  * Requirement categories
  */
 export type RequirementCategory =
-  | "functional"       // What the system should do
-  | "non_functional"   // Performance, security, etc.
-  | "technical"        // Technology constraints
-  | "user_experience"  // UX requirements
-  | "integration"      // External integrations
-  | "deployment"       // Deployment requirements
-  | "constraint";      // Limitations or restrictions
+  | "functional" // What the system should do
+  | "non_functional" // Performance, security, etc.
+  | "technical" // Technology constraints
+  | "user_experience" // UX requirements
+  | "integration" // External integrations
+  | "deployment" // Deployment requirements
+  | "constraint"; // Limitations or restrictions
 
 /**
  * Requirement priority
  */
 export type RequirementPriority =
-  | "must_have"    // Critical - system won't work without
-  | "should_have"  // Important - high value
-  | "could_have"   // Nice to have
-  | "wont_have";   // Explicitly out of scope
+  | "must_have" // Critical - system won't work without
+  | "should_have" // Important - high value
+  | "could_have" // Nice to have
+  | "wont_have"; // Explicitly out of scope
 
 /**
  * A question to ask the user
@@ -136,12 +136,12 @@ export interface Question {
  * Question categories
  */
 export type QuestionCategory =
-  | "clarification"   // Clarifying ambiguous requirement
-  | "expansion"       // Expanding on a topic
-  | "decision"        // Choosing between options
-  | "confirmation"    // Confirming an assumption
-  | "scope"           // Defining scope
-  | "priority";       // Prioritization
+  | "clarification" // Clarifying ambiguous requirement
+  | "expansion" // Expanding on a topic
+  | "decision" // Choosing between options
+  | "confirmation" // Confirming an assumption
+  | "scope" // Defining scope
+  | "priority"; // Prioritization
 
 /**
  * A clarification received from user
@@ -195,14 +195,14 @@ export interface TechDecision {
  * Technology areas
  */
 export type TechArea =
-  | "language"       // Programming language
-  | "framework"      // Framework choice
-  | "database"       // Database system
+  | "language" // Programming language
+  | "framework" // Framework choice
+  | "database" // Database system
   | "infrastructure" // Cloud, containers, etc.
-  | "testing"        // Testing framework
-  | "ci_cd"          // CI/CD tools
-  | "monitoring"     // Monitoring/logging
-  | "security";      // Security measures
+  | "testing" // Testing framework
+  | "ci_cd" // CI/CD tools
+  | "monitoring" // Monitoring/logging
+  | "security"; // Security measures
 
 /**
  * Generated specification document
@@ -341,11 +341,11 @@ export interface InputAnalysis {
  * Project types
  */
 export type ProjectType =
-  | "cli"           // Command-line tool
-  | "api"           // REST/GraphQL API
-  | "web_app"       // Web application
-  | "library"       // Reusable library
-  | "service"       // Background service
-  | "full_stack"    // Full stack application
-  | "automation"    // Scripts/automation
-  | "unknown";      // Cannot determine
+  | "cli" // Command-line tool
+  | "api" // REST/GraphQL API
+  | "web_app" // Web application
+  | "library" // Reusable library
+  | "service" // Background service
+  | "full_stack" // Full stack application
+  | "automation" // Scripts/automation
+  | "unknown"; // Cannot determine

@@ -3,11 +3,7 @@
  */
 
 import { describe, it, expect, beforeEach } from "vitest";
-import {
-  MetricsCollector,
-  createMetricsCollector,
-  formatDuration,
-} from "./metrics.js";
+import { MetricsCollector, createMetricsCollector, formatDuration } from "./metrics.js";
 
 describe("MetricsCollector", () => {
   let collector: MetricsCollector;

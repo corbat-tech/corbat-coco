@@ -3,12 +3,7 @@
  */
 
 import { randomUUID } from "node:crypto";
-import type {
-  Requirement,
-  Question,
-  Assumption,
-  TechDecision,
-} from "./types.js";
+import type { Requirement, Question, Assumption, TechDecision } from "./types.js";
 
 /**
  * Raw requirement data from LLM response
@@ -58,7 +53,7 @@ export interface RawTechHint {
  * Normalize complexity value
  */
 export function normalizeComplexity(
-  value?: string
+  value?: string,
 ): "simple" | "moderate" | "complex" | "enterprise" {
   const normalized = value?.toLowerCase();
   if (normalized === "simple") return "simple";
@@ -74,11 +69,9 @@ export function normalizeComplexity(
 export function normalizeCategory(value?: string): Requirement["category"] {
   const normalized = value?.toLowerCase();
   if (normalized === "functional") return "functional";
-  if (normalized === "non_functional" || normalized === "nonfunctional")
-    return "non_functional";
+  if (normalized === "non_functional" || normalized === "nonfunctional") return "non_functional";
   if (normalized === "technical") return "technical";
-  if (normalized === "user_experience" || normalized === "ux")
-    return "user_experience";
+  if (normalized === "user_experience" || normalized === "ux") return "user_experience";
   if (normalized === "integration") return "integration";
   if (normalized === "deployment") return "deployment";
   if (normalized === "constraint") return "constraint";
@@ -91,10 +84,8 @@ export function normalizeCategory(value?: string): Requirement["category"] {
 export function normalizePriority(value?: string): Requirement["priority"] {
   const normalized = value?.toLowerCase();
   if (normalized === "must_have" || normalized === "must") return "must_have";
-  if (normalized === "should_have" || normalized === "should")
-    return "should_have";
-  if (normalized === "could_have" || normalized === "could")
-    return "could_have";
+  if (normalized === "should_have" || normalized === "should") return "should_have";
+  if (normalized === "could_have" || normalized === "could") return "could_have";
   if (normalized === "wont_have" || normalized === "wont") return "wont_have";
   return "should_have";
 }
@@ -116,9 +107,7 @@ export function normalizeQuestionCategory(value?: string): Question["category"] 
 /**
  * Normalize question importance
  */
-export function normalizeImportance(
-  value?: string
-): "critical" | "important" | "helpful" {
+export function normalizeImportance(value?: string): "critical" | "important" | "helpful" {
   const normalized = value?.toLowerCase();
   if (normalized === "critical") return "critical";
   if (normalized === "important") return "important";

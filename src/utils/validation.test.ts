@@ -35,9 +35,7 @@ describe("validate", () => {
 
     const schema = z.object({ name: z.string() });
 
-    expect(() => validate(schema, { name: 123 }, "User data")).toThrow(
-      /User data/
-    );
+    expect(() => validate(schema, { name: 123 }, "User data")).toThrow(/User data/);
   });
 });
 
@@ -162,9 +160,7 @@ describe("assertDefined", () => {
   it("should include custom message", async () => {
     const { assertDefined } = await import("./validation.js");
 
-    expect(() => assertDefined(null, "Value must be defined")).toThrow(
-      "Value must be defined"
-    );
+    expect(() => assertDefined(null, "Value must be defined")).toThrow("Value must be defined");
   });
 });
 

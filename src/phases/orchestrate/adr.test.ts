@@ -60,9 +60,7 @@ function createMockArchitecture(): ArchitectureDoc {
       pattern: "hexagonal",
       description: "Clean architecture with hexagonal design",
       principles: ["Dependency Inversion", "Single Responsibility"],
-      qualityAttributes: [
-        { name: "Testability", description: "Easy to test", priority: "high" },
-      ],
+      qualityAttributes: [{ name: "Testability", description: "Easy to test", priority: "high" }],
     },
     components: [
       {
@@ -83,9 +81,7 @@ function createMockArchitecture(): ArchitectureDoc {
         dependencies: [],
       },
     ],
-    relationships: [
-      { from: "api", to: "domain", type: "uses" },
-    ],
+    relationships: [{ from: "api", to: "domain", type: "uses" }],
     dataModels: [
       {
         name: "User",
@@ -121,9 +117,7 @@ function createMockSpecification(): Specification {
           acceptance: ["Login works"],
         },
       ],
-      nonFunctional: [
-        { id: "nfr-1", title: "Performance", description: "Fast responses" },
-      ],
+      nonFunctional: [{ id: "nfr-1", title: "Performance", description: "Fast responses" }],
       constraints: [],
     },
     technical: {
@@ -208,10 +202,7 @@ describe("ADRGenerator", () => {
       const llm = createMockLLM(llmResponse);
       const generator = new ADRGenerator(llm, config);
 
-      const adrs = await generator.generate(
-        createMockArchitecture(),
-        createMockSpecification()
-      );
+      const adrs = await generator.generate(createMockArchitecture(), createMockSpecification());
 
       expect(adrs).toHaveLength(1);
       expect(adrs[0].title).toBe("Use Hexagonal Architecture");
@@ -230,10 +221,7 @@ describe("ADRGenerator", () => {
       const llm = createMockLLM(llmResponse);
       const generator = new ADRGenerator(llm, config);
 
-      const adrs = await generator.generate(
-        createMockArchitecture(),
-        createMockSpecification()
-      );
+      const adrs = await generator.generate(createMockArchitecture(), createMockSpecification());
 
       expect(adrs).toHaveLength(3);
     });
@@ -250,10 +238,7 @@ describe("ADRGenerator", () => {
       const llm = createMockLLM(llmResponse);
       const generator = new ADRGenerator(llm, config);
 
-      const adrs = await generator.generate(
-        createMockArchitecture(),
-        createMockSpecification()
-      );
+      const adrs = await generator.generate(createMockArchitecture(), createMockSpecification());
 
       expect(adrs).toHaveLength(1);
       expect(adrs[0].number).toBe(1);
@@ -270,10 +255,7 @@ describe("ADRGenerator", () => {
       const llm = createMockLLM(llmResponse);
       const generator = new ADRGenerator(llm, config);
 
-      const adrs = await generator.generate(
-        createMockArchitecture(),
-        createMockSpecification()
-      );
+      const adrs = await generator.generate(createMockArchitecture(), createMockSpecification());
 
       expect(adrs).toEqual([]);
     });
@@ -283,7 +265,7 @@ describe("ADRGenerator", () => {
       const generator = new ADRGenerator(llm, config);
 
       await expect(
-        generator.generate(createMockArchitecture(), createMockSpecification())
+        generator.generate(createMockArchitecture(), createMockSpecification()),
       ).rejects.toThrow(PhaseError);
     });
 
@@ -292,7 +274,7 @@ describe("ADRGenerator", () => {
       const generator = new ADRGenerator(llm, config);
 
       await expect(
-        generator.generate(createMockArchitecture(), createMockSpecification())
+        generator.generate(createMockArchitecture(), createMockSpecification()),
       ).rejects.toThrow(PhaseError);
     });
 
@@ -325,10 +307,7 @@ describe("ADRGenerator", () => {
       const llm = createMockLLM(llmResponse);
       const generator = new ADRGenerator(llm, config);
 
-      const adrs = await generator.generate(
-        createMockArchitecture(),
-        createMockSpecification()
-      );
+      const adrs = await generator.generate(createMockArchitecture(), createMockSpecification());
 
       expect(adrs[0].alternatives).toHaveLength(2);
       expect(adrs[0].alternatives?.[0].option).toBe("MySQL");
@@ -341,10 +320,7 @@ describe("ADRGenerator", () => {
           {
             number: 1,
             title: "Use TypeScript",
-            references: [
-              "https://www.typescriptlang.org/",
-              "https://docs.example.com/",
-            ],
+            references: ["https://www.typescriptlang.org/", "https://docs.example.com/"],
           },
         ],
       });
@@ -352,10 +328,7 @@ describe("ADRGenerator", () => {
       const llm = createMockLLM(llmResponse);
       const generator = new ADRGenerator(llm, config);
 
-      const adrs = await generator.generate(
-        createMockArchitecture(),
-        createMockSpecification()
-      );
+      const adrs = await generator.generate(createMockArchitecture(), createMockSpecification());
 
       expect(adrs[0].references).toHaveLength(2);
       expect(adrs[0].references?.[0]).toContain("typescriptlang.org");
@@ -372,10 +345,7 @@ describe("ADRGenerator", () => {
       const llm = createMockLLM(llmResponse);
       const generator = new ADRGenerator(llm, config);
 
-      const adrs = await generator.generate(
-        createMockArchitecture(),
-        createMockSpecification()
-      );
+      const adrs = await generator.generate(createMockArchitecture(), createMockSpecification());
 
       expect(adrs[0].id).not.toBe(adrs[1].id);
     });
@@ -388,10 +358,7 @@ describe("ADRGenerator", () => {
       const llm = createMockLLM(llmResponse);
       const generator = new ADRGenerator(llm, config);
 
-      const adrs = await generator.generate(
-        createMockArchitecture(),
-        createMockSpecification()
-      );
+      const adrs = await generator.generate(createMockArchitecture(), createMockSpecification());
 
       expect(adrs[0].date).toBeInstanceOf(Date);
       // Check it's recent (within last minute)
@@ -546,10 +513,7 @@ describe("generateADRMarkdown", () => {
 
   it("should include references section", () => {
     const adr = createMockADR({
-      references: [
-        "https://example.com/doc1",
-        "https://example.com/doc2",
-      ],
+      references: ["https://example.com/doc1", "https://example.com/doc2"],
     });
 
     const markdown = generateADRMarkdown(adr);
@@ -598,8 +562,18 @@ describe("generateADRIndexMarkdown", () => {
 
   it("should list all ADRs in table", () => {
     const adrs: ADR[] = [
-      createMockADR({ number: 1, title: "First Decision", status: "accepted", date: new Date("2024-01-15") }),
-      createMockADR({ number: 2, title: "Second Decision", status: "proposed", date: new Date("2024-02-20") }),
+      createMockADR({
+        number: 1,
+        title: "First Decision",
+        status: "accepted",
+        date: new Date("2024-01-15"),
+      }),
+      createMockADR({
+        number: 2,
+        title: "Second Decision",
+        status: "proposed",
+        date: new Date("2024-02-20"),
+      }),
     ];
 
     const index = generateADRIndexMarkdown(adrs);
@@ -616,9 +590,7 @@ describe("generateADRIndexMarkdown", () => {
   });
 
   it("should generate correct links to ADR files", () => {
-    const adrs: ADR[] = [
-      createMockADR({ number: 1, title: "Use TypeScript" }),
-    ];
+    const adrs: ADR[] = [createMockADR({ number: 1, title: "Use TypeScript" })];
 
     const index = generateADRIndexMarkdown(adrs);
 

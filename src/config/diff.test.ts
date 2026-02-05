@@ -3,11 +3,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import {
-  diffConfigs,
-  formatDiff,
-  hasBreakingChanges,
-} from "./diff.js";
+import { diffConfigs, formatDiff, hasBreakingChanges } from "./diff.js";
 
 describe("diffConfigs", () => {
   it("should detect added fields", () => {
@@ -18,7 +14,7 @@ describe("diffConfigs", () => {
 
     expect(result.identical).toBe(false);
     expect(result.added).toBe(1);
-    expect(result.entries.some(e => e.path === "b" && e.operation === "added")).toBe(true);
+    expect(result.entries.some((e) => e.path === "b" && e.operation === "added")).toBe(true);
   });
 
   it("should detect removed fields", () => {
@@ -29,7 +25,7 @@ describe("diffConfigs", () => {
 
     expect(result.identical).toBe(false);
     expect(result.removed).toBe(1);
-    expect(result.entries.some(e => e.path === "b" && e.operation === "removed")).toBe(true);
+    expect(result.entries.some((e) => e.path === "b" && e.operation === "removed")).toBe(true);
   });
 
   it("should detect modified fields", () => {
@@ -40,7 +36,7 @@ describe("diffConfigs", () => {
 
     expect(result.identical).toBe(false);
     expect(result.changed).toBe(1);
-    expect(result.entries.some(e => e.path === "a" && e.operation === "changed")).toBe(true);
+    expect(result.entries.some((e) => e.path === "a" && e.operation === "changed")).toBe(true);
   });
 
   it("should handle nested objects", () => {
@@ -50,8 +46,8 @@ describe("diffConfigs", () => {
     const result = diffConfigs(oldConfig, newConfig);
 
     expect(result.identical).toBe(false);
-    expect(result.entries.some(e => e.path === "nested.a")).toBe(true);
-    expect(result.entries.some(e => e.path === "nested.b")).toBe(true);
+    expect(result.entries.some((e) => e.path === "nested.a")).toBe(true);
+    expect(result.entries.some((e) => e.path === "nested.b")).toBe(true);
   });
 
   it("should handle arrays", () => {
@@ -102,7 +98,7 @@ describe("diffConfigs", () => {
     const result = diffConfigs(oldConfig, newConfig);
 
     expect(result.identical).toBe(false);
-    expect(result.entries.some(e => e.path === "a" && e.operation === "changed")).toBe(true);
+    expect(result.entries.some((e) => e.path === "a" && e.operation === "changed")).toBe(true);
   });
 
   it("should handle undefined values", () => {
@@ -130,7 +126,7 @@ describe("diffConfigs", () => {
     const result = diffConfigs(oldConfig, newConfig);
 
     expect(result.identical).toBe(false);
-    expect(result.entries.some(e => e.path === "a" && e.operation === "changed")).toBe(true);
+    expect(result.entries.some((e) => e.path === "a" && e.operation === "changed")).toBe(true);
   });
 
   it("should generate summary", () => {
@@ -149,7 +145,7 @@ describe("diffConfigs", () => {
 
     const result = diffConfigs(oldConfig, newConfig, { includeUnchanged: true });
 
-    expect(result.entries.some(e => e.path === "a" && e.operation === "unchanged")).toBe(true);
+    expect(result.entries.some((e) => e.path === "a" && e.operation === "unchanged")).toBe(true);
   });
 });
 

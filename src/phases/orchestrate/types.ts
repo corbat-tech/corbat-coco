@@ -211,11 +211,7 @@ export interface ADR {
 /**
  * ADR status
  */
-export type ADRStatus =
-  | "proposed"
-  | "accepted"
-  | "deprecated"
-  | "superseded";
+export type ADRStatus = "proposed" | "accepted" | "deprecated" | "superseded";
 
 /**
  * ADR consequences
@@ -288,10 +284,10 @@ export const DEFAULT_SPRINT_CONFIG: SprintConfig = {
  * Task breakdown strategy
  */
 export type TaskBreakdownStrategy =
-  | "by_layer"      // Break down by architectural layers
-  | "by_feature"    // Break down by feature/story
-  | "by_component"  // Break down by component
-  | "tdd"          // Test-first approach
+  | "by_layer" // Break down by architectural layers
+  | "by_feature" // Break down by feature/story
+  | "by_component" // Break down by component
+  | "tdd" // Test-first approach
   | "incremental"; // Small incremental changes
 
 /**

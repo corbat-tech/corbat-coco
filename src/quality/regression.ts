@@ -82,7 +82,7 @@ const DEFAULT_OPTIONS: Required<RegressionOptions> = {
 function getSeverity(
   delta: number,
   severeThreshold: number,
-  moderateThreshold: number
+  moderateThreshold: number,
 ): RegressionSeverity {
   const absDelta = Math.abs(delta);
   if (absDelta >= severeThreshold) return "severe";
@@ -105,7 +105,7 @@ function getSeverity(
 export function detectRegression(
   previous: QualityScores,
   current: QualityScores,
-  options: RegressionOptions = {}
+  options: RegressionOptions = {},
 ): RegressionResult {
   const opts = { ...DEFAULT_OPTIONS, ...options };
   const regressions: RegressionEntry[] = [];
@@ -164,9 +164,9 @@ export function detectRegression(
       : "No quality regressions detected";
   } else {
     const counts = {
-      severe: regressions.filter(r => r.severity === "severe").length,
-      moderate: regressions.filter(r => r.severity === "moderate").length,
-      minor: regressions.filter(r => r.severity === "minor").length,
+      severe: regressions.filter((r) => r.severity === "severe").length,
+      moderate: regressions.filter((r) => r.severity === "moderate").length,
+      minor: regressions.filter((r) => r.severity === "minor").length,
     };
 
     const parts: string[] = [];
@@ -174,7 +174,7 @@ export function detectRegression(
     if (counts.moderate > 0) parts.push(`${counts.moderate} moderate`);
     if (counts.minor > 0) parts.push(`${counts.minor} minor`);
 
-    const dims = regressions.map(r => r.dimension).join(", ");
+    const dims = regressions.map((r) => r.dimension).join(", ");
     summary = `Quality regression detected: ${parts.join(", ")} in [${dims}]`;
   }
 
@@ -195,7 +195,7 @@ export function detectRegression(
 export function isRegressionAcceptable(
   result: RegressionResult,
   maxSeverity: RegressionSeverity = "minor",
-  maxRegressions: number = 2
+  maxRegressions: number = 2,
 ): boolean {
   if (!result.hasRegression) return true;
 

@@ -161,18 +161,17 @@ export interface LLMProvider {
   /**
    * Send a chat message with tool use
    */
-  chatWithTools(
-    messages: Message[],
-    options: ChatWithToolsOptions
-  ): Promise<ChatWithToolsResponse>;
+  chatWithTools(messages: Message[], options: ChatWithToolsOptions): Promise<ChatWithToolsResponse>;
 
   /**
    * Stream a chat response
    */
-  stream(
-    messages: Message[],
-    options?: ChatOptions
-  ): AsyncIterable<StreamChunk>;
+  stream(messages: Message[], options?: ChatOptions): AsyncIterable<StreamChunk>;
+
+  /**
+   * Stream a chat response with tool use
+   */
+  streamWithTools(messages: Message[], options: ChatWithToolsOptions): AsyncIterable<StreamChunk>;
 
   /**
    * Count tokens in text

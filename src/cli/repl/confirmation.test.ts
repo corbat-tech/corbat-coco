@@ -380,12 +380,8 @@ describe("confirmToolExecution", () => {
       await confirmToolExecution(toolCall);
 
       // Now uses CREATE or MODIFY labels
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringMatching(/CREATE file|MODIFY file/)
-      );
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("/src/test.ts")
-      );
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringMatching(/CREATE file|MODIFY file/));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("/src/test.ts"));
     });
 
     it("should display edit_file with path", async () => {
@@ -401,9 +397,7 @@ describe("confirmToolExecution", () => {
 
       await confirmToolExecution(toolCall);
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("EDIT file")
-      );
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("EDIT file"));
     });
 
     it("should display delete_file with red emphasis", async () => {
@@ -420,7 +414,7 @@ describe("confirmToolExecution", () => {
       await confirmToolExecution(toolCall);
 
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("[red.bold]DELETE file[/red.bold]")
+        expect.stringContaining("[red.bold]DELETE file[/red.bold]"),
       );
     });
 
@@ -438,13 +432,9 @@ describe("confirmToolExecution", () => {
 
       await confirmToolExecution(toolCall);
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("EXECUTE")
-      );
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("EXECUTE"));
       // Should be truncated with ...
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("...")
-      );
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("..."));
     });
 
     it("should display diff preview for edit_file", async () => {
@@ -464,9 +454,7 @@ describe("confirmToolExecution", () => {
 
       await confirmToolExecution(toolCall);
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("Changes:")
-      );
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Changes:"));
     });
 
     it("should display content preview for write_file", async () => {
@@ -485,9 +473,7 @@ describe("confirmToolExecution", () => {
 
       await confirmToolExecution(toolCall);
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("Content:")
-      );
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Content:"));
     });
 
     it("should handle empty file content", async () => {
@@ -506,9 +492,7 @@ describe("confirmToolExecution", () => {
 
       await confirmToolExecution(toolCall);
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("(empty file)")
-      );
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("(empty file)"));
     });
 
     it("should handle missing path gracefully", async () => {
@@ -524,9 +508,7 @@ describe("confirmToolExecution", () => {
 
       await confirmToolExecution(toolCall);
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("unknown")
-      );
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("unknown"));
     });
   });
 
@@ -554,7 +536,7 @@ describe("confirmToolExecution", () => {
       const resultPromise = confirmToolExecution(toolCall);
 
       // Wait for fs.access() mock to resolve/reject before handler is set up
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
 
       // Trigger SIGINT
       if (sigintHandler) {
@@ -589,7 +571,7 @@ describe("confirmToolExecution", () => {
       const resultPromise = confirmToolExecution(toolCall);
 
       // Wait for fs.access() mock to resolve/reject before handler is set up
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
 
       // Trigger close
       if (closeHandler) {
@@ -620,9 +602,7 @@ describe("confirmToolExecution", () => {
 
       await confirmToolExecution(toolCall);
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("(no changes)")
-      );
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("(no changes)"));
     });
 
     it("should show added lines in green", async () => {
@@ -643,9 +623,7 @@ describe("confirmToolExecution", () => {
       await confirmToolExecution(toolCall);
 
       // Check that green formatting was applied to added line
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("[green]")
-      );
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("[green]"));
     });
 
     it("should show removed lines in red", async () => {
@@ -666,9 +644,7 @@ describe("confirmToolExecution", () => {
       await confirmToolExecution(toolCall);
 
       // Check that red formatting was applied to removed line
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("[red]")
-      );
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("[red]"));
     });
 
     it("should handle large diffs gracefully", async () => {
@@ -691,9 +667,7 @@ describe("confirmToolExecution", () => {
 
       await confirmToolExecution(toolCall);
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("diff too large")
-      );
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("diff too large"));
     });
 
     it("should truncate long lines in preview", async () => {
@@ -715,9 +689,7 @@ describe("confirmToolExecution", () => {
       await confirmToolExecution(toolCall);
 
       // Line should be truncated with ...
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("...")
-      );
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("..."));
     });
 
     it("should show footer for truncated file previews", async () => {
@@ -739,9 +711,7 @@ describe("confirmToolExecution", () => {
 
       await confirmToolExecution(toolCall);
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("more lines")
-      );
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("more lines"));
     });
   });
 });

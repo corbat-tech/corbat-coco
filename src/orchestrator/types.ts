@@ -146,5 +146,5 @@ export interface OrchestratorEvents {
   "task:iteration": (taskId: string, iteration: number, score: number) => void;
   "task:complete": (taskId: string, finalScore: number) => void;
   "checkpoint:created": (checkpointId: string) => void;
-  "error": (error: Error) => void;
+  error: (error: Error) => void;
 }

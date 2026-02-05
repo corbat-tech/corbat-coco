@@ -4,12 +4,7 @@
  * Generates CI/CD configurations for various providers
  */
 
-import type {
-  CICDConfig,
-  CICDFile,
-  CICDProvider,
-  ProjectMetadata,
-} from "./types.js";
+import type { CICDConfig, CICDFile, CICDProvider, ProjectMetadata } from "./types.js";
 
 /**
  * CI/CD Generator
@@ -303,9 +298,7 @@ release:
 /**
  * Create default CI/CD configuration
  */
-export function createDefaultCICDConfig(
-  provider: CICDProvider = "github_actions"
-): CICDConfig {
+export function createDefaultCICDConfig(provider: CICDProvider = "github_actions"): CICDConfig {
   return {
     provider,
     features: {
@@ -340,9 +333,6 @@ export function createDefaultCICDConfig(
 /**
  * Create a CI/CD generator
  */
-export function createCICDGenerator(
-  metadata: ProjectMetadata,
-  config: CICDConfig
-): CICDGenerator {
+export function createCICDGenerator(metadata: ProjectMetadata, config: CICDConfig): CICDGenerator {
   return new CICDGenerator(metadata, config);
 }

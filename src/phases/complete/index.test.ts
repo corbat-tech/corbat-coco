@@ -161,9 +161,7 @@ describe('User', () => {})`;
 
   describe("buildFeedbackSection", () => {
     it("should build feedback section from review", () => {
-      const issues = [
-        { severity: "high", message: "Missing null check" },
-      ];
+      const issues = [{ severity: "high", message: "Missing null check" }];
 
       const section = CompleteExports.buildFeedbackSection("Add JSDoc comments", issues);
 

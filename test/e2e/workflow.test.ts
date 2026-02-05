@@ -144,9 +144,7 @@ describe("E2E: Tool Execution", () => {
   it("should block dangerous commands", async () => {
     const { bashExecTool } = await import("../../src/tools/bash.js");
 
-    await expect(
-      bashExecTool.execute({ command: "rm -rf /" })
-    ).rejects.toThrow(/dangerous/i);
+    await expect(bashExecTool.execute({ command: "rm -rf /" })).rejects.toThrow(/dangerous/i);
   });
 });
 
@@ -190,7 +188,7 @@ describe("E2E: Tool Registry", () => {
         category: "test" as const,
         parameters: z.object({ query: z.string() }),
         execute: async () => ({}),
-      })
+      }),
     );
 
     const definitions = registry.getToolDefinitionsForLLM();
@@ -207,13 +205,12 @@ describe("E2E: Output Generation", () => {
   });
 
   it("should generate CI/CD workflows", async () => {
-    const { CICDGenerator, createDefaultCICDConfig } = await import(
-      "../../src/phases/output/cicd.js"
-    );
+    const { CICDGenerator, createDefaultCICDConfig } =
+      await import("../../src/phases/output/cicd.js");
 
     const generator = new CICDGenerator(
       { name: "test-project", language: "typescript", packageManager: "pnpm" } as any,
-      createDefaultCICDConfig()
+      createDefaultCICDConfig(),
     );
 
     const files = generator.generate();
@@ -282,11 +279,7 @@ describe("E2E: Async Utilities", () => {
     const { parallel } = await import("../../src/utils/async.js");
 
     const items = [1, 2, 3, 4, 5];
-    const results = await parallel(
-      items,
-      async (item) => item * 2,
-      2
-    );
+    const results = await parallel(items, async (item) => item * 2, 2);
 
     expect(results).toEqual([2, 4, 6, 8, 10]);
   });

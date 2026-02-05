@@ -85,9 +85,7 @@ function addRequirementsTable(sections: string[], requirements: Requirement[]): 
   for (const req of requirements) {
     const priority = formatPriority(req.priority);
     const desc = req.description.substring(0, 100).replace(/\|/g, "\\|");
-    sections.push(
-      `| ${req.id.substring(0, 8)} | ${req.title} | ${priority} | ${desc} |`
-    );
+    sections.push(`| ${req.id.substring(0, 8)} | ${req.title} | ${priority} | ${desc} |`);
   }
 
   // Add detailed sections for each requirement
@@ -120,9 +118,7 @@ export function generateFullMarkdown(spec: Specification): string {
   // Header
   sections.push(`# ${spec.overview.name} - Project Specification`);
   sections.push("");
-  sections.push(
-    `> Generated: ${spec.generatedAt.toISOString()} | Version: ${spec.version}`
-  );
+  sections.push(`> Generated: ${spec.generatedAt.toISOString()} | Version: ${spec.version}`);
   sections.push("");
 
   // Table of contents
@@ -131,9 +127,7 @@ export function generateFullMarkdown(spec: Specification): string {
   sections.push("1. [Executive Summary](#executive-summary)");
   sections.push("2. [Goals & Success Criteria](#goals--success-criteria)");
   sections.push("3. [Functional Requirements](#functional-requirements)");
-  sections.push(
-    "4. [Non-Functional Requirements](#non-functional-requirements)"
-  );
+  sections.push("4. [Non-Functional Requirements](#non-functional-requirements)");
   sections.push("5. [Technical Constraints](#technical-constraints)");
   sections.push("6. [Technology Stack](#technology-stack)");
   sections.push("7. [Architecture](#architecture)");
@@ -196,7 +190,7 @@ export function generateFullMarkdown(spec: Specification): string {
   sections.push("|------|----------|--------------|-----------|");
   for (const tech of spec.technical.stack) {
     sections.push(
-      `| ${tech.area} | **${tech.decision}** | ${tech.alternatives.join(", ") || "-"} | ${tech.rationale} |`
+      `| ${tech.area} | **${tech.decision}** | ${tech.alternatives.join(", ") || "-"} | ${tech.rationale} |`,
     );
   }
   sections.push("");
@@ -244,9 +238,7 @@ export function generateFullMarkdown(spec: Specification): string {
   sections.push("");
   if (spec.assumptions.unconfirmed.length > 0) {
     for (const assumption of spec.assumptions.unconfirmed) {
-      sections.push(
-        `- ⚠️ ${assumption.statement} (${assumption.confidence} confidence)`
-      );
+      sections.push(`- ⚠️ ${assumption.statement} (${assumption.confidence} confidence)`);
       if (assumption.impactIfWrong) {
         sections.push(`  - *Impact if wrong:* ${assumption.impactIfWrong}`);
       }
@@ -263,7 +255,7 @@ export function generateFullMarkdown(spec: Specification): string {
     sections.push("|------|------------|--------|------------|");
     for (const risk of spec.assumptions.risks) {
       sections.push(
-        `| ${risk.description} | ${risk.probability} | ${risk.impact} | ${risk.mitigation} |`
+        `| ${risk.description} | ${risk.probability} | ${risk.impact} | ${risk.mitigation} |`,
       );
     }
     sections.push("");

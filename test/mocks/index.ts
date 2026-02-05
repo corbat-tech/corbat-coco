@@ -13,10 +13,7 @@ export {
   defaultMockResponse,
 } from "./anthropic.js";
 
-export {
-  MockFileSystem,
-  setupFileSystemMock,
-} from "./filesystem.js";
+export { MockFileSystem, setupFileSystemMock } from "./filesystem.js";
 
 export {
   MockCommandExecutor,

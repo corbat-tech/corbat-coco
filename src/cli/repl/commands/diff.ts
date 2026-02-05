@@ -48,7 +48,9 @@ export const diffCommand: SlashCommand = {
 
       const totalLines = diff.split("\n").length;
       if (totalLines > 100) {
-        console.log(chalk.dim(`\n... ${totalLines - 100} more lines (use git diff for full output)`));
+        console.log(
+          chalk.dim(`\n... ${totalLines - 100} more lines (use git diff for full output)`),
+        );
       }
 
       console.log();

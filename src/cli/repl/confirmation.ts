@@ -10,12 +10,7 @@ import type { ToolCall } from "../../providers/types.js";
 /**
  * Tools that require confirmation before execution
  */
-const DESTRUCTIVE_TOOLS = new Set([
-  "write_file",
-  "edit_file",
-  "delete_file",
-  "bash_exec",
-]);
+const DESTRUCTIVE_TOOLS = new Set(["write_file", "edit_file", "delete_file", "bash_exec"]);
 
 /**
  * Check if a tool requires confirmation
@@ -146,10 +141,7 @@ function truncateLine(line: string, maxWidth: number = 80): string {
 /**
  * Format preview of content for write_file operations
  */
-function formatWriteFilePreview(
-  toolCall: ToolCall,
-  maxLines: number = 10
-): string | null {
+function formatWriteFilePreview(toolCall: ToolCall, maxLines: number = 10): string | null {
   if (toolCall.name !== "write_file") return null;
 
   const content = toolCall.input.content;
@@ -167,9 +159,7 @@ function formatWriteFilePreview(
     .map((line) => chalk.dim("  │ ") + chalk.green(truncateLine(line)))
     .join("\n");
 
-  const footer = truncated
-    ? chalk.dim(`  └─ ... ${lines.length - maxLines} more lines`)
-    : "";
+  const footer = truncated ? chalk.dim(`  └─ ... ${lines.length - maxLines} more lines`) : "";
 
   return formatted + (footer ? "\n" + footer : "");
 }
@@ -177,7 +167,10 @@ function formatWriteFilePreview(
 /**
  * Format tool call for confirmation display with CREATE/MODIFY distinction
  */
-function formatToolCallForConfirmation(toolCall: ToolCall, metadata?: { isCreate?: boolean }): string {
+function formatToolCallForConfirmation(
+  toolCall: ToolCall,
+  metadata?: { isCreate?: boolean },
+): string {
   const { name, input } = toolCall;
 
   switch (name) {
@@ -240,9 +233,7 @@ async function checkFileExists(filePath: string): Promise<boolean> {
 /**
  * Ask for confirmation before executing a tool
  */
-export async function confirmToolExecution(
-  toolCall: ToolCall
-): Promise<ConfirmationResult> {
+export async function confirmToolExecution(toolCall: ToolCall): Promise<ConfirmationResult> {
   // Detect create vs modify for write_file
   let isCreate = false;
   if (toolCall.name === "write_file" && toolCall.input.path) {
@@ -269,9 +260,7 @@ export async function confirmToolExecution(
     console.log(writePreview);
   }
 
-  console.log(
-    chalk.dim("  [y]es  [n]o  [a]ll this turn  [t]rust session  [c]ancel")
-  );
+  console.log(chalk.dim("  [y]es  [n]o  [a]ll this turn  [t]rust session  [c]ancel"));
 
   const rl = readline.createInterface({
     input: process.stdin,

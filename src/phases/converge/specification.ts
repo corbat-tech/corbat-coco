@@ -5,11 +5,7 @@
  */
 
 import type { DiscoverySession, Specification } from "./types.js";
-import {
-  DISCOVERY_SYSTEM_PROMPT,
-  ARCHITECTURE_PROMPT,
-  fillPrompt,
-} from "./prompts.js";
+import { DISCOVERY_SYSTEM_PROMPT, ARCHITECTURE_PROMPT, fillPrompt } from "./prompts.js";
 import type { LLMProvider } from "../../providers/types.js";
 import { PhaseError } from "../../utils/errors.js";
 
@@ -29,10 +25,7 @@ import {
 } from "./specification-helpers.js";
 
 // Import markdown generators
-import {
-  generateSimpleMarkdown,
-  generateFullMarkdown,
-} from "./specification-markdown.js";
+import { generateSimpleMarkdown, generateFullMarkdown } from "./specification-markdown.js";
 
 import type { SpecificationConfig, SimpleSpec } from "./specification-types.js";
 import { DEFAULT_SPEC_CONFIG } from "./specification-types.js";
@@ -56,33 +49,28 @@ export class SpecificationGenerator {
    */
   async generate(session: DiscoverySession): Promise<Specification> {
     if (session.status !== "complete" && session.status !== "refining") {
-      throw new PhaseError(
-        "Discovery session is not ready for specification",
-        { phase: "converge" }
-      );
+      throw new PhaseError("Discovery session is not ready for specification", {
+        phase: "converge",
+      });
     }
 
     // Organize requirements by category
-    const functional = session.requirements.filter(
-      (r) => r.category === "functional"
-    );
+    const functional = session.requirements.filter((r) => r.category === "functional");
     const nonFunctional = session.requirements.filter(
       (r) =>
         r.category === "non_functional" ||
         r.category === "user_experience" ||
-        r.category === "deployment"
+        r.category === "deployment",
     );
     const constraints = session.requirements.filter(
-      (r) => r.category === "constraint" || r.category === "technical"
+      (r) => r.category === "constraint" || r.category === "technical",
     );
 
     // Generate architecture if not already specified
     const architecture = await this.generateArchitecture(session);
 
     // Generate risks
-    const risks = this.config.includeRisks
-      ? generateRisksFromSession(session)
-      : [];
+    const risks = this.config.includeRisks ? generateRisksFromSession(session) : [];
 
     // Build the specification
     const spec: Specification = {
@@ -146,9 +134,7 @@ export class SpecificationGenerator {
 
   // Private helper methods
 
-  private async generateArchitecture(
-    session: DiscoverySession
-  ): Promise<string> {
+  private async generateArchitecture(session: DiscoverySession): Promise<string> {
     const projectType = inferProjectType(session);
     const complexity = assessComplexity(session);
 
@@ -218,7 +204,7 @@ export class SpecificationGenerator {
  */
 export function createSpecificationGenerator(
   llm: LLMProvider,
-  config?: Partial<SpecificationConfig>
+  config?: Partial<SpecificationConfig>,
 ): SpecificationGenerator {
   return new SpecificationGenerator(llm, config);
 }

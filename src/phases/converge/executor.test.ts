@@ -89,7 +89,9 @@ describe("ConvergeExecutor", () => {
       const executor = new ConvergeExecutor();
 
       expect(executor.canStart({ state: { artifacts: [] } } as any)).toBe(true);
-      expect(executor.canStart({ state: { artifacts: [{ type: "other", path: "/test" }] } } as any)).toBe(true);
+      expect(
+        executor.canStart({ state: { artifacts: [{ type: "other", path: "/test" }] } } as any),
+      ).toBe(true);
     });
   });
 
@@ -157,7 +159,7 @@ describe("ConvergeExecutor", () => {
             chat: mockLLMChat,
             chatWithTools: vi.fn(),
           },
-        } as any)
+        } as any),
       ).resolves.not.toThrow();
     });
   });
@@ -204,7 +206,8 @@ describe("ConvergeExecutor", () => {
         autoProceed: true,
       });
 
-      const mockLLMChat = vi.fn()
+      const mockLLMChat = vi
+        .fn()
         .mockResolvedValueOnce({
           content: JSON.stringify({
             session: { id: "test", status: "gathering" },
@@ -392,7 +395,8 @@ describe("ConvergeExecutor - advanced scenarios", () => {
         autoProceed: false,
       });
 
-      const mockLLMChat = vi.fn()
+      const mockLLMChat = vi
+        .fn()
         .mockResolvedValueOnce({
           content: JSON.stringify({
             session: { id: "test-session", status: "gathering" },
@@ -402,9 +406,7 @@ describe("ConvergeExecutor - advanced scenarios", () => {
         })
         .mockResolvedValueOnce({
           content: JSON.stringify({
-            questions: [
-              { id: "q1", question: "What tech stack?", priority: "high" },
-            ],
+            questions: [{ id: "q1", question: "What tech stack?", priority: "high" }],
           }),
           usage: { inputTokens: 100, outputTokens: 50 },
         })
@@ -455,7 +457,8 @@ describe("ConvergeExecutor - advanced scenarios", () => {
         onUserInput: userInputHandler,
       });
 
-      const mockLLMChat = vi.fn()
+      const mockLLMChat = vi
+        .fn()
         .mockResolvedValueOnce({
           content: JSON.stringify({
             session: { id: "test-session", status: "gathering" },
@@ -507,7 +510,8 @@ describe("ConvergeExecutor - advanced scenarios", () => {
         },
       });
 
-      const mockLLMChat = vi.fn()
+      const mockLLMChat = vi
+        .fn()
         .mockResolvedValueOnce({
           content: JSON.stringify({
             session: { id: "test", status: "gathering" },
@@ -557,7 +561,8 @@ describe("ConvergeExecutor - advanced scenarios", () => {
         },
       });
 
-      const mockLLMChat = vi.fn()
+      const mockLLMChat = vi
+        .fn()
         .mockResolvedValueOnce({
           content: JSON.stringify({
             session: { id: "test", status: "gathering" },
@@ -618,7 +623,8 @@ describe("ConvergeExecutor - advanced scenarios", () => {
         },
       });
 
-      const mockLLMChat = vi.fn()
+      const mockLLMChat = vi
+        .fn()
         .mockResolvedValueOnce({
           content: JSON.stringify({
             session: { id: "test", status: "gathering" },
@@ -680,7 +686,8 @@ describe("ConvergeExecutor - advanced scenarios", () => {
         },
       });
 
-      const mockLLMChat = vi.fn()
+      const mockLLMChat = vi
+        .fn()
         .mockResolvedValueOnce({
           content: JSON.stringify({
             session: { id: "test", status: "gathering" },
@@ -739,7 +746,8 @@ describe("ConvergeExecutor - advanced scenarios", () => {
         onUserInput: async () => "done",
       });
 
-      const mockLLMChat = vi.fn()
+      const mockLLMChat = vi
+        .fn()
         .mockResolvedValueOnce({
           content: JSON.stringify({ session: { id: "test", status: "gathering" }, questions: [] }),
           usage: { inputTokens: 100, outputTokens: 50 },
@@ -809,7 +817,8 @@ describe("ConvergeExecutor - advanced scenarios", () => {
         },
       });
 
-      const mockLLMChat = vi.fn()
+      const mockLLMChat = vi
+        .fn()
         .mockResolvedValueOnce({
           content: JSON.stringify({
             session: { id: "test", status: "gathering" },
@@ -836,7 +845,7 @@ describe("ConvergeExecutor - advanced scenarios", () => {
         },
       });
 
-      expect(progressUpdates.some(p => p.step === "discovery")).toBe(true);
+      expect(progressUpdates.some((p) => p.step === "discovery")).toBe(true);
     });
   });
 
@@ -848,7 +857,8 @@ describe("ConvergeExecutor - advanced scenarios", () => {
         onUserInput: async () => "done",
       });
 
-      const mockLLMChat = vi.fn()
+      const mockLLMChat = vi
+        .fn()
         .mockResolvedValueOnce({
           content: JSON.stringify({
             session: { id: "test", status: "gathering" },
@@ -980,7 +990,8 @@ describe("runConvergePhase - additional scenarios", () => {
       id: "test",
       name: "Test LLM",
       initialize: vi.fn(),
-      chat: vi.fn()
+      chat: vi
+        .fn()
         .mockResolvedValueOnce({
           id: "resp-1",
           content: JSON.stringify({
@@ -1041,7 +1052,8 @@ describe("ConvergeExecutor - LLM adapter methods", () => {
       autoProceed: true,
     });
 
-    const mockLLMChat = vi.fn()
+    const mockLLMChat = vi
+      .fn()
       .mockResolvedValueOnce({
         content: JSON.stringify({
           session: { id: "test", status: "gathering" },
@@ -1236,7 +1248,8 @@ describe("ConvergeExecutor - session status and progress", () => {
       },
     });
 
-    const mockLLMChat = vi.fn()
+    const mockLLMChat = vi
+      .fn()
       .mockResolvedValueOnce({
         content: JSON.stringify({
           session: { id: "test", status: "clarifying" },
@@ -1274,7 +1287,8 @@ describe("ConvergeExecutor - session status and progress", () => {
       onUserInput: async () => "done",
     });
 
-    const mockLLMChat = vi.fn()
+    const mockLLMChat = vi
+      .fn()
       .mockResolvedValueOnce({
         content: JSON.stringify({
           session: { id: "test", status: "refining" },
@@ -1312,7 +1326,8 @@ describe("ConvergeExecutor - session status and progress", () => {
       onUserInput: async () => "done",
     });
 
-    const mockLLMChat = vi.fn()
+    const mockLLMChat = vi
+      .fn()
       .mockResolvedValueOnce({
         content: JSON.stringify({
           session: { id: "test", status: "complete" },
@@ -1350,7 +1365,8 @@ describe("ConvergeExecutor - session status and progress", () => {
       onUserInput: async () => "done",
     });
 
-    const mockLLMChat = vi.fn()
+    const mockLLMChat = vi
+      .fn()
       .mockResolvedValueOnce({
         content: JSON.stringify({
           session: { id: "test", status: "spec_generated" },
@@ -1388,7 +1404,8 @@ describe("ConvergeExecutor - session status and progress", () => {
       onUserInput: async () => "done",
     });
 
-    const mockLLMChat = vi.fn()
+    const mockLLMChat = vi
+      .fn()
       .mockResolvedValueOnce({
         content: JSON.stringify({
           session: { id: "test", status: "unknown_status" },
@@ -1431,7 +1448,8 @@ describe("ConvergeExecutor - session status and progress", () => {
       },
     });
 
-    const mockLLMChat = vi.fn()
+    const mockLLMChat = vi
+      .fn()
       .mockResolvedValueOnce({
         content: JSON.stringify({
           session: { id: "test", status: "gathering" },
@@ -1470,7 +1488,8 @@ describe("ConvergeExecutor - session status and progress", () => {
       onUserInput: async () => "done",
     });
 
-    const mockLLMChat = vi.fn()
+    const mockLLMChat = vi
+      .fn()
       .mockResolvedValueOnce({
         content: JSON.stringify({
           session: { id: "test", status: "gathering" },
@@ -1554,12 +1573,12 @@ describe("ConvergeExecutor - resume from checkpoint", () => {
 
     await fs.writeFile(
       path.join(specDir, "discovery-session.json"),
-      JSON.stringify(sessionData, null, 2)
+      JSON.stringify(sessionData, null, 2),
     );
 
     await fs.writeFile(
       path.join(specDir, "checkpoint.json"),
-      JSON.stringify(checkpointData, null, 2)
+      JSON.stringify(checkpointData, null, 2),
     );
 
     const progressUpdates: string[] = [];
@@ -1611,7 +1630,9 @@ describe("ConvergeExecutor - resume from checkpoint", () => {
       state: { artifacts: [], progress: 0, checkpoint: null },
       tools: {} as any,
       llm: {
-        chat: vi.fn().mockResolvedValue({ content: "{}", usage: { inputTokens: 0, outputTokens: 0 } }),
+        chat: vi
+          .fn()
+          .mockResolvedValue({ content: "{}", usage: { inputTokens: 0, outputTokens: 0 } }),
         chatWithTools: vi.fn(),
       },
     };
@@ -1657,7 +1678,8 @@ describe("ConvergeExecutor - discovery loop edge cases", () => {
       },
     });
 
-    const mockLLMChat = vi.fn()
+    const mockLLMChat = vi
+      .fn()
       .mockResolvedValueOnce({
         content: JSON.stringify({
           session: { id: "test", status: "gathering" },
@@ -1707,7 +1729,8 @@ describe("ConvergeExecutor - discovery loop edge cases", () => {
       },
     });
 
-    const mockLLMChat = vi.fn()
+    const mockLLMChat = vi
+      .fn()
       .mockResolvedValueOnce({
         content: JSON.stringify({
           session: { id: "test", status: "gathering" },
@@ -1760,7 +1783,8 @@ describe("ConvergeExecutor - discovery loop edge cases", () => {
       },
     });
 
-    const mockLLMChat = vi.fn()
+    const mockLLMChat = vi
+      .fn()
       .mockResolvedValueOnce({
         content: JSON.stringify({
           session: { id: "test", status: "gathering" },
@@ -1825,7 +1849,8 @@ describe("ConvergeExecutor - discovery loop edge cases", () => {
       },
     });
 
-    const mockLLMChat = vi.fn()
+    const mockLLMChat = vi
+      .fn()
       .mockResolvedValueOnce({
         content: JSON.stringify({
           session: { id: "test", status: "gathering" },
@@ -1911,9 +1936,7 @@ describe("runConvergePhase - chatWithTools adaptation", () => {
           stopReason: "tool_use",
           usage: { inputTokens: 50, outputTokens: 25 },
           model: "test",
-          toolCalls: [
-            { name: "extract_requirements", input: { items: ["req1"] } },
-          ],
+          toolCalls: [{ name: "extract_requirements", input: { items: ["req1"] } }],
         };
       }),
       stream: vi.fn(),
@@ -2052,7 +2075,8 @@ describe("ConvergeExecutor - canComplete scenarios", () => {
       autoProceed: true,
     });
 
-    const mockLLMChat = vi.fn()
+    const mockLLMChat = vi
+      .fn()
       .mockResolvedValueOnce({
         content: JSON.stringify({
           session: { id: "test", status: "gathering" },
@@ -2110,7 +2134,8 @@ describe("runConvergePhase - context adapter chatWithTools", () => {
       id: "test",
       name: "Test LLM",
       initialize: vi.fn(),
-      chat: vi.fn()
+      chat: vi
+        .fn()
         .mockResolvedValueOnce({
           id: "resp-1",
           content: JSON.stringify({
@@ -2140,9 +2165,7 @@ describe("runConvergePhase - context adapter chatWithTools", () => {
           stopReason: "end_turn",
           usage: { inputTokens: 30, outputTokens: 15 },
           model: "test",
-          toolCalls: [
-            { name: "extract", input: { data: "test" } },
-          ],
+          toolCalls: [{ name: "extract", input: { data: "test" } }],
         };
       }),
       stream: vi.fn(),
@@ -2312,7 +2335,8 @@ describe("ConvergeExecutor - checkpoint with session and progress", () => {
       onUserInput: async () => "done",
     });
 
-    const mockLLMChat = vi.fn()
+    const mockLLMChat = vi
+      .fn()
       .mockResolvedValueOnce({
         content: JSON.stringify({
           session: { id: "test", status: "clarifying" },
@@ -2478,7 +2502,8 @@ describe("ConvergeExecutor - getCurrentStep edge cases", () => {
     });
 
     // Mock with an unknown status
-    const mockLLMChat = vi.fn()
+    const mockLLMChat = vi
+      .fn()
       .mockResolvedValueOnce({
         content: JSON.stringify({
           session: { id: "test", status: "some_unknown_status" },
@@ -2552,7 +2577,8 @@ describe("ConvergeExecutor - calculateProgress edge cases", () => {
         onUserInput: async () => "done",
       });
 
-      const mockLLMChat = vi.fn()
+      const mockLLMChat = vi
+        .fn()
         .mockResolvedValueOnce({
           content: JSON.stringify({
             session: { id: `test-${status}`, status },
@@ -2612,7 +2638,7 @@ describe("ConvergeExecutor - specific session status coverage", () => {
     const now = new Date().toISOString();
     const sessionData = {
       id: "status-complete-test",
-      status: "complete",  // Explicitly set complete status
+      status: "complete", // Explicitly set complete status
       initialInput: "Test project",
       requirements: [],
       openQuestions: [],
@@ -2634,12 +2660,12 @@ describe("ConvergeExecutor - specific session status coverage", () => {
 
     await fs.writeFile(
       path.join(specDir, "discovery-session.json"),
-      JSON.stringify(sessionData, null, 2)
+      JSON.stringify(sessionData, null, 2),
     );
 
     await fs.writeFile(
       path.join(specDir, "checkpoint.json"),
-      JSON.stringify(checkpointData, null, 2)
+      JSON.stringify(checkpointData, null, 2),
     );
 
     const executor = new ConvergeExecutor({
@@ -2685,7 +2711,7 @@ describe("ConvergeExecutor - specific session status coverage", () => {
     const now = new Date().toISOString();
     const sessionData = {
       id: "status-spec-generated-test",
-      status: "spec_generated",  // Explicitly set spec_generated status
+      status: "spec_generated", // Explicitly set spec_generated status
       initialInput: "Test project",
       requirements: [],
       openQuestions: [],
@@ -2707,12 +2733,12 @@ describe("ConvergeExecutor - specific session status coverage", () => {
 
     await fs.writeFile(
       path.join(specDir, "discovery-session.json"),
-      JSON.stringify(sessionData, null, 2)
+      JSON.stringify(sessionData, null, 2),
     );
 
     await fs.writeFile(
       path.join(specDir, "checkpoint.json"),
-      JSON.stringify(checkpointData, null, 2)
+      JSON.stringify(checkpointData, null, 2),
     );
 
     const executor = new ConvergeExecutor({
@@ -2758,7 +2784,7 @@ describe("ConvergeExecutor - specific session status coverage", () => {
     const now = new Date().toISOString();
     const sessionData = {
       id: "status-unknown-test",
-      status: "unknown_custom_status",  // Unknown status
+      status: "unknown_custom_status", // Unknown status
       initialInput: "Test project",
       requirements: [],
       openQuestions: [],
@@ -2780,12 +2806,12 @@ describe("ConvergeExecutor - specific session status coverage", () => {
 
     await fs.writeFile(
       path.join(specDir, "discovery-session.json"),
-      JSON.stringify(sessionData, null, 2)
+      JSON.stringify(sessionData, null, 2),
     );
 
     await fs.writeFile(
       path.join(specDir, "checkpoint.json"),
-      JSON.stringify(checkpointData, null, 2)
+      JSON.stringify(checkpointData, null, 2),
     );
 
     const executor = new ConvergeExecutor({
@@ -2932,12 +2958,12 @@ describe("ConvergeExecutor - direct status testing via resumed sessions", () => 
 
     await fs.writeFile(
       path.join(specDir, "discovery-session.json"),
-      JSON.stringify(sessionData, null, 2)
+      JSON.stringify(sessionData, null, 2),
     );
 
     await fs.writeFile(
       path.join(specDir, "checkpoint.json"),
-      JSON.stringify(checkpointData, null, 2)
+      JSON.stringify(checkpointData, null, 2),
     );
 
     const executor = new ConvergeExecutor({
@@ -3007,12 +3033,12 @@ describe("ConvergeExecutor - direct status testing via resumed sessions", () => 
 
     await fs.writeFile(
       path.join(specDir, "discovery-session.json"),
-      JSON.stringify(sessionData, null, 2)
+      JSON.stringify(sessionData, null, 2),
     );
 
     await fs.writeFile(
       path.join(specDir, "checkpoint.json"),
-      JSON.stringify(checkpointData, null, 2)
+      JSON.stringify(checkpointData, null, 2),
     );
 
     const executor = new ConvergeExecutor({
@@ -3079,12 +3105,12 @@ describe("ConvergeExecutor - direct status testing via resumed sessions", () => 
 
     await fs.writeFile(
       path.join(specDir, "discovery-session.json"),
-      JSON.stringify(sessionData, null, 2)
+      JSON.stringify(sessionData, null, 2),
     );
 
     await fs.writeFile(
       path.join(specDir, "checkpoint.json"),
-      JSON.stringify(checkpointData, null, 2)
+      JSON.stringify(checkpointData, null, 2),
     );
 
     const executor = new ConvergeExecutor({
@@ -3167,12 +3193,12 @@ describe("ConvergeExecutor - restore then checkpoint for status coverage", () =>
 
     await fs.writeFile(
       path.join(specDir, "discovery-session.json"),
-      JSON.stringify(sessionData, null, 2)
+      JSON.stringify(sessionData, null, 2),
     );
 
     await fs.writeFile(
       path.join(specDir, "checkpoint.json"),
-      JSON.stringify(checkpointData, null, 2)
+      JSON.stringify(checkpointData, null, 2),
     );
 
     const executor = new ConvergeExecutor({
@@ -3248,12 +3274,12 @@ describe("ConvergeExecutor - restore then checkpoint for status coverage", () =>
 
     await fs.writeFile(
       path.join(specDir, "discovery-session.json"),
-      JSON.stringify(sessionData, null, 2)
+      JSON.stringify(sessionData, null, 2),
     );
 
     await fs.writeFile(
       path.join(specDir, "checkpoint.json"),
-      JSON.stringify(checkpointData, null, 2)
+      JSON.stringify(checkpointData, null, 2),
     );
 
     const executor = new ConvergeExecutor({
@@ -3327,12 +3353,12 @@ describe("ConvergeExecutor - restore then checkpoint for status coverage", () =>
 
     await fs.writeFile(
       path.join(specDir, "discovery-session.json"),
-      JSON.stringify(sessionData, null, 2)
+      JSON.stringify(sessionData, null, 2),
     );
 
     await fs.writeFile(
       path.join(specDir, "checkpoint.json"),
-      JSON.stringify(checkpointData, null, 2)
+      JSON.stringify(checkpointData, null, 2),
     );
 
     const executor = new ConvergeExecutor({
@@ -3406,12 +3432,12 @@ describe("ConvergeExecutor - restore then checkpoint for status coverage", () =>
 
     await fs.writeFile(
       path.join(specDir, "discovery-session.json"),
-      JSON.stringify(sessionData, null, 2)
+      JSON.stringify(sessionData, null, 2),
     );
 
     await fs.writeFile(
       path.join(specDir, "checkpoint.json"),
-      JSON.stringify(checkpointData, null, 2)
+      JSON.stringify(checkpointData, null, 2),
     );
 
     const executor = new ConvergeExecutor({
@@ -3485,12 +3511,12 @@ describe("ConvergeExecutor - restore then checkpoint for status coverage", () =>
 
     await fs.writeFile(
       path.join(specDir, "discovery-session.json"),
-      JSON.stringify(sessionData, null, 2)
+      JSON.stringify(sessionData, null, 2),
     );
 
     await fs.writeFile(
       path.join(specDir, "checkpoint.json"),
-      JSON.stringify(checkpointData, null, 2)
+      JSON.stringify(checkpointData, null, 2),
     );
 
     const executor = new ConvergeExecutor({
@@ -3576,9 +3602,7 @@ describe("createLLMAdapter", () => {
       chatWithTools: vi.fn().mockResolvedValue({
         content: "Using tool",
         usage: { inputTokens: 20, outputTokens: 10 },
-        toolCalls: [
-          { name: "read_file", input: { path: "/test.txt" } },
-        ],
+        toolCalls: [{ name: "read_file", input: { path: "/test.txt" } }],
       }),
       initialize: vi.fn(),
       stream: vi.fn(),
@@ -3594,28 +3618,31 @@ describe("createLLMAdapter", () => {
         {
           name: "read_file",
           description: "Read a file",
-          parameters: { type: "object", properties: { path: { type: "string" } }, required: ["path"] },
+          parameters: {
+            type: "object",
+            properties: { path: { type: "string" } },
+            required: ["path"],
+          },
         },
-      ]
+      ],
     );
 
-    expect(mockLLM.chatWithTools).toHaveBeenCalledWith(
-      [{ role: "user", content: "Read file" }],
-      {
-        tools: [
-          {
-            name: "read_file",
-            description: "Read a file",
-            input_schema: { type: "object", properties: { path: { type: "string" } }, required: ["path"] },
+    expect(mockLLM.chatWithTools).toHaveBeenCalledWith([{ role: "user", content: "Read file" }], {
+      tools: [
+        {
+          name: "read_file",
+          description: "Read a file",
+          input_schema: {
+            type: "object",
+            properties: { path: { type: "string" } },
+            required: ["path"],
           },
-        ],
-      }
-    );
+        },
+      ],
+    });
     expect(result.content).toBe("Using tool");
     expect(result.usage).toEqual({ inputTokens: 20, outputTokens: 10 });
-    expect(result.toolCalls).toEqual([
-      { name: "read_file", arguments: { path: "/test.txt" } },
-    ]);
+    expect(result.toolCalls).toEqual([{ name: "read_file", arguments: { path: "/test.txt" } }]);
   });
 
   it("should handle chatWithTools with no tool calls", async () => {
@@ -3638,10 +3665,7 @@ describe("createLLMAdapter", () => {
     };
 
     const adapter = createLLMAdapter(mockLLM as any);
-    const result = await adapter.chatWithTools(
-      [{ role: "user", content: "Hello" }],
-      []
-    );
+    const result = await adapter.chatWithTools([{ role: "user", content: "Hello" }], []);
 
     expect(result.content).toBe("No tools needed");
     expect(result.toolCalls).toBeUndefined();
@@ -3675,7 +3699,7 @@ describe("createLLMAdapter", () => {
       [
         { name: "tool1", description: "Tool 1", parameters: { type: "object", properties: {} } },
         { name: "tool2", description: "Tool 2", parameters: { type: "object", properties: {} } },
-      ]
+      ],
     );
 
     expect(result.toolCalls).toHaveLength(2);

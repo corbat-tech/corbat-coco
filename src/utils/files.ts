@@ -56,7 +56,7 @@ export async function readJsonFile<T>(filePath: string): Promise<T> {
 export async function writeJsonFile(
   filePath: string,
   data: unknown,
-  options: { indent?: number; ensureDir?: boolean } = {}
+  options: { indent?: number; ensureDir?: boolean } = {},
 ): Promise<void> {
   const { indent = 2, ensureDir: shouldEnsureDir = true } = options;
 
@@ -82,7 +82,7 @@ export async function writeJsonFile(
 export async function copyFile(
   source: string,
   destination: string,
-  options: { ensureDir?: boolean } = {}
+  options: { ensureDir?: boolean } = {},
 ): Promise<void> {
   const { ensureDir: shouldEnsureDir = true } = options;
 
@@ -150,10 +150,7 @@ export function getStringHash(content: string): string {
 /**
  * Read a file as text, with optional fallback
  */
-export async function readTextFile(
-  filePath: string,
-  fallback?: string
-): Promise<string> {
+export async function readTextFile(filePath: string, fallback?: string): Promise<string> {
   try {
     return await fs.readFile(filePath, "utf-8");
   } catch (error) {
@@ -174,7 +171,7 @@ export async function readTextFile(
 export async function writeTextFile(
   filePath: string,
   content: string,
-  options: { ensureDir?: boolean; mode?: number } = {}
+  options: { ensureDir?: boolean; mode?: number } = {},
 ): Promise<void> {
   const { ensureDir: shouldEnsureDir = true, mode } = options;
 
@@ -199,7 +196,7 @@ export async function writeTextFile(
 export async function appendTextFile(
   filePath: string,
   content: string,
-  options: { ensureDir?: boolean } = {}
+  options: { ensureDir?: boolean } = {},
 ): Promise<void> {
   const { ensureDir: shouldEnsureDir = true } = options;
 
@@ -223,7 +220,7 @@ export async function appendTextFile(
  */
 export async function listFiles(
   dirPath: string,
-  options: { recursive?: boolean; pattern?: RegExp } = {}
+  options: { recursive?: boolean; pattern?: RegExp } = {},
 ): Promise<string[]> {
   const { recursive = false, pattern } = options;
   const files: string[] = [];
@@ -285,7 +282,7 @@ export async function getFileStats(filePath: string): Promise<{
  */
 export async function createTempFile(
   content: string,
-  options: { prefix?: string; suffix?: string; dir?: string } = {}
+  options: { prefix?: string; suffix?: string; dir?: string } = {},
 ): Promise<string> {
   const { prefix = "coco-", suffix = ".tmp", dir } = options;
   const tempDir = dir ?? (await fs.mkdtemp(path.join(process.cwd(), ".coco-temp-")));
@@ -299,10 +296,7 @@ export async function createTempFile(
 /**
  * Atomic write (write to temp then rename)
  */
-export async function atomicWriteFile(
-  filePath: string,
-  content: string
-): Promise<void> {
+export async function atomicWriteFile(filePath: string, content: string): Promise<void> {
   const tempPath = `${filePath}.${Date.now()}.tmp`;
 
   try {

@@ -76,11 +76,7 @@ export function createLogger(config: Partial<LoggerConfig> = {}): Logger<ILogObj
 /**
  * Setup file logging
  */
-function setupFileLogging(
-  logger: Logger<ILogObj>,
-  logDir: string,
-  name: string
-): void {
+function setupFileLogging(logger: Logger<ILogObj>, logDir: string, name: string): void {
   // Ensure log directory exists
   if (!fs.existsSync(logDir)) {
     fs.mkdirSync(logDir, { recursive: true });
@@ -97,10 +93,7 @@ function setupFileLogging(
 /**
  * Create a child logger with a specific name
  */
-export function createChildLogger(
-  parent: Logger<ILogObj>,
-  name: string
-): Logger<ILogObj> {
+export function createChildLogger(parent: Logger<ILogObj>, name: string): Logger<ILogObj> {
   return parent.getSubLogger({ name });
 }
 
@@ -150,7 +143,7 @@ export function initializeLogging(projectPath: string, level: LogLevel = "info")
 export function logEvent(
   logger: Logger<ILogObj>,
   event: string,
-  data: Record<string, unknown> = {}
+  data: Record<string, unknown> = {},
 ): void {
   logger.info({ event, ...data });
 }
@@ -161,7 +154,7 @@ export function logEvent(
 export async function logTiming<T>(
   logger: Logger<ILogObj>,
   operation: string,
-  fn: () => Promise<T>
+  fn: () => Promise<T>,
 ): Promise<T> {
   const start = performance.now();
   try {

@@ -109,9 +109,7 @@ describe("AnthropicProvider", () => {
       const provider = new AnthropicProvider();
       await provider.initialize({ apiKey: "test-key" });
 
-      const response = await provider.chat([
-        { role: "user", content: "Hello!" },
-      ]);
+      const response = await provider.chat([{ role: "user", content: "Hello!" }]);
 
       expect(response.content).toBe("Hello! How can I help you?");
       expect(response.stopReason).toBe("end_turn");
@@ -122,9 +120,7 @@ describe("AnthropicProvider", () => {
       const provider = new AnthropicProvider();
       await provider.initialize({ apiKey: "test-key" });
 
-      const response = await provider.chat([
-        { role: "user", content: "Test" },
-      ]);
+      const response = await provider.chat([{ role: "user", content: "Test" }]);
 
       expect(response.usage).toBeDefined();
       expect(response.usage?.inputTokens).toBe(10);
@@ -136,15 +132,14 @@ describe("AnthropicProvider", () => {
       const provider = new AnthropicProvider();
       await provider.initialize({ apiKey: "test-key" });
 
-      await provider.chat(
-        [{ role: "user", content: "Hello!" }],
-        { system: "You are a helpful assistant." }
-      );
+      await provider.chat([{ role: "user", content: "Hello!" }], {
+        system: "You are a helpful assistant.",
+      });
 
       expect(mockMessagesCreate).toHaveBeenCalledWith(
         expect.objectContaining({
           system: "You are a helpful assistant.",
-        })
+        }),
       );
     });
 
@@ -166,7 +161,7 @@ describe("AnthropicProvider", () => {
             expect.objectContaining({ role: "assistant", content: "4" }),
             expect.objectContaining({ role: "user", content: "And 3+3?" }),
           ]),
-        })
+        }),
       );
     });
   });
@@ -191,10 +186,7 @@ describe("AnthropicProvider", () => {
         },
       ];
 
-      await provider.chatWithTools(
-        [{ role: "user", content: "Read file.txt" }],
-        { tools }
-      );
+      await provider.chatWithTools([{ role: "user", content: "Read file.txt" }], { tools });
 
       expect(mockMessagesCreate).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -204,7 +196,7 @@ describe("AnthropicProvider", () => {
               description: "Read a file",
             }),
           ]),
-        })
+        }),
       );
     });
 
@@ -231,10 +223,9 @@ describe("AnthropicProvider", () => {
       const provider = new AnthropicProvider();
       await provider.initialize({ apiKey: "test-key" });
 
-      const response = await provider.chatWithTools(
-        [{ role: "user", content: "Read file.txt" }],
-        { tools: [] }
-      );
+      const response = await provider.chatWithTools([{ role: "user", content: "Read file.txt" }], {
+        tools: [],
+      });
 
       expect(response.toolCalls).toHaveLength(1);
       expect(response.toolCalls?.[0].name).toBe("readFile");
@@ -269,31 +260,23 @@ describe("AnthropicProvider", () => {
 
   describe("error handling", () => {
     it("should handle API errors gracefully", async () => {
-      mockMessagesCreate.mockRejectedValueOnce(
-        new Error("API rate limit exceeded")
-      );
+      mockMessagesCreate.mockRejectedValueOnce(new Error("API rate limit exceeded"));
 
       const { AnthropicProvider } = await import("./anthropic.js");
       const provider = new AnthropicProvider();
       await provider.initialize({ apiKey: "test-key" });
 
-      await expect(
-        provider.chat([{ role: "user", content: "Hello" }])
-      ).rejects.toThrow();
+      await expect(provider.chat([{ role: "user", content: "Hello" }])).rejects.toThrow();
     });
 
     it("should handle timeout errors", async () => {
-      mockMessagesCreate.mockRejectedValueOnce(
-        new Error("Request timeout")
-      );
+      mockMessagesCreate.mockRejectedValueOnce(new Error("Request timeout"));
 
       const { AnthropicProvider } = await import("./anthropic.js");
       const provider = new AnthropicProvider();
       await provider.initialize({ apiKey: "test-key" });
 
-      await expect(
-        provider.chat([{ role: "user", content: "Hello" }])
-      ).rejects.toThrow();
+      await expect(provider.chat([{ role: "user", content: "Hello" }])).rejects.toThrow();
     });
   });
 
@@ -311,7 +294,7 @@ describe("AnthropicProvider", () => {
       expect(mockMessagesCreate).toHaveBeenCalledWith(
         expect.objectContaining({
           model: "claude-opus-4-20250514",
-        })
+        }),
       );
     });
 
@@ -328,7 +311,7 @@ describe("AnthropicProvider", () => {
       expect(mockMessagesCreate).toHaveBeenCalledWith(
         expect.objectContaining({
           max_tokens: 4096,
-        })
+        }),
       );
     });
 
@@ -345,7 +328,7 @@ describe("AnthropicProvider", () => {
       expect(mockMessagesCreate).toHaveBeenCalledWith(
         expect.objectContaining({
           temperature: 0.7,
-        })
+        }),
       );
     });
   });
@@ -523,15 +506,15 @@ describe("tool choice conversion", () => {
     const provider = new AnthropicProvider();
     await provider.initialize({ apiKey: "test-key" });
 
-    await provider.chatWithTools(
-      [{ role: "user", content: "Hello" }],
-      { tools: [], toolChoice: "auto" }
-    );
+    await provider.chatWithTools([{ role: "user", content: "Hello" }], {
+      tools: [],
+      toolChoice: "auto",
+    });
 
     expect(mockMessagesCreate).toHaveBeenCalledWith(
       expect.objectContaining({
         tool_choice: { type: "auto" },
-      })
+      }),
     );
   });
 
@@ -540,15 +523,15 @@ describe("tool choice conversion", () => {
     const provider = new AnthropicProvider();
     await provider.initialize({ apiKey: "test-key" });
 
-    await provider.chatWithTools(
-      [{ role: "user", content: "Hello" }],
-      { tools: [], toolChoice: "any" }
-    );
+    await provider.chatWithTools([{ role: "user", content: "Hello" }], {
+      tools: [],
+      toolChoice: "any",
+    });
 
     expect(mockMessagesCreate).toHaveBeenCalledWith(
       expect.objectContaining({
         tool_choice: { type: "any" },
-      })
+      }),
     );
   });
 
@@ -557,15 +540,15 @@ describe("tool choice conversion", () => {
     const provider = new AnthropicProvider();
     await provider.initialize({ apiKey: "test-key" });
 
-    await provider.chatWithTools(
-      [{ role: "user", content: "Hello" }],
-      { tools: [], toolChoice: { type: "tool", name: "readFile" } }
-    );
+    await provider.chatWithTools([{ role: "user", content: "Hello" }], {
+      tools: [],
+      toolChoice: { type: "tool", name: "readFile" },
+    });
 
     expect(mockMessagesCreate).toHaveBeenCalledWith(
       expect.objectContaining({
         tool_choice: { type: "tool", name: "readFile" },
-      })
+      }),
     );
   });
 });
@@ -626,10 +609,9 @@ describe("stop reason mapping", () => {
     const provider = new AnthropicProvider();
     await provider.initialize({ apiKey: "test-key" });
 
-    const response = await provider.chatWithTools(
-      [{ role: "user", content: "Hello" }],
-      { tools: [] }
-    );
+    const response = await provider.chatWithTools([{ role: "user", content: "Hello" }], {
+      tools: [],
+    });
 
     expect(response.stopReason).toBe("tool_use");
   });
@@ -677,45 +659,33 @@ describe("stop reason mapping", () => {
 
 describe("error handling", () => {
   it("should handle Anthropic APIError with 429 status", async () => {
-    mockMessagesCreate.mockRejectedValueOnce(
-      new MockAPIError(429, "Rate limit exceeded")
-    );
+    mockMessagesCreate.mockRejectedValueOnce(new MockAPIError(429, "Rate limit exceeded"));
 
     const { AnthropicProvider } = await import("./anthropic.js");
     const provider = new AnthropicProvider();
     await provider.initialize({ apiKey: "test-key" });
 
-    await expect(
-      provider.chat([{ role: "user", content: "Hello" }])
-    ).rejects.toThrow();
+    await expect(provider.chat([{ role: "user", content: "Hello" }])).rejects.toThrow();
   });
 
   it("should handle Anthropic APIError with 500 status", async () => {
-    mockMessagesCreate.mockRejectedValueOnce(
-      new MockAPIError(500, "Internal server error")
-    );
+    mockMessagesCreate.mockRejectedValueOnce(new MockAPIError(500, "Internal server error"));
 
     const { AnthropicProvider } = await import("./anthropic.js");
     const provider = new AnthropicProvider();
     await provider.initialize({ apiKey: "test-key" });
 
-    await expect(
-      provider.chat([{ role: "user", content: "Hello" }])
-    ).rejects.toThrow();
+    await expect(provider.chat([{ role: "user", content: "Hello" }])).rejects.toThrow();
   });
 
   it("should handle Anthropic APIError with 400 status (non-retryable)", async () => {
-    mockMessagesCreate.mockRejectedValueOnce(
-      new MockAPIError(400, "Bad request")
-    );
+    mockMessagesCreate.mockRejectedValueOnce(new MockAPIError(400, "Bad request"));
 
     const { AnthropicProvider } = await import("./anthropic.js");
     const provider = new AnthropicProvider();
     await provider.initialize({ apiKey: "test-key" });
 
-    await expect(
-      provider.chat([{ role: "user", content: "Hello" }])
-    ).rejects.toThrow();
+    await expect(provider.chat([{ role: "user", content: "Hello" }])).rejects.toThrow();
   });
 
   it("should handle non-Error thrown values", async () => {
@@ -725,25 +695,18 @@ describe("error handling", () => {
     const provider = new AnthropicProvider();
     await provider.initialize({ apiKey: "test-key" });
 
-    await expect(
-      provider.chat([{ role: "user", content: "Hello" }])
-    ).rejects.toThrow();
+    await expect(provider.chat([{ role: "user", content: "Hello" }])).rejects.toThrow();
   });
 
   it("should handle chatWithTools errors", async () => {
-    mockMessagesCreate.mockRejectedValueOnce(
-      new MockAPIError(500, "Server error")
-    );
+    mockMessagesCreate.mockRejectedValueOnce(new MockAPIError(500, "Server error"));
 
     const { AnthropicProvider } = await import("./anthropic.js");
     const provider = new AnthropicProvider();
     await provider.initialize({ apiKey: "test-key" });
 
     await expect(
-      provider.chatWithTools(
-        [{ role: "user", content: "Hello" }],
-        { tools: [] }
-      )
+      provider.chatWithTools([{ role: "user", content: "Hello" }], { tools: [] }),
     ).rejects.toThrow();
   });
 });

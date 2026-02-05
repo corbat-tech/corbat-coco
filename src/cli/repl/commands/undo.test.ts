@@ -73,7 +73,7 @@ describe("undoCommand", () => {
 
       expect(execSync).toHaveBeenCalledWith(
         "git reset --soft HEAD~1",
-        expect.objectContaining({ cwd: "/test/project" })
+        expect.objectContaining({ cwd: "/test/project" }),
       );
     });
 
@@ -104,10 +104,7 @@ describe("undoCommand", () => {
 
       await undoCommand.execute(["src/file.ts"], mockSession);
 
-      expect(execSync).toHaveBeenCalledWith(
-        'git checkout -- "src/file.ts"',
-        expect.any(Object)
-      );
+      expect(execSync).toHaveBeenCalledWith('git checkout -- "src/file.ts"', expect.any(Object));
     });
 
     it("should handle file paths with spaces", async () => {
@@ -118,7 +115,7 @@ describe("undoCommand", () => {
 
       expect(execSync).toHaveBeenCalledWith(
         'git checkout -- "path with spaces.ts"',
-        expect.any(Object)
+        expect.any(Object),
       );
     });
 

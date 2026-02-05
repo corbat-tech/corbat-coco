@@ -13,10 +13,7 @@ import type {
 } from "../types.js";
 import type { DiscoverySession, Question, Specification } from "./types.js";
 import { DiscoveryEngine, createDiscoveryEngine } from "./discovery.js";
-import {
-  SpecificationGenerator,
-  createSpecificationGenerator,
-} from "./specification.js";
+import { SpecificationGenerator, createSpecificationGenerator } from "./specification.js";
 import { SessionManager, createSessionManager, ConvergeStep } from "./persistence.js";
 import type { LLMProvider } from "../../providers/types.js";
 import { PhaseError } from "../../utils/errors.js";
@@ -102,13 +99,13 @@ export class ConvergeExecutor implements PhaseExecutor {
         this.reportProgress(
           resumeData.checkpoint.step,
           resumeData.checkpoint.progress,
-          "Resuming from checkpoint"
+          "Resuming from checkpoint",
         );
       } else {
         // Get initial input from user
         const initialInput = await this.getUserInput(
           "Please describe the project you want to build:",
-          undefined
+          undefined,
         );
 
         // Start discovery
@@ -171,10 +168,7 @@ export class ConvergeExecutor implements PhaseExecutor {
     if (!this.discovery || !this.currentSession) return false;
 
     // Can complete if discovery is done and no critical questions remain
-    return (
-      this.discovery.isComplete() ||
-      this.discovery.getCriticalQuestions().length === 0
-    );
+    return this.discovery.isComplete() || this.discovery.getCriticalQuestions().length === 0;
   }
 
   /**
@@ -185,11 +179,7 @@ export class ConvergeExecutor implements PhaseExecutor {
     const progress = this.calculateProgress();
 
     if (this.currentSession && this.sessionManager) {
-      await this.sessionManager.saveWithCheckpoint(
-        this.currentSession,
-        step,
-        progress
-      );
+      await this.sessionManager.saveWithCheckpoint(this.currentSession, step, progress);
     }
 
     return {
@@ -207,10 +197,7 @@ export class ConvergeExecutor implements PhaseExecutor {
   /**
    * Restore from a checkpoint
    */
-  async restore(
-    _checkpoint: PhaseCheckpoint,
-    context: PhaseContext
-  ): Promise<void> {
+  async restore(_checkpoint: PhaseCheckpoint, context: PhaseContext): Promise<void> {
     await this.initialize(context);
 
     const resumeData = await this.sessionManager!.resume();
@@ -312,6 +299,51 @@ export class ConvergeExecutor implements PhaseExecutor {
         };
       },
 
+      async *streamWithTools(messages, options) {
+        // Fallback to chatWithTools for adapters (no real streaming support)
+        const adapted = messages.map((m) => ({
+          role: m.role,
+          content: typeof m.content === "string" ? m.content : JSON.stringify(m.content),
+        }));
+        const tools = options.tools.map((t) => ({
+          name: t.name,
+          description: t.description,
+          parameters: t.input_schema as Record<string, unknown>,
+        }));
+        const response = await llmContext.chatWithTools(adapted, tools);
+
+        // Yield text if present
+        if (response.content) {
+          yield {
+            type: "text" as const,
+            text: response.content,
+          };
+        }
+
+        // Yield tool calls
+        for (const tc of response.toolCalls || []) {
+          yield {
+            type: "tool_use_start" as const,
+            toolCall: {
+              id: tc.name,
+              name: tc.name,
+            },
+          };
+          yield {
+            type: "tool_use_end" as const,
+            toolCall: {
+              id: tc.name,
+              name: tc.name,
+              input: tc.arguments,
+            },
+          };
+        }
+
+        yield {
+          type: "done" as const,
+        };
+      },
+
       countTokens(_text: string): number {
         // Approximate token count
         return Math.ceil(_text.length / 4);
@@ -360,7 +392,7 @@ export class ConvergeExecutor implements PhaseExecutor {
       this.reportProgress(
         "clarification",
         30 + round * 15,
-        `Asking clarification questions (round ${round})`
+        `Asking clarification questions (round ${round})`,
       );
 
       // Process each question
@@ -370,10 +402,7 @@ export class ConvergeExecutor implements PhaseExecutor {
         if (answer.toLowerCase() === "skip") {
           // Use default answer if available
           if (question.defaultAnswer) {
-            await this.discovery!.processAnswer(
-              question.id,
-              question.defaultAnswer
-            );
+            await this.discovery!.processAnswer(question.id, question.defaultAnswer);
           }
           continue;
         }
@@ -414,41 +443,24 @@ export class ConvergeExecutor implements PhaseExecutor {
     return this.getUserInput(prompt, question.options);
   }
 
-  private async getUserInput(
-    prompt: string,
-    options?: string[]
-  ): Promise<string> {
+  private async getUserInput(prompt: string, options?: string[]): Promise<string> {
     if (this.config.onUserInput) {
       return this.config.onUserInput(prompt, options);
     }
 
     // Default implementation that throws - in real usage, a callback should be provided
-    throw new PhaseError(
-      "No user input handler configured",
-      { phase: "converge" }
-    );
+    throw new PhaseError("No user input handler configured", { phase: "converge" });
   }
 
-  private reportProgress(
-    step: ConvergeStep,
-    progress: number,
-    message: string
-  ): void {
+  private reportProgress(step: ConvergeStep, progress: number, message: string): void {
     if (this.config.onProgress) {
       this.config.onProgress(step, progress, message);
     }
   }
 
-  private async saveProgress(
-    step: ConvergeStep,
-    progress: number
-  ): Promise<void> {
+  private async saveProgress(step: ConvergeStep, progress: number): Promise<void> {
     if (this.currentSession && this.sessionManager) {
-      await this.sessionManager.saveWithCheckpoint(
-        this.currentSession,
-        step,
-        progress
-      );
+      await this.sessionManager.saveWithCheckpoint(this.currentSession, step, progress);
     }
   }
 
@@ -491,9 +503,7 @@ export class ConvergeExecutor implements PhaseExecutor {
 /**
  * Create a CONVERGE phase executor
  */
-export function createConvergeExecutor(
-  config?: Partial<ConvergeConfig>
-): ConvergeExecutor {
+export function createConvergeExecutor(config?: Partial<ConvergeConfig>): ConvergeExecutor {
   return new ConvergeExecutor(config);
 }
 
@@ -525,7 +535,11 @@ export function createLLMAdapter(llm: LLMProvider): PhaseContext["llm"] {
       const adaptedTools = tools.map((t) => ({
         name: t.name,
         description: t.description,
-        input_schema: t.parameters as { type: "object"; properties: Record<string, unknown>; required?: string[] },
+        input_schema: t.parameters as {
+          type: "object";
+          properties: Record<string, unknown>;
+          required?: string[];
+        },
       }));
       const response = await llm.chatWithTools(adaptedMessages, { tools: adaptedTools });
       return {
@@ -546,7 +560,7 @@ export function createLLMAdapter(llm: LLMProvider): PhaseContext["llm"] {
 export async function runConvergePhase(
   projectPath: string,
   llm: LLMProvider,
-  config?: Partial<ConvergeConfig>
+  config?: Partial<ConvergeConfig>,
 ): Promise<{
   success: boolean;
   specification?: Specification;
@@ -583,9 +597,7 @@ export async function runConvergePhase(
   const result = await executor.execute(context);
 
   if (result.success) {
-    const specArtifact = result.artifacts.find(
-      (a) => a.type === "specification"
-    );
+    const specArtifact = result.artifacts.find((a) => a.type === "specification");
 
     return {
       success: true,

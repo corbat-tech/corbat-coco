@@ -83,10 +83,12 @@ export function isVersionLessThan(a: ConfigVersion, b: ConfigVersion): boolean {
 /**
  * Config version schema
  */
-export const configVersionSchema = z.string().regex(
-  /^\d+\.\d+\.\d+$/,
-  "Version must be in semver format (e.g., 1.0.0)"
-) as z.ZodType<ConfigVersion>;
+export const configVersionSchema = z
+  .string()
+  .regex(
+    /^\d+\.\d+\.\d+$/,
+    "Version must be in semver format (e.g., 1.0.0)",
+  ) as z.ZodType<ConfigVersion>;
 
 /**
  * Migration registry
@@ -105,7 +107,7 @@ export class MigrationRegistry {
     // Check that toVersion > fromVersion
     if (compareVersions(migration.fromVersion, migration.toVersion) >= 0) {
       throw new Error(
-        `Migration toVersion (${migration.toVersion}) must be greater than fromVersion (${migration.fromVersion})`
+        `Migration toVersion (${migration.toVersion}) must be greater than fromVersion (${migration.fromVersion})`,
       );
     }
 
@@ -134,22 +136,18 @@ export class MigrationRegistry {
 
     while (compareVersions(currentVersion, toVersion) < 0) {
       // Find migration from current version
-      const migration = this.migrations.find(
-        m => m.fromVersion === currentVersion
-      );
+      const migration = this.migrations.find((m) => m.fromVersion === currentVersion);
 
       if (!migration) {
         // Try to find a migration that can handle this version
         const compatibleMigration = this.migrations.find(
-          m =>
+          (m) =>
             compareVersions(m.fromVersion, currentVersion) <= 0 &&
-            compareVersions(m.toVersion, currentVersion) > 0
+            compareVersions(m.toVersion, currentVersion) > 0,
         );
 
         if (!compatibleMigration) {
-          throw new Error(
-            `No migration path found from ${currentVersion} to ${toVersion}`
-          );
+          throw new Error(`No migration path found from ${currentVersion} to ${toVersion}`);
         }
 
         path.push(compatibleMigration);
@@ -174,7 +172,7 @@ export class MigrationRegistry {
   migrate(
     config: Record<string, unknown>,
     fromVersion: ConfigVersion,
-    toVersion: ConfigVersion
+    toVersion: ConfigVersion,
   ): MigrationResult {
     const result: MigrationResult = {
       success: false,
@@ -199,7 +197,7 @@ export class MigrationRegistry {
         try {
           currentConfig = migration.migrate(currentConfig);
           result.migrationsApplied.push(
-            `${migration.fromVersion} -> ${migration.toVersion}: ${migration.description}`
+            `${migration.fromVersion} -> ${migration.toVersion}: ${migration.description}`,
           );
         } catch (error) {
           result.error = `Migration ${migration.fromVersion} -> ${migration.toVersion} failed: ${
@@ -224,7 +222,7 @@ export class MigrationRegistry {
   rollback(
     config: Record<string, unknown>,
     fromVersion: ConfigVersion,
-    toVersion: ConfigVersion
+    toVersion: ConfigVersion,
   ): MigrationResult {
     const result: MigrationResult = {
       success: false,
@@ -245,11 +243,11 @@ export class MigrationRegistry {
       }
 
       // Check all migrations have rollback
-      const migrationsWithoutRollback = forwardPath.filter(m => !m.rollback);
+      const migrationsWithoutRollback = forwardPath.filter((m) => !m.rollback);
       if (migrationsWithoutRollback.length > 0) {
-        result.error = `Cannot rollback: migrations without rollback function: ${
-          migrationsWithoutRollback.map(m => `${m.fromVersion}->${m.toVersion}`).join(", ")
-        }`;
+        result.error = `Cannot rollback: migrations without rollback function: ${migrationsWithoutRollback
+          .map((m) => `${m.fromVersion}->${m.toVersion}`)
+          .join(", ")}`;
         return result;
       }
 
@@ -260,7 +258,7 @@ export class MigrationRegistry {
         try {
           currentConfig = migration.rollback!(currentConfig);
           result.migrationsApplied.push(
-            `${migration.toVersion} -> ${migration.fromVersion}: rollback ${migration.description}`
+            `${migration.toVersion} -> ${migration.fromVersion}: rollback ${migration.description}`,
           );
         } catch (error) {
           result.error = `Rollback ${migration.toVersion} -> ${migration.fromVersion} failed: ${
@@ -332,7 +330,7 @@ export function extractConfigVersion(config: Record<string, unknown>): ConfigVer
  */
 export function setConfigVersion(
   config: Record<string, unknown>,
-  version: ConfigVersion
+  version: ConfigVersion,
 ): Record<string, unknown> {
   return {
     ...config,
@@ -346,7 +344,7 @@ export function setConfigVersion(
 export function autoMigrate(
   config: Record<string, unknown>,
   latestVersion: ConfigVersion,
-  registry?: MigrationRegistry
+  registry?: MigrationRegistry,
 ): MigrationResult {
   const reg = registry ?? getMigrationRegistry();
   const currentVersion = extractConfigVersion(config) ?? ("0.0.0" as ConfigVersion);

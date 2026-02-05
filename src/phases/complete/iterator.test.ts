@@ -141,9 +141,16 @@ describe("TaskIterator", () => {
 
       await iterator.execute(
         context as any,
-        vi.fn().mockResolvedValue({ passed: 5, failed: 0, skipped: 0, coverage: { lines: 90, branches: 85, functions: 90, statements: 88 }, failures: [], duration: 100 }),
+        vi.fn().mockResolvedValue({
+          passed: 5,
+          failed: 0,
+          skipped: 0,
+          coverage: { lines: 90, branches: 85, functions: 90, statements: 88 },
+          failures: [],
+          duration: 100,
+        }),
         vi.fn().mockResolvedValue(undefined),
-        onProgress
+        onProgress,
       );
 
       expect(onProgress).toHaveBeenCalled();
@@ -171,8 +178,15 @@ describe("TaskIterator", () => {
 
       const result = await iterator.execute(
         context as any,
-        vi.fn().mockResolvedValue({ passed: 5, failed: 0, skipped: 0, coverage: { lines: 90, branches: 85, functions: 90, statements: 88 }, failures: [], duration: 100 }),
-        vi.fn().mockResolvedValue(undefined)
+        vi.fn().mockResolvedValue({
+          passed: 5,
+          failed: 0,
+          skipped: 0,
+          coverage: { lines: 90, branches: 85, functions: 90, statements: 88 },
+          failures: [],
+          duration: 100,
+        }),
+        vi.fn().mockResolvedValue(undefined),
       );
 
       expect(result.success).toBe(true);
@@ -202,12 +216,7 @@ describe("TaskIterator", () => {
         qualityConfig: { minScore: 85, minCoverage: 80 },
       };
 
-      const result = await iterator.execute(
-        context as any,
-        vi.fn(),
-        vi.fn(),
-        vi.fn()
-      );
+      const result = await iterator.execute(context as any, vi.fn(), vi.fn(), vi.fn());
 
       expect(result.success).toBe(false);
       expect(result.error).toBeDefined();
@@ -234,9 +243,16 @@ describe("TaskIterator", () => {
 
       const result = await iterator.execute(
         context as any,
-        vi.fn().mockResolvedValue({ passed: 5, failed: 0, skipped: 0, coverage: { lines: 90, branches: 85, functions: 90, statements: 88 }, failures: [], duration: 100 }),
+        vi.fn().mockResolvedValue({
+          passed: 5,
+          failed: 0,
+          skipped: 0,
+          coverage: { lines: 90, branches: 85, functions: 90, statements: 88 },
+          failures: [],
+          duration: 100,
+        }),
         vi.fn().mockResolvedValue(undefined),
-        vi.fn()
+        vi.fn(),
       );
 
       expect(result).toBeDefined();
@@ -258,7 +274,7 @@ describe("TaskIterator", () => {
       const result = iterator.checkConvergence(
         [85, 87],
         { passed: true, scores: { overall: 87 }, issues: [] } as any,
-        2
+        2,
       );
 
       expect(result.converged).toBe(false);
@@ -281,7 +297,7 @@ describe("TaskIterator", () => {
       const result = iterator.checkConvergence(
         [70, 72, 75],
         { passed: false, scores: { overall: 75 }, issues: [] } as any,
-        3
+        3,
       );
 
       expect(result.converged).toBe(false);
@@ -303,7 +319,7 @@ describe("TaskIterator", () => {
       const result = iterator.checkConvergence(
         [88, 89, 89],
         { passed: true, scores: { overall: 89 }, issues: [] } as any,
-        3
+        3,
       );
 
       expect(result.converged).toBe(true);
@@ -323,8 +339,12 @@ describe("TaskIterator", () => {
 
       const result = iterator.checkConvergence(
         [88, 89, 90],
-        { passed: false, scores: { overall: 90 }, issues: [{ severity: "critical", message: "Critical issue" }] } as any,
-        3
+        {
+          passed: false,
+          scores: { overall: 90 },
+          issues: [{ severity: "critical", message: "Critical issue" }],
+        } as any,
+        3,
       );
 
       // getCriticalIssues is mocked to return [], so it will converge
@@ -345,7 +365,7 @@ describe("TaskIterator", () => {
       const result = iterator.checkConvergence(
         [80, 85, 90],
         { passed: true, scores: { overall: 90 }, issues: [] } as any,
-        3
+        3,
       );
 
       expect(result.converged).toBe(false);
@@ -369,7 +389,7 @@ describe("TaskIterator", () => {
       const result = iterator.checkConvergence(
         [95, 92, 86],
         { passed: true, scores: { overall: 86 }, issues: [] } as any,
-        3
+        3,
       );
 
       expect(result.converged).toBe(false);
@@ -391,7 +411,7 @@ describe("TaskIterator", () => {
       const result = iterator.checkConvergence(
         [90],
         { passed: true, scores: { overall: 90 }, issues: [] } as any,
-        1
+        1,
       );
 
       expect(result.improvement).toBe(0);
@@ -411,7 +431,7 @@ describe("TaskIterator", () => {
       const result = iterator.checkConvergence(
         [70, 75, 80, 85, 88, 89],
         { passed: true, scores: { overall: 89 }, issues: [] } as any,
-        6
+        6,
       );
 
       // Uses last 3: 88, 89 -> improvement = 1
@@ -433,7 +453,7 @@ describe("TaskIterator", () => {
       const result = iterator.checkConvergence(
         [85, 90],
         { passed: true, scores: { overall: 90 }, issues: [] } as any,
-        2
+        2,
       );
 
       expect(result.improvement).toBe(5);
@@ -512,12 +532,8 @@ describe("TaskIterator - real implementation coverage", () => {
               documentation: 70,
               style: 90,
             },
-            issues: [
-              { severity: "minor", category: "documentation", message: "Add docs" },
-            ],
-            suggestions: [
-              { type: "improvement", description: "Add tests", priority: "medium" },
-            ],
+            issues: [{ severity: "minor", category: "documentation", message: "Add docs" }],
+            suggestions: [{ type: "improvement", description: "Add tests", priority: "medium" }],
           }),
           usage: { inputTokens: 100, outputTokens: 50 },
         }),
@@ -537,7 +553,13 @@ describe("TaskIterator - real implementation coverage", () => {
       });
 
       const context = {
-        task: { id: "task-1", title: "Test Task", description: "Build feature", type: "feature", files: ["src/test.ts"] },
+        task: {
+          id: "task-1",
+          title: "Test Task",
+          description: "Build feature",
+          type: "feature",
+          files: ["src/test.ts"],
+        },
         projectPath: "/test/project",
         sprint: { id: "sprint-1", name: "Sprint 1", goal: "Deliver feature", stories: [] },
         previousVersions: [],
@@ -555,7 +577,7 @@ describe("TaskIterator - real implementation coverage", () => {
           duration: 100,
         }),
         vi.fn().mockResolvedValue(undefined),
-        vi.fn()
+        vi.fn(),
       );
 
       expect(result.taskId).toBe("task-1");
@@ -670,7 +692,7 @@ describe("TaskIterator - version creation and issue mapping", () => {
         duration: 100,
       }),
       vi.fn().mockResolvedValue(undefined),
-      vi.fn()
+      vi.fn(),
     );
 
     expect(result.versions).toBeDefined();
@@ -708,8 +730,21 @@ describe("TaskIterator - version creation and issue mapping", () => {
             },
           },
           issues: [
-            { severity: "minor", category: "complexity", message: "Complex code", file: "src/a.ts", line: 10, suggestion: "Simplify" },
-            { severity: "minor", category: "duplication", message: "Duplicated code", file: "src/b.ts", line: 20 },
+            {
+              severity: "minor",
+              category: "complexity",
+              message: "Complex code",
+              file: "src/a.ts",
+              line: 10,
+              suggestion: "Simplify",
+            },
+            {
+              severity: "minor",
+              category: "duplication",
+              message: "Duplicated code",
+              file: "src/b.ts",
+              line: 20,
+            },
             { severity: "minor", category: "testCoverage", message: "Low coverage" },
             { severity: "minor", category: "testQuality", message: "Poor test quality" },
           ],
@@ -765,7 +800,7 @@ describe("TaskIterator - version creation and issue mapping", () => {
         duration: 100,
       }),
       vi.fn().mockResolvedValue(undefined),
-      vi.fn()
+      vi.fn(),
     );
 
     expect(result.versions).toBeDefined();
@@ -837,7 +872,7 @@ describe("TaskIterator - version creation and issue mapping", () => {
         duration: 500,
       }),
       vi.fn().mockResolvedValue(undefined),
-      vi.fn()
+      vi.fn(),
     );
 
     expect(result.versions).toBeDefined();
@@ -894,9 +929,16 @@ describe("TaskIterator - advanced scenarios", () => {
 
       const result = await iterator.execute(
         context as any,
-        vi.fn().mockResolvedValue({ passed: 5, failed: 0, skipped: 0, coverage: { lines: 70, branches: 70, functions: 70, statements: 70 }, failures: [], duration: 100 }),
+        vi.fn().mockResolvedValue({
+          passed: 5,
+          failed: 0,
+          skipped: 0,
+          coverage: { lines: 70, branches: 70, functions: 70, statements: 70 },
+          failures: [],
+          duration: 100,
+        }),
         vi.fn().mockResolvedValue(undefined),
-        vi.fn()
+        vi.fn(),
       );
 
       expect(result.iterations).toBeGreaterThan(0);
@@ -923,9 +965,16 @@ describe("TaskIterator - advanced scenarios", () => {
 
       const result = await iterator.execute(
         context as any,
-        vi.fn().mockResolvedValue({ passed: 5, failed: 0, skipped: 0, coverage: { lines: 90, branches: 85, functions: 90, statements: 88 }, failures: [], duration: 100 }),
+        vi.fn().mockResolvedValue({
+          passed: 5,
+          failed: 0,
+          skipped: 0,
+          coverage: { lines: 90, branches: 85, functions: 90, statements: 88 },
+          failures: [],
+          duration: 100,
+        }),
         vi.fn().mockResolvedValue(undefined),
-        vi.fn()
+        vi.fn(),
       );
 
       expect(result.success).toBe(true);
@@ -955,9 +1004,16 @@ describe("TaskIterator - advanced scenarios", () => {
 
       const result = await iterator.execute(
         context as any,
-        vi.fn().mockResolvedValue({ passed: 5, failed: 0, skipped: 0, coverage: { lines: 90, branches: 85, functions: 90, statements: 88 }, failures: [], duration: 100 }),
+        vi.fn().mockResolvedValue({
+          passed: 5,
+          failed: 0,
+          skipped: 0,
+          coverage: { lines: 90, branches: 85, functions: 90, statements: 88 },
+          failures: [],
+          duration: 100,
+        }),
         vi.fn().mockResolvedValue(undefined),
-        vi.fn()
+        vi.fn(),
       );
 
       expect(result).toBeDefined();
@@ -989,12 +1045,7 @@ describe("TaskIterator - advanced scenarios", () => {
         qualityConfig: { minScore: 85, minCoverage: 80 },
       };
 
-      const result = await iterator.execute(
-        context as any,
-        vi.fn(),
-        vi.fn(),
-        vi.fn()
-      );
+      const result = await iterator.execute(context as any, vi.fn(), vi.fn(), vi.fn());
 
       expect(result.success).toBe(false);
     });
@@ -1031,7 +1082,7 @@ describe("TaskIterator - advanced scenarios", () => {
           duration: 100,
         }),
         vi.fn().mockResolvedValue(undefined),
-        vi.fn()
+        vi.fn(),
       );
 
       expect(result.versions).toBeDefined();
@@ -1070,7 +1121,7 @@ describe("TaskIterator - advanced scenarios", () => {
           duration: 100,
         }),
         vi.fn().mockResolvedValue(undefined),
-        vi.fn()
+        vi.fn(),
       );
 
       expect(result).toBeDefined();
@@ -1128,9 +1179,16 @@ describe("TaskIterator - advanced scenarios", () => {
 
       const result = await iterator.execute(
         context as any,
-        vi.fn().mockResolvedValue({ passed: 5, failed: 0, skipped: 0, coverage: { lines: 90, branches: 85, functions: 90, statements: 88 }, failures: [], duration: 100 }),
+        vi.fn().mockResolvedValue({
+          passed: 5,
+          failed: 0,
+          skipped: 0,
+          coverage: { lines: 90, branches: 85, functions: 90, statements: 88 },
+          failures: [],
+          duration: 100,
+        }),
         vi.fn().mockResolvedValue(undefined),
-        vi.fn()
+        vi.fn(),
       );
 
       expect(result.success).toBe(true);
@@ -1148,9 +1206,9 @@ describe("TaskIterator - advanced scenarios", () => {
             suggestions: [],
           }),
           checkPassed: vi.fn().mockReturnValue(false),
-          getCriticalIssues: vi.fn().mockReturnValue([
-            { severity: "critical", message: "Critical security issue" },
-          ]),
+          getCriticalIssues: vi
+            .fn()
+            .mockReturnValue([{ severity: "critical", message: "Critical security issue" }]),
         })),
       }));
 
@@ -1171,7 +1229,7 @@ describe("TaskIterator - advanced scenarios", () => {
           scores: { overall: 90 },
           issues: [{ severity: "critical", message: "Critical" }],
         } as any,
-        3
+        3,
       );
 
       // Result depends on mocked getCriticalIssues
@@ -1192,7 +1250,7 @@ describe("TaskIterator - advanced scenarios", () => {
       const result = iterator.checkConvergence(
         [],
         { passed: true, scores: { overall: 90 }, issues: [] } as any,
-        0
+        0,
       );
 
       expect(result.improvement).toBe(0);
@@ -1238,18 +1296,25 @@ describe("TaskIterator - comprehensive coverage", () => {
                 overall: score,
                 dimensions: { correctness: score, testCoverage: score },
               },
-              issues: iterationCount < 3
-                ? [
-                    { severity: "major", category: "correctness", message: "Issue 1", suggestion: "Fix it" },
-                    { severity: "minor", category: "style", message: "Issue 2" },
-                  ]
-                : [],
-              suggestions: iterationCount < 3
-                ? [
-                    { type: "improvement", description: "Suggestion 1", priority: "high" },
-                    { type: "test", description: "Suggestion 2", priority: "medium" },
-                  ]
-                : [],
+              issues:
+                iterationCount < 3
+                  ? [
+                      {
+                        severity: "major",
+                        category: "correctness",
+                        message: "Issue 1",
+                        suggestion: "Fix it",
+                      },
+                      { severity: "minor", category: "style", message: "Issue 2" },
+                    ]
+                  : [],
+              suggestions:
+                iterationCount < 3
+                  ? [
+                      { type: "improvement", description: "Suggestion 1", priority: "high" },
+                      { type: "test", description: "Suggestion 2", priority: "medium" },
+                    ]
+                  : [],
               testResults: { passed: 5, failed: 0, skipped: 0 },
             });
           }),
@@ -1269,7 +1334,13 @@ describe("TaskIterator - comprehensive coverage", () => {
       });
 
       const context = {
-        task: { id: "task-1", title: "Test Task", description: "Test description", type: "feature", files: [] },
+        task: {
+          id: "task-1",
+          title: "Test Task",
+          description: "Test description",
+          type: "feature",
+          files: [],
+        },
         projectPath: "/test/project",
         sprint: { id: "sprint-1", name: "Sprint 1", goal: "Complete the feature", stories: [] },
         previousVersions: [],
@@ -1287,7 +1358,7 @@ describe("TaskIterator - comprehensive coverage", () => {
           duration: 100,
         }),
         vi.fn().mockResolvedValue(undefined),
-        vi.fn()
+        vi.fn(),
       );
 
       expect(result.taskId).toBe("task-1");
@@ -1319,7 +1390,9 @@ describe("TaskIterator - comprehensive coverage", () => {
               overall: 70,
               dimensions: { correctness: 70, testCoverage: 65 },
             },
-            issues: [{ severity: "major", category: "correctness", message: "Error", suggestion: "Fix" }],
+            issues: [
+              { severity: "major", category: "correctness", message: "Error", suggestion: "Fix" },
+            ],
             suggestions: [{ type: "improvement", description: "Improve", priority: "high" }],
             testResults: { passed: 3, failed: 2, skipped: 0 },
           }),
@@ -1357,7 +1430,7 @@ describe("TaskIterator - comprehensive coverage", () => {
           duration: 100,
         }),
         vi.fn().mockResolvedValue(undefined),
-        vi.fn()
+        vi.fn(),
       );
 
       expect(result.converged).toBe(false);
@@ -1438,7 +1511,7 @@ describe("TaskIterator - comprehensive coverage", () => {
           duration: 100,
         }),
         vi.fn().mockResolvedValue(undefined),
-        vi.fn()
+        vi.fn(),
       );
 
       // Quality passes threshold on first iteration
@@ -1471,12 +1544,7 @@ describe("TaskIterator - comprehensive coverage", () => {
         qualityConfig: { minScore: 85, minCoverage: 80 },
       };
 
-      const result = await iterator.execute(
-        context as any,
-        vi.fn(),
-        vi.fn(),
-        vi.fn()
-      );
+      const result = await iterator.execute(context as any, vi.fn(), vi.fn(), vi.fn());
 
       expect(result.success).toBe(false);
       expect(result.error).toBe("[object Object]");
@@ -1522,8 +1590,20 @@ describe("TaskIterator - comprehensive coverage", () => {
               },
             },
             issues: [
-              { severity: "minor", category: "correctness", message: "Minor issue", file: "src/a.ts", line: 10, suggestion: "Fix" },
-              { severity: "minor", category: "completeness", message: "Incomplete", file: "src/b.ts" },
+              {
+                severity: "minor",
+                category: "correctness",
+                message: "Minor issue",
+                file: "src/a.ts",
+                line: 10,
+                suggestion: "Fix",
+              },
+              {
+                severity: "minor",
+                category: "completeness",
+                message: "Incomplete",
+                file: "src/b.ts",
+              },
               { severity: "info", category: "robustness", message: "Consider edge case" },
               { severity: "minor", category: "readability", message: "Improve naming" },
               { severity: "minor", category: "maintainability", message: "Refactor" },
@@ -1559,7 +1639,13 @@ describe("TaskIterator - comprehensive coverage", () => {
       });
 
       const context = {
-        task: { id: "task-files", title: "File Actions Test", description: "Test all actions", type: "feature", files: [] },
+        task: {
+          id: "task-files",
+          title: "File Actions Test",
+          description: "Test all actions",
+          type: "feature",
+          files: [],
+        },
         projectPath: "/test/project",
         sprint: { id: "sprint-1", name: "Sprint 1", goal: "Test", stories: [] },
         previousVersions: [],
@@ -1577,7 +1663,7 @@ describe("TaskIterator - comprehensive coverage", () => {
           duration: 200,
         }),
         vi.fn().mockResolvedValue(undefined),
-        vi.fn()
+        vi.fn(),
       );
 
       expect(result.versions.length).toBeGreaterThan(0);
@@ -1672,7 +1758,13 @@ describe("TaskIterator - comprehensive coverage", () => {
       });
 
       const context = {
-        task: { id: "task-feedback", title: "Test", description: "Test", type: "feature", files: [] },
+        task: {
+          id: "task-feedback",
+          title: "Test",
+          description: "Test",
+          type: "feature",
+          files: [],
+        },
         projectPath: "/test",
         sprint: { id: "sprint-1", name: "Sprint 1", goal: "Test", stories: [] },
         previousVersions: [],
@@ -1690,7 +1782,7 @@ describe("TaskIterator - comprehensive coverage", () => {
           duration: 100,
         }),
         vi.fn().mockResolvedValue(undefined),
-        vi.fn()
+        vi.fn(),
       );
 
       // The test passes if iteration happens - feedback truncation is internal
@@ -1739,7 +1831,13 @@ describe("TaskIterator - comprehensive coverage", () => {
       });
 
       const context = {
-        task: { id: "task-clean", title: "Clean Code", description: "Perfect code", type: "feature", files: [] },
+        task: {
+          id: "task-clean",
+          title: "Clean Code",
+          description: "Perfect code",
+          type: "feature",
+          files: [],
+        },
         projectPath: "/test",
         sprint: { id: "sprint-1", name: "Sprint 1", goal: "Test", stories: [] },
         previousVersions: [],
@@ -1757,7 +1855,7 @@ describe("TaskIterator - comprehensive coverage", () => {
           duration: 50,
         }),
         vi.fn().mockResolvedValue(undefined),
-        vi.fn()
+        vi.fn(),
       );
 
       expect(result.success).toBe(true);
@@ -1824,7 +1922,7 @@ describe("TaskIterator - comprehensive coverage", () => {
           duration: 100,
         }),
         vi.fn().mockResolvedValue(undefined),
-        vi.fn()
+        vi.fn(),
       );
 
       expect(result.success).toBe(true);
@@ -1867,7 +1965,13 @@ describe("TaskIterator - comprehensive coverage", () => {
       });
 
       const context = {
-        task: { id: "task-no-prev", title: "Test", description: "Test", type: "feature", files: [] },
+        task: {
+          id: "task-no-prev",
+          title: "Test",
+          description: "Test",
+          type: "feature",
+          files: [],
+        },
         projectPath: "/test",
         sprint: { id: "sprint-1", name: "Sprint 1", goal: "Goal", stories: [] },
         previousVersions: [],
@@ -1885,7 +1989,7 @@ describe("TaskIterator - comprehensive coverage", () => {
           duration: 100,
         }),
         vi.fn().mockResolvedValue(undefined),
-        vi.fn()
+        vi.fn(),
       );
 
       expect(result.success).toBe(true);
@@ -1944,7 +2048,13 @@ describe("TaskIterator - comprehensive coverage", () => {
       });
 
       const context = {
-        task: { id: "task-converge", title: "Test", description: "Test", type: "feature", files: [] },
+        task: {
+          id: "task-converge",
+          title: "Test",
+          description: "Test",
+          type: "feature",
+          files: [],
+        },
         projectPath: "/test",
         sprint: { id: "sprint-1", name: "Sprint 1", goal: "Test", stories: [] },
         previousVersions: [],
@@ -1962,7 +2072,7 @@ describe("TaskIterator - comprehensive coverage", () => {
           duration: 100,
         }),
         vi.fn().mockResolvedValue(undefined),
-        vi.fn()
+        vi.fn(),
       );
 
       expect(result.converged).toBe(true);
@@ -2004,8 +2114,21 @@ describe("TaskIterator - comprehensive coverage", () => {
               },
             },
             issues: [
-              { severity: "minor", category: "correctness", message: "Correctness", file: "a.ts", line: 1, suggestion: "Fix" },
-              { severity: "minor", category: "completeness", message: "Completeness", file: "b.ts", line: 2 },
+              {
+                severity: "minor",
+                category: "correctness",
+                message: "Correctness",
+                file: "a.ts",
+                line: 1,
+                suggestion: "Fix",
+              },
+              {
+                severity: "minor",
+                category: "completeness",
+                message: "Completeness",
+                file: "b.ts",
+                line: 2,
+              },
               { severity: "minor", category: "robustness", message: "Robustness" },
               { severity: "minor", category: "readability", message: "Readability" },
               { severity: "minor", category: "maintainability", message: "Maintainability" },
@@ -2054,7 +2177,7 @@ describe("TaskIterator - comprehensive coverage", () => {
           duration: 100,
         }),
         vi.fn().mockResolvedValue(undefined),
-        vi.fn()
+        vi.fn(),
       );
 
       expect(result.versions.length).toBeGreaterThan(0);
@@ -2081,7 +2204,11 @@ describe("TaskIterator - comprehensive coverage", () => {
           generate: vi.fn().mockResolvedValue({
             files: [
               { path: "src/module-a.ts", content: "export const a = 1;", action: "create" },
-              { path: "src/module-b.ts", content: "export const b = 2;\nexport const c = 3;", action: "create" },
+              {
+                path: "src/module-b.ts",
+                content: "export const b = 2;\nexport const c = 3;",
+                action: "create",
+              },
             ],
             explanation: "Generated multiple files",
             confidence: 85,
@@ -2106,12 +2233,18 @@ describe("TaskIterator - comprehensive coverage", () => {
             return Promise.resolve({
               passed: callCount > 1,
               scores: { overall: score, dimensions: { correctness: score } },
-              issues: callCount === 1
-                ? [{ severity: "major", category: "correctness", message: "Fix it", suggestion: "Do this" }]
-                : [],
-              suggestions: callCount === 1
-                ? [{ priority: "high", description: "Improve" }]
-                : [],
+              issues:
+                callCount === 1
+                  ? [
+                      {
+                        severity: "major",
+                        category: "correctness",
+                        message: "Fix it",
+                        suggestion: "Do this",
+                      },
+                    ]
+                  : [],
+              suggestions: callCount === 1 ? [{ priority: "high", description: "Improve" }] : [],
               testResults: { passed: 5, failed: 0, skipped: 0 },
             });
           }),
@@ -2131,7 +2264,13 @@ describe("TaskIterator - comprehensive coverage", () => {
       });
 
       const context = {
-        task: { id: "task-multi", title: "Multi-file", description: "Test", type: "feature", files: [] },
+        task: {
+          id: "task-multi",
+          title: "Multi-file",
+          description: "Test",
+          type: "feature",
+          files: [],
+        },
         projectPath: "/test",
         sprint: { id: "sprint-1", name: "Sprint 1", goal: "Test", stories: [] },
         previousVersions: [],
@@ -2149,7 +2288,7 @@ describe("TaskIterator - comprehensive coverage", () => {
           duration: 100,
         }),
         vi.fn().mockResolvedValue(undefined),
-        vi.fn()
+        vi.fn(),
       );
 
       expect(result.success).toBe(true);
@@ -2195,7 +2334,13 @@ describe("TaskIterator - comprehensive coverage", () => {
       });
 
       const context = {
-        task: { id: "task-failures", title: "Test", description: "Test", type: "feature", files: [] },
+        task: {
+          id: "task-failures",
+          title: "Test",
+          description: "Test",
+          type: "feature",
+          files: [],
+        },
         projectPath: "/test",
         sprint: { id: "sprint-1", name: "Sprint 1", goal: "Test", stories: [] },
         previousVersions: [],
@@ -2210,13 +2355,23 @@ describe("TaskIterator - comprehensive coverage", () => {
           skipped: 1,
           coverage: { lines: 80, branches: 75, functions: 85, statements: 78 },
           failures: [
-            { name: "test-should-work", file: "test.spec.ts", message: "Expected true, got false", stack: "Error\n  at test.spec.ts:10" },
-            { name: "test-edge-case", file: "edge.spec.ts", message: "Timeout exceeded", stack: "TimeoutError\n  at edge.spec.ts:25" },
+            {
+              name: "test-should-work",
+              file: "test.spec.ts",
+              message: "Expected true, got false",
+              stack: "Error\n  at test.spec.ts:10",
+            },
+            {
+              name: "test-edge-case",
+              file: "edge.spec.ts",
+              message: "Timeout exceeded",
+              stack: "TimeoutError\n  at edge.spec.ts:25",
+            },
           ],
           duration: 300,
         }),
         vi.fn().mockResolvedValue(undefined),
-        vi.fn()
+        vi.fn(),
       );
 
       expect(result.versions.length).toBeGreaterThan(0);
@@ -2255,9 +2410,11 @@ describe("TaskIterator - comprehensive coverage", () => {
             testResults: { passed: 5, failed: 0, skipped: 0 },
           }),
           checkPassed: vi.fn().mockReturnValue(false),
-          getCriticalIssues: vi.fn().mockReturnValue([
-            { severity: "critical", category: "security", message: "SQL Injection" },
-          ]),
+          getCriticalIssues: vi
+            .fn()
+            .mockReturnValue([
+              { severity: "critical", category: "security", message: "SQL Injection" },
+            ]),
         })),
       }));
 
@@ -2279,7 +2436,7 @@ describe("TaskIterator - comprehensive coverage", () => {
           scores: { overall: 90 },
           issues: [{ severity: "critical", category: "security", message: "SQL Injection" }],
         } as any,
-        3
+        3,
       );
 
       expect(result.converged).toBe(false);
@@ -2342,7 +2499,7 @@ describe("TaskIterator - comprehensive coverage", () => {
             { severity: "critical", message: "Data corruption" },
           ],
         } as any,
-        3
+        3,
       );
 
       expect(result.converged).toBe(false);
@@ -2406,7 +2563,7 @@ describe("TaskIterator - comprehensive coverage", () => {
           duration: 150,
         }),
         vi.fn().mockResolvedValue(undefined),
-        vi.fn()
+        vi.fn(),
       );
 
       expect(result.versions.length).toBeGreaterThan(0);

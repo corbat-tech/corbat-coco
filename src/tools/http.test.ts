@@ -73,7 +73,7 @@ describe("httpFetchTool", () => {
         headers: expect.objectContaining({
           "User-Agent": "Corbat-Coco/0.1.0",
         }),
-      })
+      }),
     );
     expect(result.status).toBe(200);
     expect(result.body).toBe("Hello World");
@@ -117,7 +117,7 @@ describe("httpFetchTool", () => {
       expect.objectContaining({
         method: "POST",
         body: '{"name": "test"}',
-      })
+      }),
     );
     expect(result.status).toBe(201);
   });
@@ -136,7 +136,7 @@ describe("httpFetchTool", () => {
       httpFetchTool.execute({
         url: "https://slow.example.com",
         timeout: 50,
-      })
+      }),
     ).rejects.toThrow(/timed out/i);
 
     vi.useFakeTimers(); // Restore fake timers
@@ -188,7 +188,7 @@ describe("httpFetchTool", () => {
     await expect(
       httpFetchTool.execute({
         url: "https://bad.example.com",
-      })
+      }),
     ).rejects.toThrow(/HTTP request failed/);
 
     vi.useFakeTimers(); // Restore fake timers
@@ -224,7 +224,7 @@ describe("httpFetchTool", () => {
         headers: expect.objectContaining({
           Authorization: "Bearer token123",
         }),
-      })
+      }),
     );
   });
 });
@@ -328,7 +328,7 @@ describe("httpJsonTool", () => {
           "Content-Type": "application/json",
           Accept: "application/json",
         }),
-      })
+      }),
     );
   });
 

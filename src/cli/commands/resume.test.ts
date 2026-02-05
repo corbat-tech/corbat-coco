@@ -89,7 +89,7 @@ describe("registerResumeCommand", () => {
     registerResumeCommand(mockProgram as any);
 
     expect(mockProgram.description).toHaveBeenCalledWith(
-      "Resume from the last checkpoint after an interruption"
+      "Resume from the last checkpoint after an interruption",
     );
   });
 
@@ -107,7 +107,7 @@ describe("registerResumeCommand", () => {
 
     expect(mockProgram.option).toHaveBeenCalledWith(
       "-c, --checkpoint <id>",
-      "Resume from a specific checkpoint"
+      "Resume from a specific checkpoint",
     );
   });
 
@@ -123,10 +123,7 @@ describe("registerResumeCommand", () => {
 
     registerResumeCommand(mockProgram as any);
 
-    expect(mockProgram.option).toHaveBeenCalledWith(
-      "--list",
-      "List available checkpoints"
-    );
+    expect(mockProgram.option).toHaveBeenCalledWith("--list", "List available checkpoints");
   });
 
   it("should have force option", async () => {
@@ -143,7 +140,7 @@ describe("registerResumeCommand", () => {
 
     expect(mockProgram.option).toHaveBeenCalledWith(
       "--force",
-      "Force resume even if state is inconsistent"
+      "Force resume even if state is inconsistent",
     );
   });
 
@@ -179,7 +176,9 @@ describe("registerResumeCommand", () => {
 });
 
 describe("resume action handler - runResume", () => {
-  let actionHandler: ((options: { checkpoint?: string; list?: boolean; force?: boolean }) => Promise<void>) | null = null;
+  let actionHandler:
+    | ((options: { checkpoint?: string; list?: boolean; force?: boolean }) => Promise<void>)
+    | null = null;
 
   function setupDefaultMocks() {
     mockFsAccess.mockReset();
@@ -342,9 +341,7 @@ describe("resume action handler - runResume", () => {
     await vi.runAllTimersAsync();
     await promise;
 
-    expect(p.log.success).toHaveBeenCalledWith(
-      expect.stringMatching(/Resuming from phase:/)
-    );
+    expect(p.log.success).toHaveBeenCalledWith(expect.stringMatching(/Resuming from phase:/));
   });
 
   it("should display success outro message", async () => {
@@ -430,7 +427,9 @@ describe("resume command integration", () => {
 });
 
 describe("checkpoint listing", () => {
-  let actionHandler: ((options: { checkpoint?: string; list?: boolean; force?: boolean }) => Promise<void>) | null = null;
+  let actionHandler:
+    | ((options: { checkpoint?: string; list?: boolean; force?: boolean }) => Promise<void>)
+    | null = null;
 
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -503,7 +502,9 @@ describe("checkpoint listing", () => {
 });
 
 describe("checkpoint validation", () => {
-  let actionHandler: ((options: { checkpoint?: string; list?: boolean; force?: boolean }) => Promise<void>) | null = null;
+  let actionHandler:
+    | ((options: { checkpoint?: string; list?: boolean; force?: boolean }) => Promise<void>)
+    | null = null;
 
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -565,9 +566,7 @@ describe("checkpoint validation", () => {
     await promise;
 
     // Should complete successfully without validation error
-    expect(p.log.error).not.toHaveBeenCalledWith(
-      expect.stringMatching(/validation failed/)
-    );
+    expect(p.log.error).not.toHaveBeenCalledWith(expect.stringMatching(/validation failed/));
   });
 
   it("should bypass validation with --force flag", async () => {
@@ -582,7 +581,9 @@ describe("checkpoint validation", () => {
 });
 
 describe("state restoration", () => {
-  let actionHandler: ((options: { checkpoint?: string; list?: boolean; force?: boolean }) => Promise<void>) | null = null;
+  let actionHandler:
+    | ((options: { checkpoint?: string; list?: boolean; force?: boolean }) => Promise<void>)
+    | null = null;
 
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -651,8 +652,6 @@ describe("state restoration", () => {
     await vi.runAllTimersAsync();
     await promise;
 
-    expect(p.log.success).toHaveBeenCalledWith(
-      expect.stringContaining("complete")
-    );
+    expect(p.log.success).toHaveBeenCalledWith(expect.stringContaining("complete"));
   });
 });

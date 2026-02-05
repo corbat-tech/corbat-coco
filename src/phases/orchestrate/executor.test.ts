@@ -66,9 +66,7 @@ describe("OrchestrateExecutor", () => {
       // Test with specification
       const canStart = executor.canStart({
         state: {
-          artifacts: [
-            { type: "specification", path: "/test/spec.md" },
-          ],
+          artifacts: [{ type: "specification", path: "/test/spec.md" }],
         },
       } as any);
 
@@ -136,7 +134,7 @@ describe("OrchestrateExecutor", () => {
 
       // Should not throw
       await expect(
-        executor.restore(checkpoint, { projectPath: tempDir } as any)
+        executor.restore(checkpoint, { projectPath: tempDir } as any),
       ).resolves.not.toThrow();
     });
   });
@@ -349,11 +347,7 @@ describe("OrchestrateExecutor - advanced scenarios", () => {
         openQuestions: [],
       };
 
-      await fs.writeFile(
-        path.join(specDir, "spec.json"),
-        JSON.stringify(spec, null, 2),
-        "utf-8"
-      );
+      await fs.writeFile(path.join(specDir, "spec.json"), JSON.stringify(spec, null, 2), "utf-8");
 
       const mockLLMChat = vi.fn().mockResolvedValue({
         content: JSON.stringify({
@@ -460,7 +454,8 @@ describe("OrchestrateExecutor - advanced scenarios", () => {
     it("should save ADRs with index file", async () => {
       const { OrchestrateExecutor } = await import("./executor.js");
 
-      const mockLLMChat = vi.fn()
+      const mockLLMChat = vi
+        .fn()
         .mockResolvedValueOnce({
           content: JSON.stringify({
             overview: { pattern: "layered", description: "Layered" },
@@ -527,8 +522,18 @@ describe("OrchestrateExecutor - advanced scenarios", () => {
           relationships: [],
           dataModels: [],
           diagrams: [
-            { id: "system-context", title: "System Context", type: "c4-context", mermaid: "graph TD\nA-->B" },
-            { id: "sequence-login", title: "Login Flow", type: "sequence", mermaid: "sequenceDiagram\nA->>B: Login" },
+            {
+              id: "system-context",
+              title: "System Context",
+              type: "c4-context",
+              mermaid: "graph TD\nA-->B",
+            },
+            {
+              id: "sequence-login",
+              title: "Login Flow",
+              type: "sequence",
+              mermaid: "sequenceDiagram\nA->>B: Login",
+            },
           ],
         }),
         usage: { inputTokens: 100, outputTokens: 50 },

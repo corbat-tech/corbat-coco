@@ -75,7 +75,8 @@ export class CompleteExecutor implements PhaseExecutor {
 
     try {
       this.backlog = await this.loadBacklog(context.projectPath);
-      this.currentSprint = this.backlog.currentSprint || await this.loadCurrentSprint(context.projectPath);
+      this.currentSprint =
+        this.backlog.currentSprint || (await this.loadCurrentSprint(context.projectPath));
 
       if (!this.currentSprint) {
         throw new PhaseError("No sprint to execute", { phase: "complete" });
@@ -152,14 +153,10 @@ export class CompleteExecutor implements PhaseExecutor {
         context.projectPath,
         ".coco",
         "checkpoints",
-        `complete-${this.currentSprint.id}.json`
+        `complete-${this.currentSprint.id}.json`,
       );
       await fs.mkdir(path.dirname(checkpointPath), { recursive: true });
-      await fs.writeFile(
-        checkpointPath,
-        JSON.stringify(this.checkpointState, null, 2),
-        "utf-8"
-      );
+      await fs.writeFile(checkpointPath, JSON.stringify(this.checkpointState, null, 2), "utf-8");
     }
 
     return {
@@ -186,7 +183,7 @@ export class CompleteExecutor implements PhaseExecutor {
         context.projectPath,
         ".coco",
         "checkpoints",
-        `complete-${sprintId}.json`
+        `complete-${sprintId}.json`,
       );
       const content = await fs.readFile(checkpointPath, "utf-8");
       this.checkpointState = JSON.parse(content) as CompleteCheckpointState;
@@ -213,7 +210,7 @@ export class CompleteExecutor implements PhaseExecutor {
   private async executeSprint(
     context: PhaseContext,
     sprint: Sprint,
-    backlog: Backlog
+    backlog: Backlog,
   ): Promise<SprintExecutionResult> {
     const sprintTasks = this.getSprintTasks(sprint, backlog);
 
@@ -252,18 +249,26 @@ export class CompleteExecutor implements PhaseExecutor {
     }
 
     // Get remaining tasks (not yet executed)
-    const executedTaskIds = new Set(taskResults.map(r => r.taskId));
-    const remainingTasks = sprintTasks.filter(t => !executedTaskIds.has(t.id));
+    const executedTaskIds = new Set(taskResults.map((r) => r.taskId));
+    const remainingTasks = sprintTasks.filter((t) => !executedTaskIds.has(t.id));
 
     // Execute tasks in parallel batches based on dependencies
     if (this.config.parallelExecution && remainingTasks.length > 0) {
       taskResults = await this.executeTasksParallel(
-        context, sprint, remainingTasks, taskResults, startTime
+        context,
+        sprint,
+        remainingTasks,
+        taskResults,
+        startTime,
       );
     } else {
       // Sequential execution
       taskResults = await this.executeTasksSequential(
-        context, sprint, remainingTasks, taskResults, startTime
+        context,
+        sprint,
+        remainingTasks,
+        taskResults,
+        startTime,
       );
     }
 
@@ -296,7 +301,7 @@ export class CompleteExecutor implements PhaseExecutor {
     sprint: Sprint,
     tasks: Task[],
     previousResults: TaskExecutionResult[],
-    startTime: number
+    startTime: number,
   ): Promise<TaskExecutionResult[]> {
     const taskResults = [...previousResults];
     const totalTasks = tasks.length + previousResults.length;
@@ -385,23 +390,22 @@ export class CompleteExecutor implements PhaseExecutor {
     sprint: Sprint,
     tasks: Task[],
     previousResults: TaskExecutionResult[],
-    startTime: number
+    startTime: number,
   ): Promise<TaskExecutionResult[]> {
     const taskResults = [...previousResults];
     const totalTasks = tasks.length + previousResults.length;
-    const remainingTasks = new Set(tasks.map(t => t.id));
+    const remainingTasks = new Set(tasks.map((t) => t.id));
 
     while (remainingTasks.size > 0) {
       // Find tasks that can be executed (dependencies satisfied)
-      const readyTasks = tasks.filter(t =>
-        remainingTasks.has(t.id) &&
-        this.areDependenciesSatisfied(t, this.completedTaskIds)
+      const readyTasks = tasks.filter(
+        (t) => remainingTasks.has(t.id) && this.areDependenciesSatisfied(t, this.completedTaskIds),
       );
 
       if (readyTasks.length === 0) {
         // No tasks can run - remaining tasks have unmet dependencies
         for (const taskId of remainingTasks) {
-          const task = tasks.find(t => t.id === taskId);
+          const task = tasks.find((t) => t.id === taskId);
           if (task) {
             const blockedResult: TaskExecutionResult = {
               taskId: task.id,
@@ -431,11 +435,11 @@ export class CompleteExecutor implements PhaseExecutor {
       });
 
       // Execute batch in parallel
-      const batchPromises = batch.map(task =>
-        this.executeTask(context, task, sprint).then(result => ({
+      const batchPromises = batch.map((task) =>
+        this.executeTask(context, task, sprint).then((result) => ({
           task,
           result,
-        }))
+        })),
       );
 
       const batchResults = await Promise.all(batchPromises);
@@ -484,7 +488,7 @@ export class CompleteExecutor implements PhaseExecutor {
   private async executeTask(
     context: PhaseContext,
     task: Task,
-    sprint: Sprint
+    sprint: Sprint,
   ): Promise<TaskExecutionResult> {
     if (!this.iterator) {
       throw new PhaseError("Iterator not initialized", { phase: "complete" });
@@ -697,7 +701,7 @@ export class CompleteExecutor implements PhaseExecutor {
    */
   private async saveSprintResults(
     projectPath: string,
-    result: SprintExecutionResult
+    result: SprintExecutionResult,
   ): Promise<string> {
     const resultsDir = path.join(projectPath, ".coco", "results");
     await fs.mkdir(resultsDir, { recursive: true });
@@ -735,7 +739,9 @@ export class CompleteExecutor implements PhaseExecutor {
     for (const task of result.taskResults) {
       const status = task.success ? "✅" : "❌";
       const converged = task.converged ? "Yes" : "No";
-      sections.push(`| ${task.taskId} | ${status} | ${task.finalScore} | ${task.iterations} | ${converged} |`);
+      sections.push(
+        `| ${task.taskId} | ${status} | ${task.finalScore} | ${task.iterations} | ${converged} |`,
+      );
     }
 
     sections.push("");

@@ -55,17 +55,17 @@ describe("status command", () => {
         provider: { type: "anthropic" },
         quality: { minScore: 85 },
       } as any);
-      vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify({
-        currentPhase: "complete",
-        startedAt: new Date().toISOString(),
-      }));
+      vi.mocked(fs.readFile).mockResolvedValue(
+        JSON.stringify({
+          currentPhase: "complete",
+          startedAt: new Date().toISOString(),
+        }),
+      );
 
       const { runStatus } = await import("./status.js");
       await runStatus({ cwd: "/test" });
 
-      expect(prompts.log.info).toHaveBeenCalledWith(
-        expect.stringContaining("test-project")
-      );
+      expect(prompts.log.info).toHaveBeenCalledWith(expect.stringContaining("test-project"));
     });
 
     it("should show current sprint progress", async () => {
@@ -100,9 +100,7 @@ describe("status command", () => {
       const { runStatus } = await import("./status.js");
       await runStatus({ cwd: "/test" });
 
-      expect(prompts.log.info).toHaveBeenCalledWith(
-        expect.stringContaining("Sprint")
-      );
+      expect(prompts.log.info).toHaveBeenCalledWith(expect.stringContaining("Sprint"));
     });
 
     it("should show quality metrics", async () => {
@@ -116,21 +114,21 @@ describe("status command", () => {
         provider: { type: "anthropic" },
         quality: { minScore: 85 },
       } as any);
-      vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify({
-        currentPhase: "complete",
-        metrics: {
-          averageQuality: 89,
-          testCoverage: 85,
-          securityIssues: 0,
-        },
-      }));
+      vi.mocked(fs.readFile).mockResolvedValue(
+        JSON.stringify({
+          currentPhase: "complete",
+          metrics: {
+            averageQuality: 89,
+            testCoverage: 85,
+            securityIssues: 0,
+          },
+        }),
+      );
 
       const { runStatus } = await import("./status.js");
       await runStatus({ cwd: "/test", verbose: true });
 
-      expect(prompts.log.info).toHaveBeenCalledWith(
-        expect.stringContaining("89")
-      );
+      expect(prompts.log.info).toHaveBeenCalledWith(expect.stringContaining("89"));
     });
 
     it("should list checkpoints when verbose", async () => {
@@ -144,9 +142,11 @@ describe("status command", () => {
         provider: { type: "anthropic" },
         quality: { minScore: 85 },
       } as any);
-      vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify({
-        currentPhase: "complete",
-      }));
+      vi.mocked(fs.readFile).mockResolvedValue(
+        JSON.stringify({
+          currentPhase: "complete",
+        }),
+      );
       vi.mocked(fs.readdir).mockResolvedValue([
         "cp-2024-01-15-100000.json",
         "cp-2024-01-15-110000.json",
@@ -159,9 +159,7 @@ describe("status command", () => {
       const { runStatus } = await import("./status.js");
       await runStatus({ cwd: "/test", verbose: true });
 
-      expect(prompts.log.info).toHaveBeenCalledWith(
-        expect.stringContaining("checkpoint")
-      );
+      expect(prompts.log.info).toHaveBeenCalledWith(expect.stringContaining("checkpoint"));
     });
 
     it("should handle missing project gracefully", async () => {
@@ -173,9 +171,7 @@ describe("status command", () => {
       const { runStatus } = await import("./status.js");
       await runStatus({ cwd: "/test" });
 
-      expect(prompts.log.warning).toHaveBeenCalledWith(
-        expect.stringContaining("No project found")
-      );
+      expect(prompts.log.warning).toHaveBeenCalledWith(expect.stringContaining("No project found"));
     });
   });
 
@@ -240,9 +236,11 @@ describe("status command", () => {
         provider: { type: "anthropic" },
         quality: { minScore: 85 },
       } as any);
-      vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify({
-        currentPhase: "orchestrate",
-      }));
+      vi.mocked(fs.readFile).mockResolvedValue(
+        JSON.stringify({
+          currentPhase: "orchestrate",
+        }),
+      );
 
       const { runStatus } = await import("./status.js");
       const result = await runStatus({ cwd: "/test", json: true });
@@ -268,9 +266,14 @@ describe("status command", () => {
       registerStatusCommand(mockProgram as any);
 
       expect(mockProgram.command).toHaveBeenCalledWith("status");
-      expect(mockProgram.description).toHaveBeenCalledWith("Show current project status and progress");
+      expect(mockProgram.description).toHaveBeenCalledWith(
+        "Show current project status and progress",
+      );
       expect(mockProgram.option).toHaveBeenCalledWith("-d, --detailed", "Show detailed status");
-      expect(mockProgram.option).toHaveBeenCalledWith("-v, --verbose", "Show verbose output including checkpoints");
+      expect(mockProgram.option).toHaveBeenCalledWith(
+        "-v, --verbose",
+        "Show verbose output including checkpoints",
+      );
       expect(mockProgram.option).toHaveBeenCalledWith("--json", "Output as JSON");
     });
 

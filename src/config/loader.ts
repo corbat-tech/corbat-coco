@@ -5,11 +5,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import JSON5 from "json5";
-import {
-  CocoConfigSchema,
-  createDefaultConfigObject,
-  type CocoConfig,
-} from "./schema.js";
+import { CocoConfigSchema, createDefaultConfigObject, type CocoConfig } from "./schema.js";
 import { ConfigError } from "../utils/errors.js";
 
 /**
@@ -53,10 +49,7 @@ export async function loadConfig(configPath?: string): Promise<CocoConfig> {
 /**
  * Save configuration to file
  */
-export async function saveConfig(
-  config: CocoConfig,
-  configPath?: string
-): Promise<void> {
+export async function saveConfig(config: CocoConfig, configPath?: string): Promise<void> {
   // Validate configuration before saving
   const result = CocoConfigSchema.safeParse(config);
   if (!result.success) {
@@ -84,7 +77,7 @@ export async function saveConfig(
  */
 export function createDefaultConfig(
   projectName: string,
-  language: "typescript" | "python" | "go" | "rust" | "java" = "typescript"
+  language: "typescript" | "python" | "go" | "rust" | "java" = "typescript",
 ): CocoConfig {
   return createDefaultConfigObject(projectName, language);
 }
@@ -146,10 +139,7 @@ export async function configExists(configPath?: string): Promise<boolean> {
 /**
  * Get a specific configuration value by path
  */
-export function getConfigValue<T>(
-  config: CocoConfig,
-  path: string
-): T | undefined {
+export function getConfigValue<T>(config: CocoConfig, path: string): T | undefined {
   const keys = path.split(".");
   let current: unknown = config;
 
@@ -166,11 +156,7 @@ export function getConfigValue<T>(
 /**
  * Set a specific configuration value by path
  */
-export function setConfigValue<T>(
-  config: CocoConfig,
-  configPath: string,
-  value: T
-): CocoConfig {
+export function setConfigValue<T>(config: CocoConfig, configPath: string, value: T): CocoConfig {
   const keys = configPath.split(".");
   const result = structuredClone(config);
   let current: Record<string, unknown> = result as unknown as Record<string, unknown>;
@@ -195,10 +181,7 @@ export function setConfigValue<T>(
 /**
  * Merge configuration with defaults
  */
-export function mergeWithDefaults(
-  partial: Partial<CocoConfig>,
-  projectName: string
-): CocoConfig {
+export function mergeWithDefaults(partial: Partial<CocoConfig>, projectName: string): CocoConfig {
   const defaults = createDefaultConfig(projectName);
   return {
     ...defaults,

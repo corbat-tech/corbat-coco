@@ -161,12 +161,12 @@ Examples:
         result.stdout,
         result.stderr,
         result.exitCode ?? 0,
-        duration
+        duration,
       );
     } catch (error) {
       throw new ToolError(
         `Test execution failed: ${error instanceof Error ? error.message : String(error)}`,
-        { tool: "run_tests", cause: error instanceof Error ? error : undefined }
+        { tool: "run_tests", cause: error instanceof Error ? error : undefined },
       );
     }
   },
@@ -180,7 +180,7 @@ function parseTestResults(
   stdout: string,
   stderr: string,
   exitCode: number,
-  duration: number
+  duration: number,
 ): TestResult {
   // Try to parse JSON output
   try {
@@ -232,7 +232,7 @@ function parseJestLikeResults(
       }>;
     }>;
   },
-  duration: number
+  duration: number,
 ): TestResult {
   const passed = json.numPassedTests ?? 0;
   const failed = json.numFailedTests ?? 0;
@@ -350,7 +350,7 @@ Examples:
 
       throw new ToolError(
         `Failed to read coverage: ${error instanceof Error ? error.message : String(error)}`,
-        { tool: "get_coverage", cause: error instanceof Error ? error : undefined }
+        { tool: "get_coverage", cause: error instanceof Error ? error : undefined },
       );
     }
   },

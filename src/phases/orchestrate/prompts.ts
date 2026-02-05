@@ -366,7 +366,7 @@ Respond in JSON format:
  */
 export function fillPrompt(
   template: string,
-  variables: Record<string, string | number | unknown>
+  variables: Record<string, string | number | unknown>,
 ): string {
   let result = template;
 

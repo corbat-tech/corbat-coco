@@ -29,16 +29,23 @@ export const defaultMockResponse = {
 /**
  * Create a mock response with custom text
  */
-export function createMockResponse(text: string, options?: {
-  toolUse?: {
-    id: string;
-    name: string;
-    input: Record<string, unknown>;
-  };
-}) {
-  const content: Array<{ type: string; text?: string; id?: string; name?: string; input?: Record<string, unknown> }> = [
-    { type: "text", text },
-  ];
+export function createMockResponse(
+  text: string,
+  options?: {
+    toolUse?: {
+      id: string;
+      name: string;
+      input: Record<string, unknown>;
+    };
+  },
+) {
+  const content: Array<{
+    type: string;
+    text?: string;
+    id?: string;
+    name?: string;
+    input?: Record<string, unknown>;
+  }> = [{ type: "text", text }];
 
   if (options?.toolUse) {
     content.push({
@@ -140,31 +147,34 @@ export function setupAnthropicMock() {
 export function createDiscoveryMockResponses() {
   return [
     // Initial questions
-    createMockResponse(JSON.stringify({
-      questions: [
-        "What is the main purpose of this project?",
-        "What programming language do you prefer?",
-        "Any specific framework requirements?",
-      ],
-    })),
+    createMockResponse(
+      JSON.stringify({
+        questions: [
+          "What is the main purpose of this project?",
+          "What programming language do you prefer?",
+          "Any specific framework requirements?",
+        ],
+      }),
+    ),
     // Clarification questions
-    createMockResponse(JSON.stringify({
-      questions: [
-        "Do you need authentication?",
-        "What database do you want to use?",
-      ],
-    })),
+    createMockResponse(
+      JSON.stringify({
+        questions: ["Do you need authentication?", "What database do you want to use?"],
+      }),
+    ),
     // Specification generation
-    createMockResponse(JSON.stringify({
-      specification: {
-        name: "test-project",
-        description: "A test project",
-        requirements: {
-          functional: ["User authentication", "CRUD operations"],
-          nonFunctional: ["Performance", "Security"],
+    createMockResponse(
+      JSON.stringify({
+        specification: {
+          name: "test-project",
+          description: "A test project",
+          requirements: {
+            functional: ["User authentication", "CRUD operations"],
+            nonFunctional: ["Performance", "Security"],
+          },
         },
-      },
-    })),
+      }),
+    ),
   ];
 }
 
@@ -173,20 +183,22 @@ export function createDiscoveryMockResponses() {
  */
 export function createCodeGenerationMockResponses() {
   return [
-    createMockResponse(JSON.stringify({
-      files: [
-        {
-          path: "src/index.ts",
-          content: 'export function main() { console.log("Hello"); }',
-        },
-        {
-          path: "src/index.test.ts",
-          content: 'import { main } from "./index"; test("main", () => { main(); });',
-        },
-      ],
-      explanation: "Generated main entry point with test",
-      confidence: 85,
-    })),
+    createMockResponse(
+      JSON.stringify({
+        files: [
+          {
+            path: "src/index.ts",
+            content: 'export function main() { console.log("Hello"); }',
+          },
+          {
+            path: "src/index.test.ts",
+            content: 'import { main } from "./index"; test("main", () => { main(); });',
+          },
+        ],
+        explanation: "Generated main entry point with test",
+        confidence: 85,
+      }),
+    ),
   ];
 }
 
@@ -195,40 +207,42 @@ export function createCodeGenerationMockResponses() {
  */
 export function createCodeReviewMockResponses() {
   return [
-    createMockResponse(JSON.stringify({
-      scores: {
-        overall: 87,
-        dimensions: {
-          correctness: 90,
-          completeness: 85,
-          robustness: 80,
-          readability: 90,
-          maintainability: 85,
-          complexity: 88,
-          duplication: 95,
-          testCoverage: 82,
-          testQuality: 80,
-          security: 100,
-          documentation: 75,
-          style: 95,
+    createMockResponse(
+      JSON.stringify({
+        scores: {
+          overall: 87,
+          dimensions: {
+            correctness: 90,
+            completeness: 85,
+            robustness: 80,
+            readability: 90,
+            maintainability: 85,
+            complexity: 88,
+            duplication: 95,
+            testCoverage: 82,
+            testQuality: 80,
+            security: 100,
+            documentation: 75,
+            style: 95,
+          },
         },
-      },
-      issues: [
-        {
-          dimension: "documentation",
-          severity: "minor",
-          message: "Missing JSDoc comments",
-          suggestion: "Add JSDoc to public functions",
-        },
-      ],
-      suggestions: [
-        {
-          dimension: "documentation",
-          priority: "low",
-          description: "Add JSDoc comments to all public functions",
-          estimatedImpact: 5,
-        },
-      ],
-    })),
+        issues: [
+          {
+            dimension: "documentation",
+            severity: "minor",
+            message: "Missing JSDoc comments",
+            suggestion: "Add JSDoc to public functions",
+          },
+        ],
+        suggestions: [
+          {
+            dimension: "documentation",
+            priority: "low",
+            description: "Add JSDoc comments to all public functions",
+            estimatedImpact: 5,
+          },
+        ],
+      }),
+    ),
   ];
 }

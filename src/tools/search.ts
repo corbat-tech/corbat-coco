@@ -64,12 +64,25 @@ Examples:
     path: z.string().optional().describe("Directory or file to search (defaults to cwd)"),
     include: z.string().optional().describe("File glob pattern (e.g., '**/*.ts')"),
     exclude: z.array(z.string()).optional().describe("Patterns to exclude"),
-    contextLines: z.number().optional().default(0).describe("Lines of context before and after match"),
+    contextLines: z
+      .number()
+      .optional()
+      .default(0)
+      .describe("Lines of context before and after match"),
     maxResults: z.number().optional().default(100).describe("Maximum number of matches to return"),
     caseSensitive: z.boolean().optional().default(true).describe("Case sensitive search"),
     wholeWord: z.boolean().optional().default(false).describe("Match whole words only"),
   }),
-  async execute({ pattern, path: searchPath, include, exclude, contextLines, maxResults, caseSensitive, wholeWord }) {
+  async execute({
+    pattern,
+    path: searchPath,
+    include,
+    exclude,
+    contextLines,
+    maxResults,
+    caseSensitive,
+    wholeWord,
+  }) {
     const targetPath = searchPath ? path.resolve(searchPath) : process.cwd();
     const matches: SearchMatch[] = [];
     let filesSearched = 0;
@@ -181,7 +194,7 @@ Examples:
       }
       throw new ToolError(
         `Search failed: ${error instanceof Error ? error.message : String(error)}`,
-        { tool: "grep", cause: error instanceof Error ? error : undefined }
+        { tool: "grep", cause: error instanceof Error ? error : undefined },
       );
     }
   },
@@ -231,7 +244,7 @@ Examples:
     } catch (error) {
       throw new ToolError(
         `Find in file failed: ${error instanceof Error ? error.message : String(error)}`,
-        { tool: "find_in_file", cause: error instanceof Error ? error : undefined }
+        { tool: "find_in_file", cause: error instanceof Error ? error : undefined },
       );
     }
   },

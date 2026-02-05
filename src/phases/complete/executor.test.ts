@@ -28,7 +28,9 @@ vi.mock("node:fs/promises", () => ({
 const mockIteratorExecute = vi.fn().mockResolvedValue({
   taskId: "task-1",
   success: true,
-  versions: [{ version: 1, changes: { filesCreated: ["src/test.ts"], filesModified: [], filesDeleted: [] } }],
+  versions: [
+    { version: 1, changes: { filesCreated: ["src/test.ts"], filesModified: [], filesDeleted: [] } },
+  ],
   finalScore: 90,
   converged: true,
   iterations: 2,
@@ -282,9 +284,11 @@ describe("CompleteExecutor", () => {
       const { CompleteExecutor } = await import("./executor.js");
 
       mockReadFile.mockImplementation(() =>
-        Promise.resolve(JSON.stringify({
-          backlog: createMockBacklog({ currentSprint: null }),
-        }))
+        Promise.resolve(
+          JSON.stringify({
+            backlog: createMockBacklog({ currentSprint: null }),
+          }),
+        ),
       );
       mockReaddir.mockResolvedValue([]);
 
@@ -403,21 +407,48 @@ describe("CompleteExecutor", () => {
       const { CompleteExecutor } = await import("./executor.js");
 
       mockReadFile.mockImplementation(() =>
-        Promise.resolve(JSON.stringify({
-          backlog: createMockBacklog({
-            tasks: [
-              { id: "task-1", storyId: "story-1", title: "Task 1", description: "Test", type: "feature", files: [], dependencies: [], estimatedComplexity: "simple", status: "pending" },
-              { id: "task-2", storyId: "story-1", title: "Task 2", description: "Test 2", type: "feature", files: [], dependencies: [], estimatedComplexity: "simple", status: "pending" },
-            ],
+        Promise.resolve(
+          JSON.stringify({
+            backlog: createMockBacklog({
+              tasks: [
+                {
+                  id: "task-1",
+                  storyId: "story-1",
+                  title: "Task 1",
+                  description: "Test",
+                  type: "feature",
+                  files: [],
+                  dependencies: [],
+                  estimatedComplexity: "simple",
+                  status: "pending",
+                },
+                {
+                  id: "task-2",
+                  storyId: "story-1",
+                  title: "Task 2",
+                  description: "Test 2",
+                  type: "feature",
+                  files: [],
+                  dependencies: [],
+                  estimatedComplexity: "simple",
+                  status: "pending",
+                },
+              ],
+            }),
           }),
-        }))
+        ),
       );
 
       mockIteratorExecute
         .mockResolvedValueOnce({
           taskId: "task-1",
           success: true,
-          versions: [{ version: 1, changes: { filesCreated: ["src/a.ts"], filesModified: [], filesDeleted: [] } }],
+          versions: [
+            {
+              version: 1,
+              changes: { filesCreated: ["src/a.ts"], filesModified: [], filesDeleted: [] },
+            },
+          ],
           finalScore: 90,
           converged: true,
           iterations: 2,
@@ -425,7 +456,12 @@ describe("CompleteExecutor", () => {
         .mockResolvedValueOnce({
           taskId: "task-2",
           success: true,
-          versions: [{ version: 1, changes: { filesCreated: ["src/b.ts"], filesModified: [], filesDeleted: [] } }],
+          versions: [
+            {
+              version: 1,
+              changes: { filesCreated: ["src/b.ts"], filesModified: [], filesDeleted: [] },
+            },
+          ],
           finalScore: 88,
           converged: true,
           iterations: 3,
@@ -442,18 +478,22 @@ describe("CompleteExecutor", () => {
 
       mockReadFile.mockImplementation((path: string) => {
         if (path.includes("backlog")) {
-          return Promise.resolve(JSON.stringify({
-            backlog: createMockBacklog({ currentSprint: null }),
-          }));
+          return Promise.resolve(
+            JSON.stringify({
+              backlog: createMockBacklog({ currentSprint: null }),
+            }),
+          );
         }
         if (path.includes("sprint")) {
-          return Promise.resolve(JSON.stringify({
-            id: "sprint-1",
-            name: "Sprint 1",
-            goal: "Test",
-            stories: ["story-1"],
-            startDate: new Date().toISOString(),
-          }));
+          return Promise.resolve(
+            JSON.stringify({
+              id: "sprint-1",
+              name: "Sprint 1",
+              goal: "Test",
+              stories: ["story-1"],
+              startDate: new Date().toISOString(),
+            }),
+          );
         }
         return Promise.resolve("{}");
       });
@@ -638,7 +678,9 @@ describe("CompleteExecutor - onProgress callback during task execution", () => {
       return Promise.resolve({
         taskId: context.task.id,
         success: true,
-        versions: [{ version: 1, changes: { filesCreated: [], filesModified: [], filesDeleted: [] } }],
+        versions: [
+          { version: 1, changes: { filesCreated: [], filesModified: [], filesDeleted: [] } },
+        ],
         finalScore: 85,
         converged: true,
         iterations: 2,
@@ -880,9 +922,9 @@ describe("CompleteExecutor - saveFiles callback coverage", () => {
     await executor.execute(createMockContext() as any);
 
     // Should not throw when unlink fails
-    await expect(capturedSaveFiles!([
-      { path: "src/nonexistent.ts", content: "", action: "delete" },
-    ])).resolves.not.toThrow();
+    await expect(
+      capturedSaveFiles!([{ path: "src/nonexistent.ts", content: "", action: "delete" }]),
+    ).resolves.not.toThrow();
   });
 });
 
@@ -896,22 +938,59 @@ describe("CompleteExecutor - advanced scenarios", () => {
       const { CompleteExecutor } = await import("./executor.js");
 
       mockReadFile.mockImplementation(() =>
-        Promise.resolve(JSON.stringify({
-          backlog: createMockBacklog({
-            tasks: [
-              { id: "task-1", storyId: "story-1", title: "Task 1", description: "Test", type: "feature", files: [], dependencies: [], estimatedComplexity: "simple", status: "pending" },
-              { id: "task-2", storyId: "story-1", title: "Task 2", description: "Test 2", type: "feature", files: [], dependencies: [], estimatedComplexity: "simple", status: "pending" },
-              { id: "task-3", storyId: "story-1", title: "Task 3", description: "Test 3", type: "feature", files: [], dependencies: [], estimatedComplexity: "simple", status: "pending" },
-            ],
+        Promise.resolve(
+          JSON.stringify({
+            backlog: createMockBacklog({
+              tasks: [
+                {
+                  id: "task-1",
+                  storyId: "story-1",
+                  title: "Task 1",
+                  description: "Test",
+                  type: "feature",
+                  files: [],
+                  dependencies: [],
+                  estimatedComplexity: "simple",
+                  status: "pending",
+                },
+                {
+                  id: "task-2",
+                  storyId: "story-1",
+                  title: "Task 2",
+                  description: "Test 2",
+                  type: "feature",
+                  files: [],
+                  dependencies: [],
+                  estimatedComplexity: "simple",
+                  status: "pending",
+                },
+                {
+                  id: "task-3",
+                  storyId: "story-1",
+                  title: "Task 3",
+                  description: "Test 3",
+                  type: "feature",
+                  files: [],
+                  dependencies: [],
+                  estimatedComplexity: "simple",
+                  status: "pending",
+                },
+              ],
+            }),
           }),
-        }))
+        ),
       );
 
       mockIteratorExecute
         .mockResolvedValueOnce({
           taskId: "task-1",
           success: true,
-          versions: [{ version: 1, changes: { filesCreated: ["src/a.ts"], filesModified: [], filesDeleted: [] } }],
+          versions: [
+            {
+              version: 1,
+              changes: { filesCreated: ["src/a.ts"], filesModified: [], filesDeleted: [] },
+            },
+          ],
           finalScore: 90,
           converged: true,
           iterations: 2,
@@ -919,7 +998,12 @@ describe("CompleteExecutor - advanced scenarios", () => {
         .mockResolvedValueOnce({
           taskId: "task-2",
           success: true,
-          versions: [{ version: 1, changes: { filesCreated: ["src/b.ts"], filesModified: [], filesDeleted: [] } }],
+          versions: [
+            {
+              version: 1,
+              changes: { filesCreated: ["src/b.ts"], filesModified: [], filesDeleted: [] },
+            },
+          ],
           finalScore: 88,
           converged: true,
           iterations: 3,
@@ -927,7 +1011,12 @@ describe("CompleteExecutor - advanced scenarios", () => {
         .mockResolvedValueOnce({
           taskId: "task-3",
           success: true,
-          versions: [{ version: 1, changes: { filesCreated: ["src/c.ts"], filesModified: [], filesDeleted: [] } }],
+          versions: [
+            {
+              version: 1,
+              changes: { filesCreated: ["src/c.ts"], filesModified: [], filesDeleted: [] },
+            },
+          ],
           finalScore: 91,
           converged: true,
           iterations: 1,
@@ -948,21 +1037,45 @@ describe("CompleteExecutor - advanced scenarios", () => {
       const { CompleteExecutor } = await import("./executor.js");
 
       mockReadFile.mockImplementation(() =>
-        Promise.resolve(JSON.stringify({
-          backlog: createMockBacklog({
-            tasks: [
-              { id: "task-1", storyId: "story-1", title: "Task 1", description: "Test", type: "feature", files: [], dependencies: [], estimatedComplexity: "simple", status: "pending" },
-              { id: "task-2", storyId: "story-1", title: "Task 2", description: "Test 2", type: "feature", files: [], dependencies: [], estimatedComplexity: "simple", status: "pending" },
-            ],
+        Promise.resolve(
+          JSON.stringify({
+            backlog: createMockBacklog({
+              tasks: [
+                {
+                  id: "task-1",
+                  storyId: "story-1",
+                  title: "Task 1",
+                  description: "Test",
+                  type: "feature",
+                  files: [],
+                  dependencies: [],
+                  estimatedComplexity: "simple",
+                  status: "pending",
+                },
+                {
+                  id: "task-2",
+                  storyId: "story-1",
+                  title: "Task 2",
+                  description: "Test 2",
+                  type: "feature",
+                  files: [],
+                  dependencies: [],
+                  estimatedComplexity: "simple",
+                  status: "pending",
+                },
+              ],
+            }),
           }),
-        }))
+        ),
       );
 
       mockIteratorExecute
         .mockResolvedValueOnce({
           taskId: "task-1",
           success: true,
-          versions: [{ version: 1, changes: { filesCreated: [], filesModified: [], filesDeleted: [] } }],
+          versions: [
+            { version: 1, changes: { filesCreated: [], filesModified: [], filesDeleted: [] } },
+          ],
           finalScore: 90,
           converged: true,
           iterations: 2,
@@ -970,7 +1083,9 @@ describe("CompleteExecutor - advanced scenarios", () => {
         .mockResolvedValueOnce({
           taskId: "task-2",
           success: true,
-          versions: [{ version: 1, changes: { filesCreated: [], filesModified: [], filesDeleted: [] } }],
+          versions: [
+            { version: 1, changes: { filesCreated: [], filesModified: [], filesDeleted: [] } },
+          ],
           finalScore: 88,
           converged: true,
           iterations: 3,
@@ -990,13 +1105,25 @@ describe("CompleteExecutor - advanced scenarios", () => {
       const { CompleteExecutor } = await import("./executor.js");
 
       mockReadFile.mockImplementation(() =>
-        Promise.resolve(JSON.stringify({
-          backlog: createMockBacklog({
-            tasks: [
-              { id: "task-1", storyId: "story-1", title: "Task 1", description: "Test", type: "feature", files: [], dependencies: ["non-existent"], estimatedComplexity: "simple", status: "pending" },
-            ],
+        Promise.resolve(
+          JSON.stringify({
+            backlog: createMockBacklog({
+              tasks: [
+                {
+                  id: "task-1",
+                  storyId: "story-1",
+                  title: "Task 1",
+                  description: "Test",
+                  type: "feature",
+                  files: [],
+                  dependencies: ["non-existent"],
+                  estimatedComplexity: "simple",
+                  status: "pending",
+                },
+              ],
+            }),
           }),
-        }))
+        ),
       );
 
       const executor = new CompleteExecutor({
@@ -1016,21 +1143,45 @@ describe("CompleteExecutor - advanced scenarios", () => {
       const { CompleteExecutor } = await import("./executor.js");
 
       mockReadFile.mockImplementation(() =>
-        Promise.resolve(JSON.stringify({
-          backlog: createMockBacklog({
-            tasks: [
-              { id: "task-1", storyId: "story-1", title: "Task 1", description: "Test", type: "feature", files: [], dependencies: [], estimatedComplexity: "simple", status: "pending" },
-              { id: "task-2", storyId: "story-1", title: "Task 2", description: "Test 2", type: "feature", files: [], dependencies: ["task-1"], estimatedComplexity: "simple", status: "pending" },
-            ],
+        Promise.resolve(
+          JSON.stringify({
+            backlog: createMockBacklog({
+              tasks: [
+                {
+                  id: "task-1",
+                  storyId: "story-1",
+                  title: "Task 1",
+                  description: "Test",
+                  type: "feature",
+                  files: [],
+                  dependencies: [],
+                  estimatedComplexity: "simple",
+                  status: "pending",
+                },
+                {
+                  id: "task-2",
+                  storyId: "story-1",
+                  title: "Task 2",
+                  description: "Test 2",
+                  type: "feature",
+                  files: [],
+                  dependencies: ["task-1"],
+                  estimatedComplexity: "simple",
+                  status: "pending",
+                },
+              ],
+            }),
           }),
-        }))
+        ),
       );
 
       mockIteratorExecute
         .mockResolvedValueOnce({
           taskId: "task-1",
           success: true,
-          versions: [{ version: 1, changes: { filesCreated: [], filesModified: [], filesDeleted: [] } }],
+          versions: [
+            { version: 1, changes: { filesCreated: [], filesModified: [], filesDeleted: [] } },
+          ],
           finalScore: 90,
           converged: true,
           iterations: 2,
@@ -1038,7 +1189,9 @@ describe("CompleteExecutor - advanced scenarios", () => {
         .mockResolvedValueOnce({
           taskId: "task-2",
           success: true,
-          versions: [{ version: 1, changes: { filesCreated: [], filesModified: [], filesDeleted: [] } }],
+          versions: [
+            { version: 1, changes: { filesCreated: [], filesModified: [], filesDeleted: [] } },
+          ],
           finalScore: 88,
           converged: true,
           iterations: 3,
@@ -1056,14 +1209,36 @@ describe("CompleteExecutor - advanced scenarios", () => {
 
       // Create tasks with circular dependencies
       mockReadFile.mockImplementation(() =>
-        Promise.resolve(JSON.stringify({
-          backlog: createMockBacklog({
-            tasks: [
-              { id: "task-1", storyId: "story-1", title: "Task 1", description: "Test", type: "feature", files: [], dependencies: ["task-2"], estimatedComplexity: "simple", status: "pending" },
-              { id: "task-2", storyId: "story-1", title: "Task 2", description: "Test 2", type: "feature", files: [], dependencies: ["task-1"], estimatedComplexity: "simple", status: "pending" },
-            ],
+        Promise.resolve(
+          JSON.stringify({
+            backlog: createMockBacklog({
+              tasks: [
+                {
+                  id: "task-1",
+                  storyId: "story-1",
+                  title: "Task 1",
+                  description: "Test",
+                  type: "feature",
+                  files: [],
+                  dependencies: ["task-2"],
+                  estimatedComplexity: "simple",
+                  status: "pending",
+                },
+                {
+                  id: "task-2",
+                  storyId: "story-1",
+                  title: "Task 2",
+                  description: "Test 2",
+                  type: "feature",
+                  files: [],
+                  dependencies: ["task-1"],
+                  estimatedComplexity: "simple",
+                  status: "pending",
+                },
+              ],
+            }),
           }),
-        }))
+        ),
       );
 
       // Both tasks will eventually be blocked due to circular dependency
@@ -1081,13 +1256,25 @@ describe("CompleteExecutor - advanced scenarios", () => {
       const { CompleteExecutor } = await import("./executor.js");
 
       mockReadFile.mockImplementation(() =>
-        Promise.resolve(JSON.stringify({
-          backlog: createMockBacklog({
-            tasks: [
-              { id: "task-1", storyId: "story-1", title: "Task 1", description: "Test", type: "feature", files: [], dependencies: ["missing-dep"], estimatedComplexity: "simple", status: "pending" },
-            ],
+        Promise.resolve(
+          JSON.stringify({
+            backlog: createMockBacklog({
+              tasks: [
+                {
+                  id: "task-1",
+                  storyId: "story-1",
+                  title: "Task 1",
+                  description: "Test",
+                  type: "feature",
+                  files: [],
+                  dependencies: ["missing-dep"],
+                  estimatedComplexity: "simple",
+                  status: "pending",
+                },
+              ],
+            }),
           }),
-        }))
+        ),
       );
 
       const progressFn = vi.fn();
@@ -1123,14 +1310,16 @@ describe("CompleteExecutor - advanced scenarios", () => {
         sprintId: "sprint-1",
         currentTaskIndex: 1,
         completedTaskIds: ["task-1"],
-        taskResults: [{
-          taskId: "task-1",
-          success: true,
-          versions: [],
-          finalScore: 90,
-          converged: true,
-          iterations: 2,
-        }],
+        taskResults: [
+          {
+            taskId: "task-1",
+            success: true,
+            versions: [],
+            finalScore: 90,
+            converged: true,
+            iterations: 2,
+          },
+        ],
         startTime: Date.now(),
       };
 
@@ -1139,14 +1328,36 @@ describe("CompleteExecutor - advanced scenarios", () => {
           return Promise.resolve(JSON.stringify(checkpointState));
         }
         if (path.includes("backlog")) {
-          return Promise.resolve(JSON.stringify({
-            backlog: createMockBacklog({
-              tasks: [
-                { id: "task-1", storyId: "story-1", title: "Task 1", description: "Test", type: "feature", files: [], dependencies: [], estimatedComplexity: "simple", status: "pending" },
-                { id: "task-2", storyId: "story-1", title: "Task 2", description: "Test 2", type: "feature", files: [], dependencies: [], estimatedComplexity: "simple", status: "pending" },
-              ],
+          return Promise.resolve(
+            JSON.stringify({
+              backlog: createMockBacklog({
+                tasks: [
+                  {
+                    id: "task-1",
+                    storyId: "story-1",
+                    title: "Task 1",
+                    description: "Test",
+                    type: "feature",
+                    files: [],
+                    dependencies: [],
+                    estimatedComplexity: "simple",
+                    status: "pending",
+                  },
+                  {
+                    id: "task-2",
+                    storyId: "story-1",
+                    title: "Task 2",
+                    description: "Test 2",
+                    type: "feature",
+                    files: [],
+                    dependencies: [],
+                    estimatedComplexity: "simple",
+                    status: "pending",
+                  },
+                ],
+              }),
             }),
-          }));
+          );
         }
         return Promise.resolve("{}");
       });
@@ -1154,7 +1365,9 @@ describe("CompleteExecutor - advanced scenarios", () => {
       mockIteratorExecute.mockResolvedValue({
         taskId: "task-2",
         success: true,
-        versions: [{ version: 1, changes: { filesCreated: [], filesModified: [], filesDeleted: [] } }],
+        versions: [
+          { version: 1, changes: { filesCreated: [], filesModified: [], filesDeleted: [] } },
+        ],
         finalScore: 88,
         converged: true,
         iterations: 2,
@@ -1166,12 +1379,15 @@ describe("CompleteExecutor - advanced scenarios", () => {
       });
 
       // First restore from checkpoint
-      await executor.restore({
-        phase: "complete",
-        timestamp: new Date(),
-        state: { artifacts: [], progress: 50, checkpoint: null },
-        resumePoint: "sprint-1",
-      }, createMockContext() as any);
+      await executor.restore(
+        {
+          phase: "complete",
+          timestamp: new Date(),
+          state: { artifacts: [], progress: 50, checkpoint: null },
+          resumePoint: "sprint-1",
+        },
+        createMockContext() as any,
+      );
 
       // Then execute
       const result = await executor.execute(createMockContext() as any);
@@ -1196,12 +1412,15 @@ describe("CompleteExecutor - advanced scenarios", () => {
 
       // Should not throw when checkpoint file is missing
       await expect(
-        executor.restore({
-          phase: "complete",
-          timestamp: new Date(),
-          state: { artifacts: [], progress: 50, checkpoint: null },
-          resumePoint: "sprint-1",
-        }, createMockContext() as any)
+        executor.restore(
+          {
+            phase: "complete",
+            timestamp: new Date(),
+            state: { artifacts: [], progress: 50, checkpoint: null },
+            resumePoint: "sprint-1",
+          },
+          createMockContext() as any,
+        ),
       ).resolves.not.toThrow();
     });
 
@@ -1210,12 +1429,15 @@ describe("CompleteExecutor - advanced scenarios", () => {
 
       const executor = new CompleteExecutor();
 
-      await executor.restore({
-        phase: "complete",
-        timestamp: new Date(),
-        state: { artifacts: [], progress: 0, checkpoint: null },
-        resumePoint: "start",
-      }, createMockContext() as any);
+      await executor.restore(
+        {
+          phase: "complete",
+          timestamp: new Date(),
+          state: { artifacts: [], progress: 0, checkpoint: null },
+          resumePoint: "start",
+        },
+        createMockContext() as any,
+      );
 
       // Should not attempt to read checkpoint file
     });
@@ -1293,14 +1515,16 @@ describe("CompleteExecutor - advanced scenarios", () => {
       mockIteratorExecute.mockResolvedValueOnce({
         taskId: "task-1",
         success: true,
-        versions: [{
-          version: 1,
-          changes: {
-            filesCreated: [],
-            filesModified: [],
-            filesDeleted: ["src/old.ts"],
+        versions: [
+          {
+            version: 1,
+            changes: {
+              filesCreated: [],
+              filesModified: [],
+              filesDeleted: ["src/old.ts"],
+            },
           },
-        }],
+        ],
         finalScore: 90,
         converged: true,
         iterations: 2,
@@ -1309,7 +1533,7 @@ describe("CompleteExecutor - advanced scenarios", () => {
       const executor = new CompleteExecutor();
       await executor.execute(createMockContext() as any);
 
-      expect(result => result.phase).toBeDefined();
+      expect((result) => result.phase).toBeDefined();
     });
 
     it("should create directories for new files", async () => {
@@ -1328,18 +1552,22 @@ describe("CompleteExecutor - advanced scenarios", () => {
 
       mockReadFile.mockImplementation((path: string) => {
         if (path.includes("backlog")) {
-          return Promise.resolve(JSON.stringify({
-            backlog: createMockBacklog({ currentSprint: null }),
-          }));
+          return Promise.resolve(
+            JSON.stringify({
+              backlog: createMockBacklog({ currentSprint: null }),
+            }),
+          );
         }
         if (path.includes("sprint")) {
-          return Promise.resolve(JSON.stringify({
-            id: "sprint-1",
-            name: "Sprint 1",
-            goal: "Test goal",
-            stories: ["story-1"],
-            startDate: new Date().toISOString(),
-          }));
+          return Promise.resolve(
+            JSON.stringify({
+              id: "sprint-1",
+              name: "Sprint 1",
+              goal: "Test goal",
+              stories: ["story-1"],
+              startDate: new Date().toISOString(),
+            }),
+          );
         }
         return Promise.resolve("{}");
       });
@@ -1355,9 +1583,11 @@ describe("CompleteExecutor - advanced scenarios", () => {
       const { CompleteExecutor } = await import("./executor.js");
 
       mockReadFile.mockImplementation(() =>
-        Promise.resolve(JSON.stringify({
-          backlog: createMockBacklog({ currentSprint: null }),
-        }))
+        Promise.resolve(
+          JSON.stringify({
+            backlog: createMockBacklog({ currentSprint: null }),
+          }),
+        ),
       );
       mockReaddir.mockResolvedValue([]);
 
@@ -1372,9 +1602,11 @@ describe("CompleteExecutor - advanced scenarios", () => {
       const { CompleteExecutor } = await import("./executor.js");
 
       mockReadFile.mockImplementation(() =>
-        Promise.resolve(JSON.stringify({
-          backlog: createMockBacklog({ currentSprint: null }),
-        }))
+        Promise.resolve(
+          JSON.stringify({
+            backlog: createMockBacklog({ currentSprint: null }),
+          }),
+        ),
       );
       mockReaddir.mockRejectedValue(new Error("Directory not found"));
 
@@ -1398,7 +1630,9 @@ describe("CompleteExecutor - advanced scenarios", () => {
       mockIteratorExecute.mockResolvedValue({
         taskId: "task-1",
         success: true,
-        versions: [{ version: 1, changes: { filesCreated: [], filesModified: [], filesDeleted: [] } }],
+        versions: [
+          { version: 1, changes: { filesCreated: [], filesModified: [], filesDeleted: [] } },
+        ],
         finalScore: 90,
         converged: true,
         iterations: 2,
@@ -1410,8 +1644,8 @@ describe("CompleteExecutor - advanced scenarios", () => {
       await executor.execute(createMockContext() as any);
 
       // Should write markdown file - check for results directory writes
-      const resultsWriteCalls = mockWriteFile.mock.calls.filter((c: any) =>
-        c[0].includes("results") && c[0].includes(".md")
+      const resultsWriteCalls = mockWriteFile.mock.calls.filter(
+        (c: any) => c[0].includes("results") && c[0].includes(".md"),
       );
       // Markdown results should be written
       expect(mockWriteFile).toHaveBeenCalled();
@@ -1429,7 +1663,9 @@ describe("CompleteExecutor - advanced scenarios", () => {
       mockIteratorExecute.mockResolvedValue({
         taskId: "task-1",
         success: true,
-        versions: [{ version: 1, changes: { filesCreated: [], filesModified: [], filesDeleted: [] } }],
+        versions: [
+          { version: 1, changes: { filesCreated: [], filesModified: [], filesDeleted: [] } },
+        ],
         finalScore: 90,
         converged: true,
         iterations: 2,

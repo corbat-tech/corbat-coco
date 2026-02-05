@@ -61,7 +61,7 @@ Examples:
     } catch (error) {
       throw new ToolError(
         `Git status failed: ${error instanceof Error ? error.message : String(error)}`,
-        { tool: "git_status", cause: error instanceof Error ? error : undefined }
+        { tool: "git_status", cause: error instanceof Error ? error : undefined },
       );
     }
   },
@@ -110,7 +110,7 @@ Examples:
     } catch (error) {
       throw new ToolError(
         `Git diff failed: ${error instanceof Error ? error.message : String(error)}`,
-        { tool: "git_diff", cause: error instanceof Error ? error : undefined }
+        { tool: "git_diff", cause: error instanceof Error ? error : undefined },
       );
     }
   },
@@ -119,36 +119,34 @@ Examples:
 /**
  * Git add tool
  */
-export const gitAddTool: ToolDefinition<
-  { cwd?: string; files: string[] },
-  { added: string[] }
-> = defineTool({
-  name: "git_add",
-  description: `Stage files for commit.
+export const gitAddTool: ToolDefinition<{ cwd?: string; files: string[] }, { added: string[] }> =
+  defineTool({
+    name: "git_add",
+    description: `Stage files for commit.
 
 Examples:
 - Stage all: { "files": ["."] }
 - Specific files: { "files": ["src/app.ts", "package.json"] }
 - Pattern: { "files": ["src/*.ts"] }`,
-  category: "git",
-  parameters: z.object({
-    cwd: z.string().optional().describe("Repository directory"),
-    files: z.array(z.string()).describe("Files to stage (use '.' for all)"),
-  }),
-  async execute({ cwd, files }) {
-    try {
-      const git = getGit(cwd);
-      await git.add(files);
+    category: "git",
+    parameters: z.object({
+      cwd: z.string().optional().describe("Repository directory"),
+      files: z.array(z.string()).describe("Files to stage (use '.' for all)"),
+    }),
+    async execute({ cwd, files }) {
+      try {
+        const git = getGit(cwd);
+        await git.add(files);
 
-      return { added: files };
-    } catch (error) {
-      throw new ToolError(
-        `Git add failed: ${error instanceof Error ? error.message : String(error)}`,
-        { tool: "git_add", cause: error instanceof Error ? error : undefined }
-      );
-    }
-  },
-});
+        return { added: files };
+      } catch (error) {
+        throw new ToolError(
+          `Git add failed: ${error instanceof Error ? error.message : String(error)}`,
+          { tool: "git_add", cause: error instanceof Error ? error : undefined },
+        );
+      }
+    },
+  });
 
 /**
  * Git commit tool
@@ -189,7 +187,7 @@ Examples:
     } catch (error) {
       throw new ToolError(
         `Git commit failed: ${error instanceof Error ? error.message : String(error)}`,
-        { tool: "git_commit", cause: error instanceof Error ? error : undefined }
+        { tool: "git_commit", cause: error instanceof Error ? error : undefined },
       );
     }
   },
@@ -246,7 +244,7 @@ Examples:
     } catch (error) {
       throw new ToolError(
         `Git log failed: ${error instanceof Error ? error.message : String(error)}`,
-        { tool: "git_log", cause: error instanceof Error ? error : undefined }
+        { tool: "git_log", cause: error instanceof Error ? error : undefined },
       );
     }
   },
@@ -301,7 +299,7 @@ Examples:
     } catch (error) {
       throw new ToolError(
         `Git branch failed: ${error instanceof Error ? error.message : String(error)}`,
-        { tool: "git_branch", cause: error instanceof Error ? error : undefined }
+        { tool: "git_branch", cause: error instanceof Error ? error : undefined },
       );
     }
   },
@@ -340,7 +338,7 @@ Examples:
     } catch (error) {
       throw new ToolError(
         `Git checkout failed: ${error instanceof Error ? error.message : String(error)}`,
-        { tool: "git_checkout", cause: error instanceof Error ? error : undefined }
+        { tool: "git_checkout", cause: error instanceof Error ? error : undefined },
       );
     }
   },
@@ -388,7 +386,7 @@ Examples:
     } catch (error) {
       throw new ToolError(
         `Git push failed: ${error instanceof Error ? error.message : String(error)}`,
-        { tool: "git_push", cause: error instanceof Error ? error : undefined }
+        { tool: "git_push", cause: error instanceof Error ? error : undefined },
       );
     }
   },
@@ -435,7 +433,7 @@ Examples:
     } catch (error) {
       throw new ToolError(
         `Git pull failed: ${error instanceof Error ? error.message : String(error)}`,
-        { tool: "git_pull", cause: error instanceof Error ? error : undefined }
+        { tool: "git_pull", cause: error instanceof Error ? error : undefined },
       );
     }
   },
@@ -472,7 +470,7 @@ Examples:
     } catch (error) {
       throw new ToolError(
         `Git init failed: ${error instanceof Error ? error.message : String(error)}`,
-        { tool: "git_init", cause: error instanceof Error ? error : undefined }
+        { tool: "git_init", cause: error instanceof Error ? error : undefined },
       );
     }
   },

@@ -24,7 +24,13 @@ vi.mock("../../providers/index.js", () => ({
           style: 88,
         },
         issues: [
-          { severity: "minor", category: "documentation", message: "Missing JSDoc", file: "src/user.ts", line: 5 },
+          {
+            severity: "minor",
+            category: "documentation",
+            message: "Missing JSDoc",
+            file: "src/user.ts",
+            line: 5,
+          },
         ],
         suggestions: [
           { type: "improvement", description: "Add more tests", priority: "medium", impact: 5 },
@@ -79,7 +85,14 @@ describe("CodeReviewer", () => {
         "Create User Model",
         "Create a User model",
         [{ path: "src/user.ts", content: "export class User {}" }],
-        { passed: 5, failed: 0, skipped: 0, coverage: { lines: 85, branches: 80, functions: 90, statements: 85 }, failures: [], duration: 100 }
+        {
+          passed: 5,
+          failed: 0,
+          skipped: 0,
+          coverage: { lines: 85, branches: 80, functions: 90, statements: 85 },
+          failures: [],
+          duration: 100,
+        },
       );
 
       expect(result.passed).toBe(true);
@@ -112,7 +125,14 @@ describe("CodeReviewer", () => {
         "Task",
         "Description",
         [{ path: "src/test.ts", content: "code" }],
-        { passed: 5, failed: 0, skipped: 0, coverage: { lines: 95, branches: 90, functions: 88, statements: 92 }, failures: [], duration: 100 }
+        {
+          passed: 5,
+          failed: 0,
+          skipped: 0,
+          coverage: { lines: 95, branches: 90, functions: 88, statements: 92 },
+          failures: [],
+          duration: 100,
+        },
       );
 
       // Actual coverage should override LLM estimate
@@ -140,7 +160,14 @@ describe("CodeReviewer", () => {
         "Task",
         "Description",
         [{ path: "src/test.ts", content: "code" }],
-        { passed: 0, failed: 1, skipped: 0, coverage: { lines: 0, branches: 0, functions: 0, statements: 0 }, failures: [], duration: 100 }
+        {
+          passed: 0,
+          failed: 1,
+          skipped: 0,
+          coverage: { lines: 0, branches: 0, functions: 0, statements: 0 },
+          failures: [],
+          duration: 100,
+        },
       );
 
       expect(result.passed).toBe(false);
@@ -177,7 +204,7 @@ describe("CodeReviewer", () => {
 
       const analyses = await reviewer.analyzeFailures(
         [{ name: "should validate email", message: "Expected true, got false" }],
-        "export class User {}"
+        "export class User {}",
       );
 
       expect(analyses.length).toBeGreaterThan(0);
@@ -204,7 +231,7 @@ describe("CodeReviewer", () => {
 
       const analyses = await reviewer.analyzeFailures(
         [{ name: "test", message: "failed" }],
-        "code"
+        "code",
       );
 
       expect(analyses).toEqual([]);
@@ -373,7 +400,14 @@ describe("CodeReviewer - normalization and parsing", () => {
         "Task",
         "Description",
         [{ path: "src/test.ts", content: "code" }],
-        { passed: 5, failed: 0, skipped: 0, coverage: { lines: 85, branches: 80, functions: 90, statements: 85 }, failures: [], duration: 100 }
+        {
+          passed: 5,
+          failed: 0,
+          skipped: 0,
+          coverage: { lines: 85, branches: 80, functions: 90, statements: 85 },
+          failures: [],
+          duration: 100,
+        },
       );
 
       // Missing dimensions should default to 50
@@ -409,7 +443,14 @@ describe("CodeReviewer - normalization and parsing", () => {
         "Task",
         "Description",
         [{ path: "src/test.ts", content: "code" }],
-        { passed: 5, failed: 0, skipped: 0, coverage: { lines: 85, branches: 80, functions: 90, statements: 85 }, failures: [], duration: 100 }
+        {
+          passed: 5,
+          failed: 0,
+          skipped: 0,
+          coverage: { lines: 85, branches: 80, functions: 90, statements: 85 },
+          failures: [],
+          duration: 100,
+        },
       );
 
       expect(result.scores.dimensions.correctness).toBe(100);
@@ -443,7 +484,14 @@ describe("CodeReviewer - normalization and parsing", () => {
         "Task",
         "Description",
         [{ path: "src/test.ts", content: "code" }],
-        { passed: 5, failed: 0, skipped: 0, coverage: { lines: 85, branches: 80, functions: 90, statements: 85 }, failures: [], duration: 100 }
+        {
+          passed: 5,
+          failed: 0,
+          skipped: 0,
+          coverage: { lines: 85, branches: 80, functions: 90, statements: 85 },
+          failures: [],
+          duration: 100,
+        },
       );
 
       expect(result.scores.dimensions.correctness).toBe(50);
@@ -482,7 +530,14 @@ describe("CodeReviewer - normalization and parsing", () => {
         "Task",
         "Description",
         [{ path: "src/test.ts", content: "code" }],
-        { passed: 5, failed: 0, skipped: 0, coverage: { lines: 85, branches: 80, functions: 90, statements: 85 }, failures: [], duration: 100 }
+        {
+          passed: 5,
+          failed: 0,
+          skipped: 0,
+          coverage: { lines: 85, branches: 80, functions: 90, statements: 85 },
+          failures: [],
+          duration: 100,
+        },
       );
 
       expect(result.issues[0]?.severity).toBe("critical");
@@ -525,7 +580,14 @@ describe("CodeReviewer - normalization and parsing", () => {
         "Task",
         "Description",
         [{ path: "src/test.ts", content: "code" }],
-        { passed: 5, failed: 0, skipped: 0, coverage: { lines: 85, branches: 80, functions: 90, statements: 85 }, failures: [], duration: 100 }
+        {
+          passed: 5,
+          failed: 0,
+          skipped: 0,
+          coverage: { lines: 85, branches: 80, functions: 90, statements: 85 },
+          failures: [],
+          duration: 100,
+        },
       );
 
       expect(result.issues[0]?.category).toBe("correctness");
@@ -568,7 +630,14 @@ describe("CodeReviewer - normalization and parsing", () => {
         "Task",
         "Description",
         [{ path: "src/test.ts", content: "code" }],
-        { passed: 5, failed: 0, skipped: 0, coverage: { lines: 85, branches: 80, functions: 90, statements: 85 }, failures: [], duration: 100 }
+        {
+          passed: 5,
+          failed: 0,
+          skipped: 0,
+          coverage: { lines: 85, branches: 80, functions: 90, statements: 85 },
+          failures: [],
+          duration: 100,
+        },
       );
 
       expect(result.suggestions[0]?.type).toBe("improvement");
@@ -610,7 +679,14 @@ describe("CodeReviewer - normalization and parsing", () => {
         "Task",
         "Description",
         [{ path: "src/test.ts", content: "code" }],
-        { passed: 5, failed: 0, skipped: 0, coverage: { lines: 85, branches: 80, functions: 90, statements: 85 }, failures: [], duration: 100 }
+        {
+          passed: 5,
+          failed: 0,
+          skipped: 0,
+          coverage: { lines: 85, branches: 80, functions: 90, statements: 85 },
+          failures: [],
+          duration: 100,
+        },
       );
 
       expect(result.suggestions[0]?.priority).toBe("high");
@@ -642,7 +718,7 @@ describe("CodeReviewer - normalization and parsing", () => {
 
       const analyses = await reviewer.analyzeFailures(
         [{ name: "test", message: "failed" }],
-        "code"
+        "code",
       );
 
       expect(analyses).toEqual([]);
@@ -673,7 +749,7 @@ describe("CodeReviewer - normalization and parsing", () => {
 
       const analyses = await reviewer.analyzeFailures(
         [{ name: "test", message: "failed" }],
-        "code"
+        "code",
       );
 
       expect(analyses.length).toBe(3);
@@ -705,7 +781,14 @@ describe("CodeReviewer - normalization and parsing", () => {
         "Task",
         "Description",
         [{ path: "src/test.ts", content: "code" }],
-        { passed: 0, failed: 1, skipped: 0, coverage: { lines: 50, branches: 40, functions: 60, statements: 45 }, failures: [], duration: 100 }
+        {
+          passed: 0,
+          failed: 1,
+          skipped: 0,
+          coverage: { lines: 50, branches: 40, functions: 60, statements: 45 },
+          failures: [],
+          duration: 100,
+        },
       );
 
       expect(result.passed).toBe(false);
@@ -735,7 +818,14 @@ describe("CodeReviewer - normalization and parsing", () => {
         "Task",
         "Description",
         [{ path: "src/test.ts", content: "code" }],
-        { passed: 0, failed: 0, skipped: 0, coverage: { lines: 75, branches: 70, functions: 80, statements: 72 }, failures: [], duration: 0 }
+        {
+          passed: 0,
+          failed: 0,
+          skipped: 0,
+          coverage: { lines: 75, branches: 70, functions: 80, statements: 72 },
+          failures: [],
+          duration: 0,
+        },
       );
 
       expect(result.scores.dimensions.testCoverage).toBe(75);
@@ -781,7 +871,14 @@ describe("CodeReviewer - normalization and parsing", () => {
         "Task",
         "Description",
         [{ path: "src/test.ts", content: "code" }],
-        { passed: 10, failed: 0, skipped: 0, coverage: { lines: 100, branches: 100, functions: 100, statements: 100 }, failures: [], duration: 100 }
+        {
+          passed: 10,
+          failed: 0,
+          skipped: 0,
+          coverage: { lines: 100, branches: 100, functions: 100, statements: 100 },
+          failures: [],
+          duration: 100,
+        },
       );
 
       // All 100s should result in 100 overall (weights sum to 1.0)
@@ -824,7 +921,14 @@ describe("CodeReviewer - normalization and parsing", () => {
         "Task",
         "Description",
         [{ path: "src/test.ts", content: "code" }],
-        { passed: 5, failed: 0, skipped: 0, coverage: { lines: 85, branches: 80, functions: 90, statements: 85 }, failures: [], duration: 100 }
+        {
+          passed: 5,
+          failed: 0,
+          skipped: 0,
+          coverage: { lines: 85, branches: 80, functions: 90, statements: 85 },
+          failures: [],
+          duration: 100,
+        },
       );
 
       expect(result.issues[0]?.file).toBe("src/db.ts");
@@ -859,7 +963,14 @@ describe("CodeReviewer - normalization and parsing", () => {
         "Task",
         "Description",
         [{ path: "src/test.ts", content: "code" }],
-        { passed: 5, failed: 0, skipped: 0, coverage: { lines: 85, branches: 80, functions: 90, statements: 85 }, failures: [], duration: 100 }
+        {
+          passed: 5,
+          failed: 0,
+          skipped: 0,
+          coverage: { lines: 85, branches: 80, functions: 90, statements: 85 },
+          failures: [],
+          duration: 100,
+        },
       );
 
       expect(result.issues[0]?.message).toBe("");
@@ -875,9 +986,7 @@ describe("CodeReviewer - normalization and parsing", () => {
           content: JSON.stringify({
             scores: { correctness: 80 },
             issues: [],
-            suggestions: [
-              { type: "improvement", description: "Add caching" },
-            ],
+            suggestions: [{ type: "improvement", description: "Add caching" }],
           }),
         }),
       };
@@ -894,7 +1003,14 @@ describe("CodeReviewer - normalization and parsing", () => {
         "Task",
         "Description",
         [{ path: "src/test.ts", content: "code" }],
-        { passed: 5, failed: 0, skipped: 0, coverage: { lines: 85, branches: 80, functions: 90, statements: 85 }, failures: [], duration: 100 }
+        {
+          passed: 5,
+          failed: 0,
+          skipped: 0,
+          coverage: { lines: 85, branches: 80, functions: 90, statements: 85 },
+          failures: [],
+          duration: 100,
+        },
       );
 
       expect(result.suggestions[0]?.impact).toBe(5);
@@ -908,9 +1024,7 @@ describe("CodeReviewer - normalization and parsing", () => {
           content: JSON.stringify({
             scores: { correctness: 80 },
             issues: [],
-            suggestions: [
-              { type: "improvement", description: "Add caching", impact: 10 },
-            ],
+            suggestions: [{ type: "improvement", description: "Add caching", impact: 10 }],
           }),
         }),
       };
@@ -927,7 +1041,14 @@ describe("CodeReviewer - normalization and parsing", () => {
         "Task",
         "Description",
         [{ path: "src/test.ts", content: "code" }],
-        { passed: 5, failed: 0, skipped: 0, coverage: { lines: 85, branches: 80, functions: 90, statements: 85 }, failures: [], duration: 100 }
+        {
+          passed: 5,
+          failed: 0,
+          skipped: 0,
+          coverage: { lines: 85, branches: 80, functions: 90, statements: 85 },
+          failures: [],
+          duration: 100,
+        },
       );
 
       expect(result.suggestions[0]?.impact).toBe(10);

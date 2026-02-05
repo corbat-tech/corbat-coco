@@ -99,7 +99,13 @@ describe("analyzeFailure", () => {
     const context = createContext({
       attemptCount: 2,
       toolHistory: [
-        { name: "write_file", input: {}, success: false, error: "Permission denied", duration: 100 },
+        {
+          name: "write_file",
+          input: {},
+          success: false,
+          error: "Permission denied",
+          duration: 100,
+        },
         { name: "git_commit", input: {}, success: false, error: "No changes", duration: 50 },
       ],
     });
@@ -135,17 +141,17 @@ describe("analyzeFailure", () => {
       expect(decision.suggestedTasks.length).toBe(3);
 
       // Check prep task
-      const prepTask = decision.suggestedTasks.find(t => t.id.includes("-prep"));
+      const prepTask = decision.suggestedTasks.find((t) => t.id.includes("-prep"));
       expect(prepTask).toBeDefined();
       expect(prepTask?.dependencies).toEqual(context.task.dependencies);
 
       // Check core task
-      const coreTask = decision.suggestedTasks.find(t => t.id.includes("-core"));
+      const coreTask = decision.suggestedTasks.find((t) => t.id.includes("-core"));
       expect(coreTask).toBeDefined();
       expect(coreTask?.dependencies).toContain("task-123-prep");
 
       // Check verify task
-      const verifyTask = decision.suggestedTasks.find(t => t.id.includes("-verify"));
+      const verifyTask = decision.suggestedTasks.find((t) => t.id.includes("-verify"));
       expect(verifyTask).toBeDefined();
       expect(verifyTask?.type).toBe("test");
     }

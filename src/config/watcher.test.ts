@@ -189,9 +189,7 @@ describe("ConfigWatcher", () => {
       const initialConfig = { project: { name: "initial" } } as any;
       const newConfig = { project: { name: "updated" } } as any;
 
-      vi.mocked(loadConfig)
-        .mockResolvedValueOnce(initialConfig)
-        .mockResolvedValueOnce(newConfig);
+      vi.mocked(loadConfig).mockResolvedValueOnce(initialConfig).mockResolvedValueOnce(newConfig);
 
       const watcher = new ConfigWatcher("/path/to/.coco/config.json", { debounceMs: 10 });
       const onChange = vi.fn();
@@ -202,7 +200,10 @@ describe("ConfigWatcher", () => {
       // Simulate file change by calling the watch callback
       // The callback is passed to fs.watch as the second argument
       const fs = await import("node:fs");
-      const watchCallback = vi.mocked(fs.watch).mock.calls[0]?.[1] as (eventType: string, filename: string) => void;
+      const watchCallback = vi.mocked(fs.watch).mock.calls[0]?.[1] as (
+        eventType: string,
+        filename: string,
+      ) => void;
       watchCallback("change", "config.json");
 
       // Wait for debounce
@@ -229,7 +230,10 @@ describe("ConfigWatcher", () => {
 
       // Simulate file change
       const fs = await import("node:fs");
-      const watchCallback = vi.mocked(fs.watch).mock.calls[0]?.[1] as (eventType: string, filename: string) => void;
+      const watchCallback = vi.mocked(fs.watch).mock.calls[0]?.[1] as (
+        eventType: string,
+        filename: string,
+      ) => void;
       watchCallback("change", "config.json");
 
       await vi.advanceTimersByTimeAsync(20);
@@ -254,7 +258,10 @@ describe("ConfigWatcher", () => {
 
       // Simulate change to a different file
       const fs = await import("node:fs");
-      const watchCallback = vi.mocked(fs.watch).mock.calls[0]?.[1] as (eventType: string, filename: string) => void;
+      const watchCallback = vi.mocked(fs.watch).mock.calls[0]?.[1] as (
+        eventType: string,
+        filename: string,
+      ) => void;
       watchCallback("change", "other-file.json");
 
       await vi.advanceTimersByTimeAsync(20);
@@ -272,7 +279,7 @@ describe("ConfigWatcher", () => {
 
       const watcher = new ConfigWatcher("/path/to/.coco/config.json", {
         debounceMs: 10,
-        autoReload: false
+        autoReload: false,
       });
       const onChange = vi.fn();
       watcher.on("change", onChange);
@@ -280,7 +287,10 @@ describe("ConfigWatcher", () => {
       await watcher.start();
 
       const fs = await import("node:fs");
-      const watchCallback = vi.mocked(fs.watch).mock.calls[0]?.[1] as (eventType: string, filename: string) => void;
+      const watchCallback = vi.mocked(fs.watch).mock.calls[0]?.[1] as (
+        eventType: string,
+        filename: string,
+      ) => void;
       watchCallback("change", "config.json");
 
       await vi.advanceTimersByTimeAsync(20);
@@ -307,7 +317,10 @@ describe("ConfigWatcher", () => {
       await watcher.start();
 
       const fs = await import("node:fs");
-      const watchCallback = vi.mocked(fs.watch).mock.calls[0]?.[1] as (eventType: string, filename: string) => void;
+      const watchCallback = vi.mocked(fs.watch).mock.calls[0]?.[1] as (
+        eventType: string,
+        filename: string,
+      ) => void;
       watchCallback("change", "config.json");
 
       await vi.advanceTimersByTimeAsync(20);
@@ -334,7 +347,10 @@ describe("ConfigWatcher", () => {
       await watcher.start();
 
       const fs = await import("node:fs");
-      const watchCallback = vi.mocked(fs.watch).mock.calls[0]?.[1] as (eventType: string, filename: string) => void;
+      const watchCallback = vi.mocked(fs.watch).mock.calls[0]?.[1] as (
+        eventType: string,
+        filename: string,
+      ) => void;
       watchCallback("change", "config.json");
 
       await vi.advanceTimersByTimeAsync(20);
@@ -352,9 +368,7 @@ describe("ConfigWatcher", () => {
       const initialConfig = { project: { name: "initial" } } as any;
       const newConfig = { project: { name: "final" } } as any;
 
-      vi.mocked(loadConfig)
-        .mockResolvedValueOnce(initialConfig)
-        .mockResolvedValue(newConfig);
+      vi.mocked(loadConfig).mockResolvedValueOnce(initialConfig).mockResolvedValue(newConfig);
 
       const watcher = new ConfigWatcher("/path/to/.coco/config.json", { debounceMs: 50 });
       const onChange = vi.fn();
@@ -363,7 +377,10 @@ describe("ConfigWatcher", () => {
       await watcher.start();
 
       const fs = await import("node:fs");
-      const watchCallback = vi.mocked(fs.watch).mock.calls[0]?.[1] as (eventType: string, filename: string) => void;
+      const watchCallback = vi.mocked(fs.watch).mock.calls[0]?.[1] as (
+        eventType: string,
+        filename: string,
+      ) => void;
 
       // Trigger multiple rapid changes
       watchCallback("change", "config.json");
@@ -436,7 +453,10 @@ describe("ConfigWatcher", () => {
 
       // Trigger a change to start debounce timer
       const fs = await import("node:fs");
-      const watchCallback = vi.mocked(fs.watch).mock.calls[0]?.[1] as (eventType: string, filename: string) => void;
+      const watchCallback = vi.mocked(fs.watch).mock.calls[0]?.[1] as (
+        eventType: string,
+        filename: string,
+      ) => void;
       watchCallback("change", "config.json");
 
       // Stop before debounce completes
