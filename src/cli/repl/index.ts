@@ -283,7 +283,7 @@ export async function startRepl(
             ),
           );
         }
-      } catch (compactError) {
+      } catch {
         // Silently ignore compaction errors - not critical
       }
 
@@ -320,7 +320,9 @@ export async function startRepl(
         errorMsg.includes("ECONNRESET")
       ) {
         renderError("Request timed out");
-        console.log(chalk.dim("   The model took too long to respond. Try again or use a faster model."));
+        console.log(
+          chalk.dim("   The model took too long to respond. Try again or use a faster model."),
+        );
         continue;
       }
 
@@ -357,14 +359,30 @@ async function printWelcome(session: { projectPath: string; config: ReplConfig }
 
   console.log();
   console.log(chalk.magenta("  ╭" + "─".repeat(boxWidth - 2) + "╮"));
-  console.log(chalk.magenta("  │ ") + "🥥 " + chalk.bold.white(titleText) + " ".repeat(titlePadding) + chalk.dim(versionText) + chalk.magenta(" │"));
-  console.log(chalk.magenta("  │ ") + chalk.dim(subtitleText) + " ".repeat(subtitlePadding) + chalk.magenta(" │"));
+  console.log(
+    chalk.magenta("  │ ") +
+      "🥥 " +
+      chalk.bold.white(titleText) +
+      " ".repeat(titlePadding) +
+      chalk.dim(versionText) +
+      chalk.magenta(" │"),
+  );
+  console.log(
+    chalk.magenta("  │ ") +
+      chalk.dim(subtitleText) +
+      " ".repeat(subtitlePadding) +
+      chalk.magenta(" │"),
+  );
   console.log(chalk.magenta("  ╰" + "─".repeat(boxWidth - 2) + "╯"));
 
   // Check for updates (non-blocking, with 3s timeout)
   const updateInfo = await checkForUpdates();
   if (updateInfo) {
-    console.log(chalk.yellow(`  ⬆ ${chalk.dim(updateInfo.currentVersion)} → ${chalk.green(updateInfo.latestVersion)} ${chalk.dim(`(${updateInfo.updateCommand})`)}`));
+    console.log(
+      chalk.yellow(
+        `  ⬆ ${chalk.dim(updateInfo.currentVersion)} → ${chalk.green(updateInfo.latestVersion)} ${chalk.dim(`(${updateInfo.updateCommand})`)}`,
+      ),
+    );
   }
 
   // Project info - single compact block
@@ -376,13 +394,26 @@ async function printWelcome(session: { projectPath: string; config: ReplConfig }
 
   const providerName = session.config.provider.type;
   const modelName = session.config.provider.model || "default";
-  const trustText = trustLevel === "full" ? "full" : trustLevel === "write" ? "write" : trustLevel === "read" ? "read" : "";
+  const trustText =
+    trustLevel === "full"
+      ? "full"
+      : trustLevel === "write"
+        ? "write"
+        : trustLevel === "read"
+          ? "read"
+          : "";
 
   console.log();
   console.log(chalk.dim(`  📁 ${displayPath}`));
-  console.log(chalk.dim(`  🤖 ${providerName}/`) + chalk.magenta(modelName) + (trustText ? chalk.dim(` • 🔐 ${trustText}`) : ""));
+  console.log(
+    chalk.dim(`  🤖 ${providerName}/`) +
+      chalk.magenta(modelName) +
+      (trustText ? chalk.dim(` • 🔐 ${trustText}`) : ""),
+  );
   console.log();
-  console.log(chalk.dim("  Type your request or ") + chalk.magenta("/help") + chalk.dim(" for commands"));
+  console.log(
+    chalk.dim("  Type your request or ") + chalk.magenta("/help") + chalk.dim(" for commands"),
+  );
   console.log();
 }
 

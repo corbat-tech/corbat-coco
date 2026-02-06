@@ -490,7 +490,9 @@ async function switchProvider(
   spinner.start(`Connecting to ${newProvider.name}...`);
 
   try {
-    const testProvider = await createProvider(internalProviderId as ProviderType, { model: newModel });
+    const testProvider = await createProvider(internalProviderId as ProviderType, {
+      model: newModel,
+    });
     const available = await testProvider.isAvailable();
 
     if (!available) {
@@ -507,7 +509,11 @@ async function switchProvider(
     session.config.provider.model = newModel;
 
     // Save preferences with auth method
-    await saveProviderPreference(userFacingProviderId as ProviderType, newModel, selectedAuthMethod);
+    await saveProviderPreference(
+      userFacingProviderId as ProviderType,
+      newModel,
+      selectedAuthMethod,
+    );
 
     console.log(chalk.green(`\n✓ Switched to ${newProvider.emoji} ${newProvider.name}`));
     console.log(chalk.dim(`  Model: ${newModel}`));

@@ -8,10 +8,7 @@
 import path from "node:path";
 import chalk from "chalk";
 import * as p from "@clack/prompts";
-import {
-  addAllowedPathToSession,
-  persistAllowedPath,
-} from "../../tools/allowed-paths.js";
+import { addAllowedPathToSession, persistAllowedPath } from "../../tools/allowed-paths.js";
 
 /**
  * Prompt the user to authorize an external directory.

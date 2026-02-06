@@ -53,7 +53,9 @@ function startStreamingIndicator(): void {
     const frame = STREAMING_FRAMES[streamingIndicatorFrame]!;
     const lines = codeBlockLines.length;
     const linesText = lines > 0 ? ` (${lines} lines)` : "";
-    process.stdout.write(`\r${chalk.magenta(frame)} ${chalk.dim(`Receiving markdown...${linesText}`)}`);
+    process.stdout.write(
+      `\r${chalk.magenta(frame)} ${chalk.dim(`Receiving markdown...${linesText}`)}`,
+    );
   }, 80);
 }
 
@@ -226,7 +228,14 @@ function renderMarkdownBlock(lines: string[]): void {
       const wrappedLines = wrapText(formatted, contentWidth);
       for (const wrappedLine of wrappedLines) {
         const padding = contentWidth - stripAnsi(wrappedLine).length;
-        console.log(chalk.magenta("│") + " " + wrappedLine + " ".repeat(Math.max(0, padding)) + " " + chalk.magenta("│"));
+        console.log(
+          chalk.magenta("│") +
+            " " +
+            wrappedLine +
+            " ".repeat(Math.max(0, padding)) +
+            " " +
+            chalk.magenta("│"),
+        );
       }
       i++;
     }
@@ -267,7 +276,10 @@ function renderNestedTable(lines: string[], parentWidth: number): void {
     if (isTableSeparator(line)) continue; // Skip separator
 
     // Parse cells
-    const cells = line.split("|").slice(1, -1).map(c => c.trim());
+    const cells = line
+      .split("|")
+      .slice(1, -1)
+      .map((c) => c.trim());
     rows.push(cells);
 
     // Track max width per column
@@ -283,19 +295,20 @@ function renderNestedTable(lines: string[], parentWidth: number): void {
 
   // Calculate total table width and adjust if needed
   const minCellPadding = 2;
-  let totalWidth = columnWidths.reduce((sum, w) => sum + w + minCellPadding, 0) + columnWidths.length + 1;
+  let totalWidth =
+    columnWidths.reduce((sum, w) => sum + w + minCellPadding, 0) + columnWidths.length + 1;
 
   // If table is too wide, shrink columns proportionally
   const maxTableWidth = parentWidth - 4;
   if (totalWidth > maxTableWidth) {
     const scale = maxTableWidth / totalWidth;
-    columnWidths = columnWidths.map(w => Math.max(3, Math.floor(w * scale)));
+    columnWidths = columnWidths.map((w) => Math.max(3, Math.floor(w * scale)));
   }
 
   // Render table top border
-  const tableTop = "┌" + columnWidths.map(w => "─".repeat(w + 2)).join("┬") + "┐";
-  const tableMid = "├" + columnWidths.map(w => "─".repeat(w + 2)).join("┼") + "┤";
-  const tableBot = "└" + columnWidths.map(w => "─".repeat(w + 2)).join("┴") + "┘";
+  const tableTop = "┌" + columnWidths.map((w) => "─".repeat(w + 2)).join("┬") + "┐";
+  const tableMid = "├" + columnWidths.map((w) => "─".repeat(w + 2)).join("┼") + "┤";
+  const tableBot = "└" + columnWidths.map((w) => "─".repeat(w + 2)).join("┴") + "┘";
 
   // Helper to render a row
   const renderRow = (cells: string[], isHeader: boolean) => {
@@ -311,7 +324,13 @@ function renderNestedTable(lines: string[], parentWidth: number): void {
   // Output table inside the markdown box
   const outputTableLine = (tableLine: string) => {
     const padding = parentWidth - stripAnsi(tableLine).length - 2;
-    console.log(chalk.magenta("│") + " " + chalk.cyan(tableLine) + " ".repeat(Math.max(0, padding)) + chalk.magenta("│"));
+    console.log(
+      chalk.magenta("│") +
+        " " +
+        chalk.cyan(tableLine) +
+        " ".repeat(Math.max(0, padding)) +
+        chalk.magenta("│"),
+    );
   };
 
   outputTableLine(tableTop);
@@ -332,9 +351,19 @@ function renderNestedCodeBlock(lang: string, lines: string[], parentWidth: numbe
   const innerTopPadding = Math.floor((innerWidth - title.length - 4) / 2);
   const innerTopRemainder = innerWidth - title.length - 4 - innerTopPadding;
   console.log(
-    chalk.magenta("│") + " " +
-    chalk.cyan("┌" + "─".repeat(Math.max(0, innerTopPadding)) + " " + title + " " + "─".repeat(Math.max(0, innerTopRemainder)) + "┐") +
-    " " + chalk.magenta("│")
+    chalk.magenta("│") +
+      " " +
+      chalk.cyan(
+        "┌" +
+          "─".repeat(Math.max(0, innerTopPadding)) +
+          " " +
+          title +
+          " " +
+          "─".repeat(Math.max(0, innerTopRemainder)) +
+          "┐",
+      ) +
+      " " +
+      chalk.magenta("│"),
   );
 
   // Code lines
@@ -345,18 +374,27 @@ function renderNestedCodeBlock(lang: string, lines: string[], parentWidth: numbe
     for (const wrappedLine of wrappedLines) {
       const padding = codeWidth - stripAnsi(wrappedLine).length;
       console.log(
-        chalk.magenta("│") + " " +
-        chalk.cyan("│") + " " + wrappedLine + " ".repeat(Math.max(0, padding)) + " " + chalk.cyan("│") +
-        " " + chalk.magenta("│")
+        chalk.magenta("│") +
+          " " +
+          chalk.cyan("│") +
+          " " +
+          wrappedLine +
+          " ".repeat(Math.max(0, padding)) +
+          " " +
+          chalk.cyan("│") +
+          " " +
+          chalk.magenta("│"),
       );
     }
   }
 
   // Inner bottom border
   console.log(
-    chalk.magenta("│") + " " +
-    chalk.cyan("└" + "─".repeat(innerWidth - 2) + "┘") +
-    " " + chalk.magenta("│")
+    chalk.magenta("│") +
+      " " +
+      chalk.cyan("└" + "─".repeat(innerWidth - 2) + "┘") +
+      " " +
+      chalk.magenta("│"),
   );
 }
 
@@ -369,14 +407,23 @@ function renderSimpleCodeBlock(lang: string, lines: string[]): void {
 
   const topPadding = Math.floor((width - titleDisplay.length - 2) / 2);
   const topRemainder = width - titleDisplay.length - 2 - topPadding;
-  console.log(chalk.magenta("┌" + "─".repeat(topPadding) + titleDisplay + "─".repeat(topRemainder) + "┐"));
+  console.log(
+    chalk.magenta("┌" + "─".repeat(topPadding) + titleDisplay + "─".repeat(topRemainder) + "┐"),
+  );
 
   for (const line of lines) {
     const formatted = formatCodeLine(line, lang);
     const wrappedLines = wrapText(formatted, contentWidth);
     for (const wrappedLine of wrappedLines) {
       const padding = contentWidth - stripAnsi(wrappedLine).length;
-      console.log(chalk.magenta("│") + " " + wrappedLine + " ".repeat(Math.max(0, padding)) + " " + chalk.magenta("│"));
+      console.log(
+        chalk.magenta("│") +
+          " " +
+          wrappedLine +
+          " ".repeat(Math.max(0, padding)) +
+          " " +
+          chalk.magenta("│"),
+      );
     }
   }
 
@@ -701,10 +748,34 @@ export function renderWarning(message: string): void {
 
 export function highlightCode(code: string): string {
   const keywords = new Set([
-    "const", "let", "var", "function", "return", "if", "else", "for", "while",
-    "import", "export", "from", "class", "extends", "async", "await", "try",
-    "catch", "throw", "new", "this", "true", "false", "null", "undefined",
-    "type", "interface", "enum",
+    "const",
+    "let",
+    "var",
+    "function",
+    "return",
+    "if",
+    "else",
+    "for",
+    "while",
+    "import",
+    "export",
+    "from",
+    "class",
+    "extends",
+    "async",
+    "await",
+    "try",
+    "catch",
+    "throw",
+    "new",
+    "this",
+    "true",
+    "false",
+    "null",
+    "undefined",
+    "type",
+    "interface",
+    "enum",
   ]);
 
   return code

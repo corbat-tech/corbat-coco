@@ -105,20 +105,20 @@ export function renderMarkdown(markdown: string): string {
 export function containsMarkdown(text: string): boolean {
   // Check for common markdown patterns
   const markdownPatterns = [
-    /^#{1,6}\s/m,           // Headers
-    /\*\*[^*]+\*\*/,        // Bold
-    /\*[^*]+\*/,            // Italic
-    /`[^`]+`/,              // Inline code
-    /```[\s\S]*?```/,       // Code blocks
-    /^\s*[-*+]\s/m,         // Unordered lists
-    /^\s*\d+\.\s/m,         // Ordered lists
-    /\[.+\]\(.+\)/,         // Links
-    /^\s*>/m,               // Blockquotes
-    /\|.+\|/,               // Tables
-    /^---$/m,               // Horizontal rule
+    /^#{1,6}\s/m, // Headers
+    /\*\*[^*]+\*\*/, // Bold
+    /\*[^*]+\*/, // Italic
+    /`[^`]+`/, // Inline code
+    /```[\s\S]*?```/, // Code blocks
+    /^\s*[-*+]\s/m, // Unordered lists
+    /^\s*\d+\.\s/m, // Ordered lists
+    /\[.+\]\(.+\)/, // Links
+    /^\s*>/m, // Blockquotes
+    /\|.+\|/, // Tables
+    /^---$/m, // Horizontal rule
   ];
 
-  return markdownPatterns.some(pattern => pattern.test(text));
+  return markdownPatterns.some((pattern) => pattern.test(text));
 }
 
 /**
@@ -131,7 +131,7 @@ export function renderAssistantMarkdown(markdown: string): string {
   // Add slight indentation for assistant responses
   return rendered
     .split("\n")
-    .map(line => line ? `  ${line}` : line)
+    .map((line) => (line ? `  ${line}` : line))
     .join("\n");
 }
 
@@ -140,20 +140,22 @@ export function renderAssistantMarkdown(markdown: string): string {
  * Handles basic formatting without full markdown parsing
  */
 export function renderInlineMarkdown(text: string): string {
-  return text
-    // Bold **text**
-    .replace(/\*\*([^*]+)\*\*/g, (_, p1: string) => chalk.bold(p1))
-    // Italic *text* (not inside bold)
-    .replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, (_, p1: string) => chalk.italic(p1))
-    // Strikethrough ~~text~~
-    .replace(/~~([^~]+)~~/g, (_, p1: string) => chalk.strikethrough(p1))
-    // Inline code `code`
-    .replace(/`([^`]+)`/g, (_, p1: string) => chalk.cyan(p1))
-    // Links [text](url)
-    .replace(
-      /\[([^\]]+)\]\(([^)]+)\)/g,
-      (_, text: string, url: string) => chalk.blue.underline(text) + chalk.dim(` (${url})`)
-    );
+  return (
+    text
+      // Bold **text**
+      .replace(/\*\*([^*]+)\*\*/g, (_, p1: string) => chalk.bold(p1))
+      // Italic *text* (not inside bold)
+      .replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, (_, p1: string) => chalk.italic(p1))
+      // Strikethrough ~~text~~
+      .replace(/~~([^~]+)~~/g, (_, p1: string) => chalk.strikethrough(p1))
+      // Inline code `code`
+      .replace(/`([^`]+)`/g, (_, p1: string) => chalk.cyan(p1))
+      // Links [text](url)
+      .replace(
+        /\[([^\]]+)\]\(([^)]+)\)/g,
+        (_, text: string, url: string) => chalk.blue.underline(text) + chalk.dim(` (${url})`),
+      )
+  );
 }
 
 export { marked };

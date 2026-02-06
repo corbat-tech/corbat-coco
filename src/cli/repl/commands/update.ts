@@ -29,7 +29,9 @@ export const updateCommand: SlashCommand = {
     }
 
     spinner.stop(
-      chalk.yellow(`Update available: ${updateInfo.currentVersion} → ${chalk.green(updateInfo.latestVersion)}`),
+      chalk.yellow(
+        `Update available: ${updateInfo.currentVersion} → ${chalk.green(updateInfo.latestVersion)}`,
+      ),
     );
 
     // Ask user if they want to update

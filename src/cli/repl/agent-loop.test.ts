@@ -4,13 +4,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import type { Mock } from "vitest";
-import type {
-  LLMProvider,
-  ChatWithToolsResponse,
-  Message,
-  StreamChunk,
-  ToolCall,
-} from "../../providers/types.js";
+import type { LLMProvider, StreamChunk, ToolCall } from "../../providers/types.js";
 
 /**
  * Create async iterable from generator
@@ -651,7 +645,11 @@ describe("executeAgentTurn", () => {
       (requiresConfirmation as Mock).mockReturnValue(true);
       (confirmToolExecution as Mock).mockResolvedValue("trust_global");
 
-      const toolCall: ToolCall = { id: "tool-1", name: "write_file", input: { path: "/test.ts", content: "code" } };
+      const toolCall: ToolCall = {
+        id: "tool-1",
+        name: "write_file",
+        input: { path: "/test.ts", content: "code" },
+      };
 
       let callCount = 0;
       (mockProvider.streamWithTools as Mock).mockImplementation(() => {

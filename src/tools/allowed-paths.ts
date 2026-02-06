@@ -110,9 +110,7 @@ export function removeAllowedPathFromSession(dirPath: string): boolean {
   const absolute = path.resolve(dirPath);
   const normalized = path.normalize(absolute);
   const before = sessionAllowedPaths.length;
-  sessionAllowedPaths = sessionAllowedPaths.filter(
-    (e) => path.normalize(e.path) !== normalized,
-  );
+  sessionAllowedPaths = sessionAllowedPaths.filter((e) => path.normalize(e.path) !== normalized);
   return sessionAllowedPaths.length < before;
 }
 
@@ -142,10 +140,7 @@ export async function loadAllowedPaths(projectPath: string): Promise<void> {
 /**
  * Persist an allowed path for the current project
  */
-export async function persistAllowedPath(
-  dirPath: string,
-  level: "read" | "write",
-): Promise<void> {
+export async function persistAllowedPath(dirPath: string, level: "read" | "write"): Promise<void> {
   if (!currentProjectPath) return;
 
   const absolute = path.resolve(dirPath);
@@ -186,9 +181,7 @@ export async function removePersistedAllowedPath(dirPath: string): Promise<boole
   if (!entries) return false;
 
   const before = entries.length;
-  store.projects[currentProjectPath] = entries.filter(
-    (e) => path.normalize(e.path) !== normalized,
-  );
+  store.projects[currentProjectPath] = entries.filter((e) => path.normalize(e.path) !== normalized);
 
   if (store.projects[currentProjectPath]!.length < before) {
     await saveStore(store);

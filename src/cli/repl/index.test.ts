@@ -173,6 +173,8 @@ describe("REPL index", () => {
       const mockInputHandler = {
         prompt: vi.fn().mockResolvedValueOnce(null),
         close: vi.fn(),
+        resume: vi.fn(),
+        pause: vi.fn(),
       };
       vi.mocked(createInputHandler).mockReturnValue(mockInputHandler);
 
@@ -215,6 +217,8 @@ describe("REPL index", () => {
       const mockInputHandler = {
         prompt: vi.fn().mockResolvedValueOnce(null), // EOF on first call
         close: vi.fn(),
+        resume: vi.fn(),
+        pause: vi.fn(),
       };
       vi.mocked(createInputHandler).mockReturnValue(mockInputHandler);
 
@@ -259,6 +263,8 @@ describe("REPL index", () => {
           .mockResolvedValueOnce("") // Empty input
           .mockResolvedValueOnce(null), // Then EOF
         close: vi.fn(),
+        resume: vi.fn(),
+        pause: vi.fn(),
       };
       vi.mocked(createInputHandler).mockReturnValue(mockInputHandler);
 
@@ -299,6 +305,8 @@ describe("REPL index", () => {
       const mockInputHandler = {
         prompt: vi.fn().mockResolvedValueOnce("/help").mockResolvedValueOnce(null),
         close: vi.fn(),
+        resume: vi.fn(),
+        pause: vi.fn(),
       };
       vi.mocked(createInputHandler).mockReturnValue(mockInputHandler);
       vi.mocked(isSlashCommand).mockReturnValue(true);
@@ -344,6 +352,8 @@ describe("REPL index", () => {
       const mockInputHandler = {
         prompt: vi.fn().mockResolvedValueOnce("/exit"),
         close: vi.fn(),
+        resume: vi.fn(),
+        pause: vi.fn(),
       };
       vi.mocked(createInputHandler).mockReturnValue(mockInputHandler);
       vi.mocked(isSlashCommand).mockReturnValue(true);
@@ -391,6 +401,8 @@ describe("REPL index", () => {
       const mockInputHandler = {
         prompt: vi.fn().mockResolvedValueOnce("Hello").mockResolvedValueOnce(null),
         close: vi.fn(),
+        resume: vi.fn(),
+        pause: vi.fn(),
       };
       vi.mocked(createInputHandler).mockReturnValue(mockInputHandler);
       vi.mocked(isSlashCommand).mockReturnValue(false);
@@ -440,6 +452,8 @@ describe("REPL index", () => {
       const mockInputHandler = {
         prompt: vi.fn().mockResolvedValueOnce("Do something").mockResolvedValueOnce(null),
         close: vi.fn(),
+        resume: vi.fn(),
+        pause: vi.fn(),
       };
       vi.mocked(createInputHandler).mockReturnValue(mockInputHandler);
       vi.mocked(isSlashCommand).mockReturnValue(false);
@@ -489,6 +503,8 @@ describe("REPL index", () => {
       const mockInputHandler = {
         prompt: vi.fn().mockResolvedValueOnce("trigger error").mockResolvedValueOnce(null),
         close: vi.fn(),
+        resume: vi.fn(),
+        pause: vi.fn(),
       };
       vi.mocked(createInputHandler).mockReturnValue(mockInputHandler);
       vi.mocked(isSlashCommand).mockReturnValue(false);
@@ -531,6 +547,8 @@ describe("REPL index", () => {
       const mockInputHandler = {
         prompt: vi.fn().mockResolvedValueOnce("abort").mockResolvedValueOnce(null),
         close: vi.fn(),
+        resume: vi.fn(),
+        pause: vi.fn(),
       };
       vi.mocked(createInputHandler).mockReturnValue(mockInputHandler);
       vi.mocked(isSlashCommand).mockReturnValue(false);
@@ -577,6 +595,8 @@ describe("REPL index", () => {
       const mockInputHandler = {
         prompt: vi.fn().mockResolvedValueOnce("throw string").mockResolvedValueOnce(null),
         close: vi.fn(),
+        resume: vi.fn(),
+        pause: vi.fn(),
       };
       vi.mocked(createInputHandler).mockReturnValue(mockInputHandler);
       vi.mocked(isSlashCommand).mockReturnValue(false);
@@ -616,6 +636,8 @@ describe("REPL index", () => {
       const mockInputHandler = {
         prompt: vi.fn().mockResolvedValueOnce(null),
         close: vi.fn(),
+        resume: vi.fn(),
+        pause: vi.fn(),
       };
       vi.mocked(createInputHandler).mockReturnValue(mockInputHandler);
 
@@ -659,6 +681,8 @@ describe("REPL index", () => {
       const mockInputHandler = {
         prompt: vi.fn().mockResolvedValueOnce("test input").mockResolvedValueOnce(null),
         close: vi.fn(),
+        resume: vi.fn(),
+        pause: vi.fn(),
       };
       vi.mocked(createInputHandler).mockReturnValue(mockInputHandler);
       vi.mocked(isSlashCommand).mockReturnValue(false);
@@ -728,6 +752,8 @@ describe("REPL index", () => {
       const mockInputHandler = {
         prompt: vi.fn().mockResolvedValueOnce("run tools").mockResolvedValueOnce(null),
         close: vi.fn(),
+        resume: vi.fn(),
+        pause: vi.fn(),
       };
       vi.mocked(createInputHandler).mockReturnValue(mockInputHandler);
       vi.mocked(isSlashCommand).mockReturnValue(false);

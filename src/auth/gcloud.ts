@@ -96,7 +96,10 @@ export async function getADCAccessToken(): Promise<ADCToken | null> {
     const message = error instanceof Error ? error.message : String(error);
 
     // Check for common errors
-    if (message.includes("not logged in") || message.includes("no application default credentials")) {
+    if (
+      message.includes("not logged in") ||
+      message.includes("no application default credentials")
+    ) {
       return null;
     }
 
@@ -108,7 +111,7 @@ export async function getADCAccessToken(): Promise<ADCToken | null> {
 /**
  * Read ADC credentials from file (for refresh token)
  */
-async function readADCCredentials(): Promise<ADCCredentials | null> {
+export async function readADCCredentials(): Promise<ADCCredentials | null> {
   const adcPath = getADCPath();
 
   try {

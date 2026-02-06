@@ -127,16 +127,9 @@ async function openBrowserFallback(url: string): Promise<boolean> {
   const commands: string[] = [];
 
   if (platform === "darwin") {
-    commands.push(
-      `open "${url}"`,
-      `open -a Safari "${url}"`,
-      `open -a "Google Chrome" "${url}"`,
-    );
+    commands.push(`open "${url}"`, `open -a Safari "${url}"`, `open -a "Google Chrome" "${url}"`);
   } else if (platform === "win32") {
-    commands.push(
-      `start "" "${url}"`,
-      `rundll32 url.dll,FileProtocolHandler ${url}`,
-    );
+    commands.push(`start "" "${url}"`, `rundll32 url.dll,FileProtocolHandler ${url}`);
   } else {
     // Linux - try multiple browsers
     commands.push(
@@ -190,7 +183,11 @@ export async function runOAuthFlow(
   // Show auth method selection
   console.log();
   console.log(chalk.magenta("   ┌─────────────────────────────────────────────────┐"));
-  console.log(chalk.magenta("   │ ") + chalk.bold.white(`${displayInfo.emoji} ${displayInfo.name} Authentication`.padEnd(47)) + chalk.magenta("│"));
+  console.log(
+    chalk.magenta("   │ ") +
+      chalk.bold.white(`${displayInfo.emoji} ${displayInfo.name} Authentication`.padEnd(47)) +
+      chalk.magenta("│"),
+  );
   console.log(chalk.magenta("   └─────────────────────────────────────────────────┘"));
   console.log();
 
@@ -224,7 +221,9 @@ export async function runOAuthFlow(
 /**
  * Check if a specific port is available
  */
-async function isPortAvailable(port: number): Promise<{ available: boolean; processName?: string }> {
+async function isPortAvailable(
+  port: number,
+): Promise<{ available: boolean; processName?: string }> {
   const net = await import("node:net");
 
   return new Promise((resolve) => {
@@ -284,12 +283,18 @@ async function runBrowserOAuthFlow(
       console.log();
       console.log(chalk.yellow(`   ⚠ Port ${requiredPort} is already in use`));
       console.log();
-      console.log(chalk.dim(`   ${displayInfo.name} OAuth requires port ${requiredPort}, which is currently occupied.`));
+      console.log(
+        chalk.dim(
+          `   ${displayInfo.name} OAuth requires port ${requiredPort}, which is currently occupied.`,
+        ),
+      );
       console.log(chalk.dim("   This usually means OpenCode or another coding tool is running."));
       console.log();
       console.log(chalk.cyan("   To fix this:"));
       console.log(chalk.dim("   1. Close OpenCode/Codex CLI (if running)"));
-      console.log(chalk.dim("   2. Or use an API key instead (recommended if using multiple tools)"));
+      console.log(
+        chalk.dim("   2. Or use an API key instead (recommended if using multiple tools)"),
+      );
       console.log();
 
       const fallbackOptions = [
@@ -350,16 +355,33 @@ async function runBrowserOAuthFlow(
 
     // Step 3: Build redirect URI and authorization URL
     const redirectUri = `http://localhost:${port}/auth/callback`;
-    const authUrl = buildAuthorizationUrl(oauthProvider, redirectUri, pkce.codeChallenge, pkce.state);
+    const authUrl = buildAuthorizationUrl(
+      oauthProvider,
+      redirectUri,
+      pkce.codeChallenge,
+      pkce.state,
+    );
 
     // Step 4: Show instructions
     console.log(chalk.green(`   ✓ Server ready on port ${port}`));
     console.log();
     console.log(chalk.magenta("   ┌─────────────────────────────────────────────────┐"));
-    console.log(chalk.magenta("   │ ") + chalk.bold.white(`${displayInfo.authDescription}`.padEnd(47)) + chalk.magenta("│"));
+    console.log(
+      chalk.magenta("   │ ") +
+        chalk.bold.white(`${displayInfo.authDescription}`.padEnd(47)) +
+        chalk.magenta("│"),
+    );
     console.log(chalk.magenta("   │                                                 │"));
-    console.log(chalk.magenta("   │ ") + chalk.dim("A browser window will open for you to sign in.") + chalk.magenta("  │"));
-    console.log(chalk.magenta("   │ ") + chalk.dim("After signing in, you'll be redirected back.") + chalk.magenta("    │"));
+    console.log(
+      chalk.magenta("   │ ") +
+        chalk.dim("A browser window will open for you to sign in.") +
+        chalk.magenta("  │"),
+    );
+    console.log(
+      chalk.magenta("   │ ") +
+        chalk.dim("After signing in, you'll be redirected back.") +
+        chalk.magenta("    │"),
+    );
     console.log(chalk.magenta("   └─────────────────────────────────────────────────┘"));
     console.log();
 
@@ -489,9 +511,17 @@ async function runDeviceCodeFlow(
     // Step 2: Show user instructions
     console.log();
     console.log(chalk.magenta("   ┌─────────────────────────────────────────────────┐"));
-    console.log(chalk.magenta("   │ ") + chalk.bold.white("Enter this code in your browser:") + chalk.magenta("               │"));
+    console.log(
+      chalk.magenta("   │ ") +
+        chalk.bold.white("Enter this code in your browser:") +
+        chalk.magenta("               │"),
+    );
     console.log(chalk.magenta("   │                                                 │"));
-    console.log(chalk.magenta("   │       ") + chalk.bold.cyan.bgBlack(` ${deviceCode.userCode} `) + chalk.magenta("                            │"));
+    console.log(
+      chalk.magenta("   │       ") +
+        chalk.bold.cyan.bgBlack(` ${deviceCode.userCode} `) +
+        chalk.magenta("                            │"),
+    );
     console.log(chalk.magenta("   │                                                 │"));
     console.log(chalk.magenta("   └─────────────────────────────────────────────────┘"));
     console.log();
@@ -603,11 +633,27 @@ async function runApiKeyFlow(
 
   console.log();
   console.log(chalk.magenta("   ┌─────────────────────────────────────────────────┐"));
-  console.log(chalk.magenta("   │ ") + chalk.bold.white(`🔑 Get your ${displayInfo.name} API key:`.padEnd(47)) + chalk.magenta("│"));
+  console.log(
+    chalk.magenta("   │ ") +
+      chalk.bold.white(`🔑 Get your ${displayInfo.name} API key:`.padEnd(47)) +
+      chalk.magenta("│"),
+  );
   console.log(chalk.magenta("   ├─────────────────────────────────────────────────┤"));
-  console.log(chalk.magenta("   │ ") + chalk.dim("1. Sign in with your account") + chalk.magenta("                   │"));
-  console.log(chalk.magenta("   │ ") + chalk.dim("2. Create a new API key") + chalk.magenta("                        │"));
-  console.log(chalk.magenta("   │ ") + chalk.dim("3. Copy and paste it here") + chalk.magenta("                      │"));
+  console.log(
+    chalk.magenta("   │ ") +
+      chalk.dim("1. Sign in with your account") +
+      chalk.magenta("                   │"),
+  );
+  console.log(
+    chalk.magenta("   │ ") +
+      chalk.dim("2. Create a new API key") +
+      chalk.magenta("                        │"),
+  );
+  console.log(
+    chalk.magenta("   │ ") +
+      chalk.dim("3. Copy and paste it here") +
+      chalk.magenta("                      │"),
+  );
   console.log(chalk.magenta("   └─────────────────────────────────────────────────┘"));
   console.log();
   console.log(chalk.cyan(`   → ${apiKeysUrl}`));

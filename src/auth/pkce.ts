@@ -49,11 +49,7 @@ export function generateState(length = 32): string {
  * - Remove trailing =
  */
 function base64UrlEncode(buffer: Buffer): string {
-  return buffer
-    .toString("base64")
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=/g, "");
+  return buffer.toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
 }
 
 /**

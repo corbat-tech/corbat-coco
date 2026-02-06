@@ -232,10 +232,7 @@ function isSafeBashCommand(command: string): boolean {
  * @param toolName - Name of the tool
  * @param input - Optional tool input for context-aware decisions
  */
-export function requiresConfirmation(
-  toolName: string,
-  input?: Record<string, unknown>,
-): boolean {
+export function requiresConfirmation(toolName: string, input?: Record<string, unknown>): boolean {
   // Always confirm these tools
   if (ALWAYS_CONFIRM_TOOLS.has(toolName)) {
     return true;
@@ -546,7 +543,6 @@ async function promptEditCommand(
 
   return trimmed;
 }
-
 
 /**
  * Ask for confirmation before executing a tool

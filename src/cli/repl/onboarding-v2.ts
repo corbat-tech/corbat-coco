@@ -22,9 +22,17 @@ import {
   formatModelInfo,
   type ProviderDefinition,
 } from "./providers-config.js";
-import { runOAuthFlow, supportsOAuth, isADCConfigured, isGcloudInstalled, getADCAccessToken, isOAuthConfigured, getOrRefreshOAuthToken } from "../../auth/index.js";
+import {
+  runOAuthFlow,
+  supportsOAuth,
+  isADCConfigured,
+  isGcloudInstalled,
+  getADCAccessToken,
+  isOAuthConfigured,
+  getOrRefreshOAuthToken,
+} from "../../auth/index.js";
 import { CONFIG_PATHS } from "../../config/paths.js";
-import { saveProviderPreference, getAuthMethod, type AuthMethod } from "../../config/env.js";
+import { saveProviderPreference, getAuthMethod } from "../../config/env.js";
 
 /**
  * Resultado del onboarding
@@ -50,8 +58,17 @@ export async function runOnboardingV2(): Promise<OnboardingResult | null> {
     // Primera vez - mostrar banner compacto con branding morado
     console.log();
     console.log(chalk.magenta("  ╭───────────────────────────────────────────────────────────╮"));
-    console.log(chalk.magenta("  │ ") + chalk.bold.white("🥥 Welcome to CORBAT-COCO") + chalk.magenta(` v${VERSION}`.padStart(32)) + chalk.magenta(" │"));
-    console.log(chalk.magenta("  │ ") + chalk.dim("The AI Coding Agent That Ships Production Code") + chalk.magenta("          │"));
+    console.log(
+      chalk.magenta("  │ ") +
+        chalk.bold.white("🥥 Welcome to CORBAT-COCO") +
+        chalk.magenta(` v${VERSION}`.padStart(32)) +
+        chalk.magenta(" │"),
+    );
+    console.log(
+      chalk.magenta("  │ ") +
+        chalk.dim("The AI Coding Agent That Ships Production Code") +
+        chalk.magenta("          │"),
+    );
     console.log(chalk.magenta("  ╰───────────────────────────────────────────────────────────╯"));
     console.log();
     console.log(chalk.dim("  🌐 Open source project • corbat.tech"));
@@ -104,7 +121,12 @@ export async function runOnboardingV2(): Promise<OnboardingResult | null> {
   // Ya tiene providers configurados - banner compacto
   console.log();
   console.log(chalk.magenta("  ╭───────────────────────────────────────╮"));
-  console.log(chalk.magenta("  │ ") + chalk.bold.white("🥥 CORBAT-COCO") + chalk.magenta(` v${VERSION}`.padStart(22)) + chalk.magenta(" │"));
+  console.log(
+    chalk.magenta("  │ ") +
+      chalk.bold.white("🥥 CORBAT-COCO") +
+      chalk.magenta(` v${VERSION}`.padStart(22)) +
+      chalk.magenta(" │"),
+  );
   console.log(chalk.magenta("  ╰───────────────────────────────────────╯"));
   console.log();
 
@@ -154,7 +176,7 @@ async function showApiKeyHelp(): Promise<void> {
 
   console.log(chalk.bold("\n\n📝 Quick Setup Options:\n"));
   console.log(chalk.dim("   1. Set environment variable:"));
-  console.log(chalk.white("      export ANTHROPIC_API_KEY=\"sk-ant-...\"\n"));
+  console.log(chalk.white('      export ANTHROPIC_API_KEY="sk-ant-..."\n'));
   console.log(chalk.dim("   2. Or let Coco save it for you during setup\n"));
 
   console.log(chalk.yellow("\n💡 Tip: Anthropic Claude gives the best coding results.\n"));
@@ -168,7 +190,9 @@ async function showApiKeyHelp(): Promise<void> {
 /**
  * Setup provider with auth method selection (OAuth, gcloud ADC, or API key)
  */
-async function setupProviderWithAuth(provider: ProviderDefinition): Promise<OnboardingResult | null> {
+async function setupProviderWithAuth(
+  provider: ProviderDefinition,
+): Promise<OnboardingResult | null> {
   // Check available auth methods
   const hasOAuth = supportsOAuth(provider.id);
   const hasGcloudADC = provider.supportsGcloudADC;
@@ -302,7 +326,11 @@ async function setupProviderWithAuth(provider: ProviderDefinition): Promise<Onbo
 async function setupGcloudADC(provider: ProviderDefinition): Promise<OnboardingResult | null> {
   console.log();
   console.log(chalk.magenta("   ┌─────────────────────────────────────────────────┐"));
-  console.log(chalk.magenta("   │ ") + chalk.bold.white("☁️ Google Cloud ADC Authentication") + chalk.magenta("              │"));
+  console.log(
+    chalk.magenta("   │ ") +
+      chalk.bold.white("☁️ Google Cloud ADC Authentication") +
+      chalk.magenta("              │"),
+  );
   console.log(chalk.magenta("   └─────────────────────────────────────────────────┘"));
   console.log();
 
@@ -391,7 +419,6 @@ async function setupGcloudADC(provider: ProviderDefinition): Promise<OnboardingR
       // This will open a browser for authentication
       await execAsync("gcloud auth application-default login", {
         timeout: 120000, // 2 minute timeout
-        stdio: "inherit", // Show output
       });
 
       // Verify authentication
@@ -611,7 +638,10 @@ export async function setupLMStudioProvider(port = 1234): Promise<OnboardingResu
               // Test the model before returning
               const testResult = await testLMStudioModel(port, model);
               if (!testResult.success) {
-                if (testResult.error?.includes("context length") || testResult.error?.includes("tokens to keep")) {
+                if (
+                  testResult.error?.includes("context length") ||
+                  testResult.error?.includes("tokens to keep")
+                ) {
                   await showContextLengthError(model);
                   return setupLMStudioProvider(port);
                 }
@@ -644,7 +674,10 @@ export async function setupLMStudioProvider(port = 1234): Promise<OnboardingResu
               // Test the selected model
               const testResult = await testLMStudioModel(port, modelChoice);
               if (!testResult.success) {
-                if (testResult.error?.includes("context length") || testResult.error?.includes("tokens to keep")) {
+                if (
+                  testResult.error?.includes("context length") ||
+                  testResult.error?.includes("tokens to keep")
+                ) {
                   await showContextLengthError(modelChoice);
                   return setupLMStudioProvider(port);
                 }
@@ -720,7 +753,11 @@ export async function setupLMStudioProvider(port = 1234): Promise<OnboardingResu
     message: "What would you like to do?",
     options: [
       { value: "retry", label: "🔄 Retry (after loading a model)", hint: "Check again" },
-      { value: "manual", label: "✏️  Enter model name manually", hint: "If you know the exact name" },
+      {
+        value: "manual",
+        label: "✏️  Enter model name manually",
+        hint: "If you know the exact name",
+      },
       { value: "exit", label: "👋 Exit", hint: "Come back later" },
     ],
   });
@@ -746,7 +783,12 @@ export async function setupLMStudioProvider(port = 1234): Promise<OnboardingResu
   const testSpinner = p.spinner();
   testSpinner.start("Testing model connection...");
 
-  const valid = await testConnectionQuiet(provider, "lm-studio", manualModel, port === 1234 ? undefined : baseUrl);
+  const valid = await testConnectionQuiet(
+    provider,
+    "lm-studio",
+    manualModel,
+    port === 1234 ? undefined : baseUrl,
+  );
 
   if (!valid) {
     testSpinner.stop(chalk.yellow("⚠️  Model not responding"));
@@ -840,7 +882,6 @@ async function setupNewProvider(): Promise<OnboardingResult | null> {
   return setupProviderWithAuth(provider);
 }
 
-
 /**
  * Mostrar información del provider (usa p.log para mantener la barra vertical)
  */
@@ -920,7 +961,9 @@ async function selectModel(provider: ProviderDefinition): Promise<string | null>
     const isLMStudio = provider.id === "lmstudio";
     const custom = await p.text({
       message: isLMStudio ? "Enter the model name (as shown in LM Studio):" : "Enter model ID:",
-      placeholder: isLMStudio ? "e.g. qwen2.5-coder-7b-instruct" : provider.models[0]?.id || "model-name",
+      placeholder: isLMStudio
+        ? "e.g. qwen2.5-coder-7b-instruct"
+        : provider.models[0]?.id || "model-name",
       validate: (v) => (!v || !v.trim() ? "Model name is required" : undefined),
     });
 
@@ -1039,16 +1082,16 @@ export async function saveConfiguration(result: OnboardingResult): Promise<void>
   // gcloud ADC doesn't need to save API key - credentials are managed by gcloud
   if (isGcloudADC) {
     p.log.success("✅ Using gcloud ADC (credentials managed by gcloud CLI)");
-    p.log.message(chalk.dim("   Run `gcloud auth application-default login` to refresh credentials"));
+    p.log.message(
+      chalk.dim("   Run `gcloud auth application-default login` to refresh credentials"),
+    );
     // Still save provider/model preference to config.json
     await saveProviderPreference(result.type, result.model);
     return;
   }
 
   // API keys are user-level credentials — always saved globally in ~/.coco/.env
-  const message = isLocal
-    ? "Save your LM Studio configuration?"
-    : "Save your API key?";
+  const message = isLocal ? "Save your LM Studio configuration?" : "Save your API key?";
 
   const saveOptions = await p.select({
     message,

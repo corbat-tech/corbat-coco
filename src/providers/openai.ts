@@ -512,6 +512,7 @@ export class OpenAIProvider implements LLMProvider {
     const codePatterns = /[{}[\]();=<>!&|+\-*/]/g;
     const whitespacePattern = /\s/g;
     const wordPattern = /\b\w+\b/g;
+    // oxlint-disable-next-line no-control-regex -- Intentional: detecting non-ASCII characters
     const nonAsciiPattern = /[^\x00-\x7F]/g;
 
     const codeChars = (text.match(codePatterns) || []).length;
@@ -638,7 +639,7 @@ export class OpenAIProvider implements LLMProvider {
           max_tokens: 1,
         });
         return true;
-      } catch (chatError) {
+      } catch {
         // If we get a 401/403, the key is invalid
         // If we get a 404, the model might not exist
         // If we get other errors, provider might be down

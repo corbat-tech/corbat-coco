@@ -21,7 +21,17 @@ import {
 /**
  * System paths that can never be allowed
  */
-const BLOCKED_SYSTEM_PATHS = ["/etc", "/var", "/usr", "/root", "/sys", "/proc", "/boot", "/bin", "/sbin"];
+const BLOCKED_SYSTEM_PATHS = [
+  "/etc",
+  "/var",
+  "/usr",
+  "/root",
+  "/sys",
+  "/proc",
+  "/boot",
+  "/bin",
+  "/sbin",
+];
 
 /**
  * Allow-path command

@@ -85,9 +85,10 @@ export class GeminiProvider implements LLMProvider {
     const isADCMarker = config.apiKey === "__gcloud_adc__";
 
     // Try explicit API keys first (unless it's the ADC marker)
-    let apiKey = (!isADCMarker && config.apiKey)
-      ? config.apiKey
-      : process.env["GEMINI_API_KEY"] ?? process.env["GOOGLE_API_KEY"];
+    let apiKey =
+      !isADCMarker && config.apiKey
+        ? config.apiKey
+        : (process.env["GEMINI_API_KEY"] ?? process.env["GOOGLE_API_KEY"]);
 
     // If no API key or ADC marker is set, try gcloud ADC
     if (!apiKey || isADCMarker) {

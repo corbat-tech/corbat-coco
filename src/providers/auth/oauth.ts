@@ -70,9 +70,7 @@ export function generatePKCE(): PKCEPair {
     .slice(0, 43);
 
   // Create SHA256 hash of verifier for challenge
-  const challenge = createHash("sha256")
-    .update(verifier)
-    .digest("base64url");
+  const challenge = createHash("sha256").update(verifier).digest("base64url");
 
   return { verifier, challenge };
 }
@@ -87,11 +85,7 @@ export function generateState(): string {
 /**
  * Build authorization URL with PKCE
  */
-export function buildAuthorizationUrl(
-  config: OAuthConfig,
-  pkce: PKCEPair,
-  state: string,
-): string {
+export function buildAuthorizationUrl(config: OAuthConfig, pkce: PKCEPair, state: string): string {
   const params = new URLSearchParams({
     client_id: config.clientId,
     redirect_uri: config.redirectUri,
@@ -134,14 +128,14 @@ export async function exchangeCodeForTokens(
     throw new Error(`Token exchange failed: ${response.status} ${errorText}`);
   }
 
-  const data = await response.json();
+  const data = (await response.json()) as Record<string, unknown>;
 
   return {
-    accessToken: data.access_token,
-    refreshToken: data.refresh_token,
-    expiresIn: data.expires_in,
-    tokenType: data.token_type,
-    scope: data.scope,
+    accessToken: data.access_token as string,
+    refreshToken: data.refresh_token as string,
+    expiresIn: data.expires_in as number,
+    tokenType: data.token_type as string,
+    scope: data.scope as string | undefined,
   };
 }
 
@@ -171,14 +165,14 @@ export async function refreshAccessToken(
     throw new Error(`Token refresh failed: ${response.status} ${errorText}`);
   }
 
-  const data = await response.json();
+  const data = (await response.json()) as Record<string, unknown>;
 
   return {
-    accessToken: data.access_token,
-    refreshToken: data.refresh_token ?? refreshToken,
-    expiresIn: data.expires_in,
-    tokenType: data.token_type,
-    scope: data.scope,
+    accessToken: data.access_token as string,
+    refreshToken: (data.refresh_token as string) ?? refreshToken,
+    expiresIn: data.expires_in as number,
+    tokenType: data.token_type as string,
+    scope: data.scope as string | undefined,
   };
 }
 
@@ -206,10 +200,7 @@ export async function openBrowser(url: string): Promise<void> {
 /**
  * Start local HTTP server to receive OAuth callback
  */
-export function startCallbackServer(
-  port: number,
-  expectedState: string,
-): Promise<string> {
+export function startCallbackServer(port: number, expectedState: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const server = createServer((req: IncomingMessage, res: ServerResponse) => {
       const url = new URL(req.url ?? "/", `http://localhost:${port}`);
@@ -290,10 +281,13 @@ export function startCallbackServer(
     });
 
     // Timeout after 5 minutes
-    setTimeout(() => {
-      server.close();
-      reject(new Error("Authentication timeout"));
-    }, 5 * 60 * 1000);
+    setTimeout(
+      () => {
+        server.close();
+        reject(new Error("Authentication timeout"));
+      },
+      5 * 60 * 1000,
+    );
   });
 }
 
@@ -333,9 +327,7 @@ export async function browserOAuthFlow(
 /**
  * Request device code for device code flow
  */
-export async function requestDeviceCode(
-  config: OAuthConfig,
-): Promise<DeviceCodeResponse> {
+export async function requestDeviceCode(config: OAuthConfig): Promise<DeviceCodeResponse> {
   if (!config.deviceAuthorizationUrl) {
     throw new Error("Device authorization URL not configured");
   }
@@ -358,15 +350,15 @@ export async function requestDeviceCode(
     throw new Error(`Device code request failed: ${response.status} ${errorText}`);
   }
 
-  const data = await response.json();
+  const data = (await response.json()) as Record<string, unknown>;
 
   return {
-    deviceCode: data.device_code,
-    userCode: data.user_code,
-    verificationUri: data.verification_uri,
-    verificationUriComplete: data.verification_uri_complete,
-    expiresIn: data.expires_in,
-    interval: data.interval ?? 5,
+    deviceCode: data.device_code as string,
+    userCode: data.user_code as string,
+    verificationUri: data.verification_uri as string,
+    verificationUriComplete: data.verification_uri_complete as string | undefined,
+    expiresIn: data.expires_in as number,
+    interval: (data.interval as number) ?? 5,
   };
 }
 
@@ -399,15 +391,15 @@ export async function pollForDeviceTokens(
       body: body.toString(),
     });
 
-    const data = await response.json();
+    const data = (await response.json()) as Record<string, unknown>;
 
     if (response.ok) {
       return {
-        accessToken: data.access_token,
-        refreshToken: data.refresh_token,
-        expiresIn: data.expires_in,
-        tokenType: data.token_type,
-        scope: data.scope,
+        accessToken: data.access_token as string,
+        refreshToken: data.refresh_token as string,
+        expiresIn: data.expires_in as number,
+        tokenType: data.token_type as string,
+        scope: data.scope as string | undefined,
       };
     }
 

@@ -45,7 +45,7 @@ export async function copyToClipboard(text: string): Promise<boolean> {
 
       let resolved = false;
 
-      proc.on("error", (err) => {
+      proc.on("error", () => {
         if (resolved) return;
         resolved = true;
 

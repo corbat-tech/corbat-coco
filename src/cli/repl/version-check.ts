@@ -170,7 +170,9 @@ export function printUpdateNotification(updateInfo: {
 }): void {
   console.log();
   console.log(
-    chalk.yellow(`  ⬆️  Update available: ${chalk.dim(updateInfo.currentVersion)} → ${chalk.green(updateInfo.latestVersion)}`),
+    chalk.yellow(
+      `  ⬆️  Update available: ${chalk.dim(updateInfo.currentVersion)} → ${chalk.green(updateInfo.latestVersion)}`,
+    ),
   );
   console.log(chalk.dim(`     Run: ${chalk.white(updateInfo.updateCommand)}`));
   console.log();

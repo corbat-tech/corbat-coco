@@ -128,7 +128,9 @@ export class ParallelToolExecutor {
     }));
 
     // Results array to maintain order
-    const results: (ExecutedToolCall | null)[] = new Array(total).fill(null);
+    const results: (ExecutedToolCall | null)[] = Array.from<ExecutedToolCall | null>({
+      length: total,
+    }).fill(null);
 
     // Active execution count for concurrency control
     let activeCount = 0;

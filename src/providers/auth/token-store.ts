@@ -3,7 +3,7 @@
  * Stores tokens in ~/.config/coco/auth.json with restricted permissions
  */
 
-import { readFile, writeFile, mkdir, chmod, stat } from "node:fs/promises";
+import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { homedir } from "node:os";
 import type { OAuthTokens } from "./oauth.js";
@@ -98,16 +98,11 @@ async function saveTokenStore(data: TokenStoreData): Promise<void> {
 /**
  * Save a token for a provider
  */
-export async function saveToken(
-  provider: string,
-  tokens: OAuthTokens,
-): Promise<void> {
+export async function saveToken(provider: string, tokens: OAuthTokens): Promise<void> {
   const store = await loadTokenStore();
 
   const createdAt = Date.now();
-  const expiresAt = tokens.expiresIn
-    ? createdAt + tokens.expiresIn * 1000
-    : undefined;
+  const expiresAt = tokens.expiresIn ? createdAt + tokens.expiresIn * 1000 : undefined;
 
   store.tokens[provider] = {
     ...tokens,

@@ -15,10 +15,7 @@ import type {
 import type { ToolRegistry } from "../../tools/registry.js";
 import type { ReplSession, AgentTurnResult, ExecutedToolCall } from "./types.js";
 import { getConversationContext, addMessage, saveTrustedTool } from "./session.js";
-import {
-  requiresConfirmation,
-  confirmToolExecution,
-} from "./confirmation.js";
+import { requiresConfirmation, confirmToolExecution } from "./confirmation.js";
 import { ParallelToolExecutor } from "./parallel-executor.js";
 import {
   type HookRegistryInterface,

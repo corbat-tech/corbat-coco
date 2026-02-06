@@ -74,7 +74,7 @@ function extractAccountId(accessToken: string): string | undefined {
   return (
     (claims["chatgpt_account_id"] as string) ||
     (auth?.["chatgpt_account_id"] as string) ||
-    ((claims["organizations"] as Array<{ id: string }> | undefined)?.[0]?.id)
+    (claims["organizations"] as Array<{ id: string }> | undefined)?.[0]?.id
   );
 }
 
@@ -110,7 +110,7 @@ export class CodexProvider implements LLMProvider {
     if (!this.accessToken) {
       throw new ProviderError(
         "No OAuth token found. Please run authentication first with: coco --provider openai",
-        { provider: this.id }
+        { provider: this.id },
       );
     }
   }
@@ -178,10 +178,10 @@ export class CodexProvider implements LLMProvider {
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new ProviderError(
-        `Codex API error: ${response.status} - ${errorText}`,
-        { provider: this.id, statusCode: response.status }
-      );
+      throw new ProviderError(`Codex API error: ${response.status} - ${errorText}`, {
+        provider: this.id,
+        statusCode: response.status,
+      });
     }
 
     return response;
@@ -237,7 +237,6 @@ export class CodexProvider implements LLMProvider {
     });
   }
 
-
   /**
    * Send a chat message using Codex Responses API format
    */
@@ -246,7 +245,9 @@ export class CodexProvider implements LLMProvider {
 
     // Extract system message for instructions (if any)
     const systemMsg = messages.find((m) => m.role === "system");
-    const instructions = systemMsg ? this.extractTextContent(systemMsg) : "You are a helpful coding assistant.";
+    const instructions = systemMsg
+      ? this.extractTextContent(systemMsg)
+      : "You are a helpful coding assistant.";
 
     // Convert remaining messages to Responses API format
     const inputMessages = messages
@@ -332,9 +333,12 @@ export class CodexProvider implements LLMProvider {
       });
     }
 
-    const stopReason = status === "completed" ? "end_turn" as const
-      : status === "incomplete" ? "max_tokens" as const
-      : "end_turn" as const;
+    const stopReason =
+      status === "completed"
+        ? ("end_turn" as const)
+        : status === "incomplete"
+          ? ("max_tokens" as const)
+          : ("end_turn" as const);
 
     return {
       id: responseId,
@@ -355,7 +359,7 @@ export class CodexProvider implements LLMProvider {
    */
   async chatWithTools(
     messages: Message[],
-    options: ChatWithToolsOptions
+    options: ChatWithToolsOptions,
   ): Promise<ChatWithToolsResponse> {
     // For now, use basic chat without tools
     const response = await this.chat(messages, options);
@@ -387,7 +391,7 @@ export class CodexProvider implements LLMProvider {
 
         // Small delay to simulate streaming (only if there's more content)
         if (i + chunkSize < content.length) {
-          await new Promise(resolve => setTimeout(resolve, 5));
+          await new Promise((resolve) => setTimeout(resolve, 5));
         }
       }
     }
@@ -402,7 +406,7 @@ export class CodexProvider implements LLMProvider {
    */
   async *streamWithTools(
     messages: Message[],
-    options: ChatWithToolsOptions
+    options: ChatWithToolsOptions,
   ): AsyncIterable<StreamChunk> {
     // Use the basic stream method (tools not supported yet)
     yield* this.stream(messages, options);

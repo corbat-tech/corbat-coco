@@ -28,13 +28,13 @@ export async function loadConfig(configPath?: string): Promise<CocoConfig> {
   // Start with defaults
   let config = createDefaultConfig("my-project");
 
-  // Load global config first (lowest priority)
-  const globalConfig = await loadConfigFile(CONFIG_PATHS.config);
+  // Load global config first (lowest priority, lenient — may contain preferences)
+  const globalConfig = await loadConfigFile(CONFIG_PATHS.config, { strict: false });
   if (globalConfig) {
     config = deepMergeConfig(config, globalConfig);
   }
 
-  // Load project config (higher priority)
+  // Load project config (higher priority, strict validation)
   const projectConfigPath = configPath || getProjectConfigPath();
   const projectConfig = await loadConfigFile(projectConfigPath);
   if (projectConfig) {
@@ -47,7 +47,11 @@ export async function loadConfig(configPath?: string): Promise<CocoConfig> {
 /**
  * Load a single config file, returning null if not found
  */
-async function loadConfigFile(configPath: string): Promise<Partial<CocoConfig> | null> {
+async function loadConfigFile(
+  configPath: string,
+  options: { strict?: boolean } = {},
+): Promise<Partial<CocoConfig> | null> {
+  const { strict = true } = options;
   try {
     const content = await fs.readFile(configPath, "utf-8");
     const parsed = JSON5.parse(content);
@@ -55,6 +59,10 @@ async function loadConfigFile(configPath: string): Promise<Partial<CocoConfig> |
     // Validate partial config
     const result = CocoConfigSchema.partial().safeParse(parsed);
     if (!result.success) {
+      if (!strict) {
+        // Non-project config files (e.g., user preferences) may not match the schema.
+        return null;
+      }
       const issues = result.error.issues.map((i) => ({
         path: i.path.join("."),
         message: i.message,

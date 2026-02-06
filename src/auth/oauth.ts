@@ -103,7 +103,9 @@ export async function requestDeviceCode(provider: string): Promise<DeviceCodeRes
   }
 
   if (!config.deviceAuthEndpoint) {
-    throw new Error(`Device code flow not supported for provider: ${provider}. Use browser OAuth instead.`);
+    throw new Error(
+      `Device code flow not supported for provider: ${provider}. Use browser OAuth instead.`,
+    );
   }
 
   const body = new URLSearchParams({
@@ -131,7 +133,11 @@ export async function requestDeviceCode(provider: string): Promise<DeviceCodeRes
     const error = await response.text();
 
     // Check if we got an HTML page (Cloudflare block, captcha, etc.)
-    if (contentType.includes("text/html") || error.includes("<!DOCTYPE") || error.includes("<html")) {
+    if (
+      contentType.includes("text/html") ||
+      error.includes("<!DOCTYPE") ||
+      error.includes("<html")
+    ) {
       throw new Error(
         "OAuth request blocked (possibly by Cloudflare).\n" +
           "   This can happen due to network restrictions or rate limiting.\n" +

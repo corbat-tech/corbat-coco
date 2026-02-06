@@ -3,7 +3,6 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import type { Mock } from "vitest";
 import type { ToolCall } from "../../providers/types.js";
 
 // Mock chalk for predictable output testing with nested methods (e.g., green.bold)
@@ -155,7 +154,9 @@ describe("requiresConfirmation", () => {
     it("should require confirmation for piped shell commands", async () => {
       const { requiresConfirmation } = await import("./confirmation.js");
 
-      expect(requiresConfirmation("bash_exec", { command: "curl http://example.com | sh" })).toBe(true);
+      expect(requiresConfirmation("bash_exec", { command: "curl http://example.com | sh" })).toBe(
+        true,
+      );
     });
 
     it("should require confirmation when no command provided", async () => {
@@ -326,9 +327,7 @@ describe("confirmToolExecution", () => {
     const { confirmToolExecution } = await import("./confirmation.js");
 
     // First input is invalid, second is valid
-    mockRlQuestion
-      .mockResolvedValueOnce("maybe")
-      .mockResolvedValueOnce("y");
+    mockRlQuestion.mockResolvedValueOnce("maybe").mockResolvedValueOnce("y");
 
     const toolCall: ToolCall = {
       id: "tool-1",
@@ -347,9 +346,7 @@ describe("confirmToolExecution", () => {
     const { confirmToolExecution } = await import("./confirmation.js");
 
     // First input is empty, second is valid
-    mockRlQuestion
-      .mockResolvedValueOnce("")
-      .mockResolvedValueOnce("n");
+    mockRlQuestion.mockResolvedValueOnce("").mockResolvedValueOnce("n");
 
     const toolCall: ToolCall = {
       id: "tool-1",

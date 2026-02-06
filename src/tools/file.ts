@@ -51,6 +51,7 @@ function hasNullByte(str: string): boolean {
  */
 function normalizePath(filePath: string): string {
   // Remove null bytes
+  // oxlint-disable-next-line no-control-regex -- Intentional: sanitizing null bytes from file paths
   let normalized = filePath.replace(/\0/g, "");
   // Normalize path separators and resolve .. and .
   normalized = path.normalize(normalized);

@@ -126,7 +126,10 @@ export function getDefaultModel(provider: ProviderType): string {
  */
 export function getDefaultProvider(): ProviderType {
   const provider = process.env["COCO_PROVIDER"]?.toLowerCase();
-  if (provider && ["anthropic", "openai", "codex", "gemini", "kimi", "lmstudio"].includes(provider)) {
+  if (
+    provider &&
+    ["anthropic", "openai", "codex", "gemini", "kimi", "lmstudio"].includes(provider)
+  ) {
     return provider as ProviderType;
   }
   return "anthropic";
@@ -269,12 +272,18 @@ export function getInternalProviderId(provider: ProviderType): ProviderType {
  */
 export function getLastUsedProvider(): ProviderType {
   const prefs = loadUserPreferences();
-  if (prefs.provider && ["anthropic", "openai", "codex", "gemini", "kimi", "lmstudio"].includes(prefs.provider)) {
+  if (
+    prefs.provider &&
+    ["anthropic", "openai", "codex", "gemini", "kimi", "lmstudio"].includes(prefs.provider)
+  ) {
     return prefs.provider;
   }
   // Fall back to env variable or default
   const envProvider = process.env["COCO_PROVIDER"]?.toLowerCase();
-  if (envProvider && ["anthropic", "openai", "codex", "gemini", "kimi", "lmstudio"].includes(envProvider)) {
+  if (
+    envProvider &&
+    ["anthropic", "openai", "codex", "gemini", "kimi", "lmstudio"].includes(envProvider)
+  ) {
     return envProvider as ProviderType;
   }
   return "anthropic";
