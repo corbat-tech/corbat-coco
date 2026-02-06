@@ -18,6 +18,18 @@
 export const OAUTH_CALLBACK_PORT = 1455;
 
 import * as http from "node:http";
+
+/**
+ * Escape a string for safe HTML insertion to prevent XSS
+ */
+function escapeHtml(unsafe: string): string {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#x27;");
+}
 import { URL } from "node:url";
 
 /**
@@ -120,7 +132,9 @@ const SUCCESS_HTML = `
 /**
  * Error HTML page shown when authentication fails
  */
-const ERROR_HTML = (error: string) => `
+const ERROR_HTML = (error: string) => {
+  const safeError = escapeHtml(error);
+  return `
 <!DOCTYPE html>
 <html>
 <head>
@@ -193,11 +207,12 @@ const ERROR_HTML = (error: string) => `
     </div>
     <h1>Authentication Failed</h1>
     <p>Something went wrong. Please try again.</p>
-    <div class="error">${error}</div>
+    <div class="error">${safeError}</div>
   </div>
 </body>
 </html>
 `;
+};
 
 /**
  * Start a local callback server and wait for the OAuth redirect

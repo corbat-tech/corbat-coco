@@ -23,7 +23,7 @@
 
 import * as p from "@clack/prompts";
 import chalk from "chalk";
-import { exec } from "node:child_process";
+import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
 import {
@@ -40,7 +40,7 @@ import {
 import { generatePKCECredentials } from "./pkce.js";
 import { createCallbackServer } from "./callback-server.js";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 /**
  * Map provider to its OAuth config name
@@ -99,18 +99,44 @@ export async function isOAuthConfigured(provider: string): Promise<boolean> {
 }
 
 /**
+ * Print an auth URL to console, masking sensitive query parameters
+ */
+function printAuthUrl(url: string): void {
+  try {
+    const parsed = new URL(url);
+    // Mask client_id and other sensitive params for logging
+    const maskedParams = new URLSearchParams(parsed.searchParams);
+    if (maskedParams.has("client_id")) {
+      const clientId = maskedParams.get("client_id")!;
+      maskedParams.set("client_id", clientId.slice(0, 8) + "...");
+    }
+    parsed.search = maskedParams.toString();
+    console.log(chalk.cyan(`   ${parsed.toString()}`));
+  } catch {
+    console.log(chalk.cyan("   [invalid URL]"));
+  }
+}
+
+/**
  * Open URL in browser (cross-platform)
  */
 async function openBrowser(url: string): Promise<boolean> {
+  // Validate URL to prevent command injection
+  try {
+    new URL(url);
+  } catch {
+    return false;
+  }
+
   const platform = process.platform;
 
   try {
     if (platform === "darwin") {
-      await execAsync(`open "${url}"`);
+      await execFileAsync("open", [url]);
     } else if (platform === "win32") {
-      await execAsync(`start "" "${url}"`);
+      await execFileAsync("cmd", ["/c", "start", "", url]);
     } else {
-      await execAsync(`xdg-open "${url}"`);
+      await execFileAsync("xdg-open", [url]);
     }
     return true;
   } catch {
@@ -123,29 +149,43 @@ async function openBrowser(url: string): Promise<boolean> {
  * Tries multiple approaches for stubborn systems
  */
 async function openBrowserFallback(url: string): Promise<boolean> {
+  // Validate URL to prevent command injection
+  try {
+    new URL(url);
+  } catch {
+    return false;
+  }
+
   const platform = process.platform;
-  const commands: string[] = [];
+  const commands: Array<{ cmd: string; args: string[] }> = [];
 
   if (platform === "darwin") {
-    commands.push(`open "${url}"`, `open -a Safari "${url}"`, `open -a "Google Chrome" "${url}"`);
+    commands.push(
+      { cmd: "open", args: [url] },
+      { cmd: "open", args: ["-a", "Safari", url] },
+      { cmd: "open", args: ["-a", "Google Chrome", url] },
+    );
   } else if (platform === "win32") {
-    commands.push(`start "" "${url}"`, `rundll32 url.dll,FileProtocolHandler ${url}`);
+    commands.push(
+      { cmd: "cmd", args: ["/c", "start", "", url] },
+      { cmd: "rundll32", args: ["url.dll,FileProtocolHandler", url] },
+    );
   } else {
     // Linux - try multiple browsers
     commands.push(
-      `xdg-open "${url}"`,
-      `sensible-browser "${url}"`,
-      `x-www-browser "${url}"`,
-      `gnome-open "${url}"`,
-      `firefox "${url}"`,
-      `chromium-browser "${url}"`,
-      `google-chrome "${url}"`,
+      { cmd: "xdg-open", args: [url] },
+      { cmd: "sensible-browser", args: [url] },
+      { cmd: "x-www-browser", args: [url] },
+      { cmd: "gnome-open", args: [url] },
+      { cmd: "firefox", args: [url] },
+      { cmd: "chromium-browser", args: [url] },
+      { cmd: "google-chrome", args: [url] },
     );
   }
 
-  for (const cmd of commands) {
+  for (const { cmd, args } of commands) {
     try {
-      await execAsync(cmd);
+      await execFileAsync(cmd, args);
       return true;
     } catch {
       // Try next method
@@ -405,14 +445,14 @@ async function runBrowserOAuthFlow(
           console.log(chalk.dim("   Could not open browser automatically."));
           console.log(chalk.dim("   Please open this URL manually:"));
           console.log();
-          console.log(chalk.cyan(`   ${authUrl}`));
+          printAuthUrl(authUrl);
           console.log();
         }
       }
     } else {
       console.log(chalk.dim("   Please open this URL in your browser:"));
       console.log();
-      console.log(chalk.cyan(`   ${authUrl}`));
+      printAuthUrl(authUrl);
       console.log();
     }
 
@@ -449,7 +489,9 @@ async function runBrowserOAuthFlow(
 
     console.log();
     console.log(chalk.yellow("   ⚠ Browser authentication failed"));
-    console.log(chalk.dim(`   Error: ${errorMsg}`));
+    // Sanitize error message to avoid logging sensitive data (tokens, client secrets)
+    const safeErrorMsg = errorMsg.replace(/(?:token|key|secret|code)[=:]\s*\S+/gi, "[REDACTED]");
+    console.log(chalk.dim(`   Error: ${safeErrorMsg}`));
     console.log();
 
     // Offer fallback options (only device code if provider supports it)
@@ -610,8 +652,9 @@ async function runDeviceCodeFlow(
       return runApiKeyFlow(provider);
     }
 
-    // Other errors
-    p.log.error(chalk.red(`   Authentication failed: ${errorMsg}`));
+    // Other errors — sanitize to avoid logging tokens/keys/secrets
+    const sanitizedMsg = errorMsg.replace(/(?:token|key|secret|code|password|credential)[=:]\s*\S+/gi, "[REDACTED]");
+    p.log.error(chalk.red(`   Authentication failed: ${sanitizedMsg}`));
     return null;
   }
 }
@@ -656,7 +699,15 @@ async function runApiKeyFlow(
   );
   console.log(chalk.magenta("   └─────────────────────────────────────────────────┘"));
   console.log();
-  console.log(chalk.cyan(`   → ${apiKeysUrl}`));
+  // Log a sanitized version of the URL (mask any sensitive query params)
+  try {
+    const parsedUrl = new URL(apiKeysUrl);
+    // Remove any query parameters that might contain sensitive data
+    parsedUrl.search = "";
+    console.log(chalk.cyan(`   → ${parsedUrl.toString()}`));
+  } catch {
+    console.log(chalk.cyan("   → [provider API keys page]"));
+  }
   console.log();
 
   // Ask to open browser

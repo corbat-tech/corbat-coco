@@ -211,12 +211,19 @@ export function startCallbackServer(port: number, expectedState: string): Promis
         const error = url.searchParams.get("error");
 
         if (error) {
+          // Escape error to prevent reflected XSS
+          const safeError = error
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#x27;");
           res.writeHead(400, { "Content-Type": "text/html" });
           res.end(`
             <html>
               <body style="font-family: system-ui; padding: 40px; text-align: center;">
                 <h1>Authentication Failed</h1>
-                <p>Error: ${error}</p>
+                <p>Error: ${safeError}</p>
                 <p>You can close this window.</p>
               </body>
             </html>

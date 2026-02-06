@@ -170,7 +170,14 @@ async function showApiKeyHelp(): Promise<void> {
   for (const provider of providers) {
     console.log(chalk.bold(`\n${provider.emoji} ${provider.name}`));
     console.log(chalk.dim(`   ${provider.description}`));
-    console.log(`   ${chalk.cyan("→")} ${provider.apiKeyUrl}`);
+    // Log URL without any query parameters to avoid leaking sensitive info
+    try {
+      const parsedUrl = new URL(provider.apiKeyUrl);
+      parsedUrl.search = "";
+      console.log(`   ${chalk.cyan("→")} ${parsedUrl.toString()}`);
+    } catch {
+      console.log(`   ${chalk.cyan("→")} [API keys page]`);
+    }
     console.log(chalk.dim(`   Env var: ${provider.envVar}`));
   }
 
