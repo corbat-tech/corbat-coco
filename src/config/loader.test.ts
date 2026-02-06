@@ -3,6 +3,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { CONFIG_PATHS } from "./paths.js";
 import {
   loadConfig,
   saveConfig,
@@ -358,7 +359,7 @@ describe("loadConfig edge cases", () => {
     const fs = await import("node:fs/promises");
     // Global config exists, project config doesn't
     vi.mocked(fs.default.readFile).mockImplementation(async (path) => {
-      if (String(path).includes(".coco/config.json") && String(path).includes("vmart")) {
+      if (String(path) === CONFIG_PATHS.config) {
         // Global config found
         return JSON.stringify(globalConfig);
       }
@@ -387,8 +388,7 @@ describe("loadConfig edge cases", () => {
     vi.mocked(fs.default.readFile).mockImplementation(async (path) => {
       const pathStr = String(path);
       // Global config is in home dir (~/.coco), project is in cwd
-      // Home dir contains "vmart" but NOT "WORKSPACE" (which is the cwd)
-      const isGlobalPath = pathStr.includes("vmart") && !pathStr.includes("WORKSPACE");
+      const isGlobalPath = pathStr === CONFIG_PATHS.config;
       if (isGlobalPath) {
         return JSON.stringify(globalConfig);
       }
@@ -483,7 +483,7 @@ describe("saveConfig edge cases", () => {
     const calledPath = vi.mocked(fs.default.writeFile).mock.calls[0]?.[0] as string;
     expect(calledPath).toContain(".coco/config.json");
     // Global path should be in home directory
-    expect(calledPath).toMatch(/vmart.*\.coco/);
+    expect(calledPath).toMatch(/\.coco\/config\.json$/);
   });
 });
 
