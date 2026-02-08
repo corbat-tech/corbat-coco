@@ -196,10 +196,7 @@ export class MCPClientImpl implements MCPClient {
   /**
    * Get a specific prompt with arguments
    */
-  async getPrompt(
-    name: string,
-    args?: Record<string, string>,
-  ): Promise<MCPGetPromptResult> {
+  async getPrompt(name: string, args?: Record<string, string>): Promise<MCPGetPromptResult> {
     this.ensureInitialized();
     return this.sendRequest<MCPGetPromptResult>("prompts/get", {
       name,

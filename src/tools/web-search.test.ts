@@ -26,8 +26,31 @@ describe("web-search", () => {
     globalThis.fetch = originalFetch;
   });
 
+  describe("extractRealUrl", () => {
+    it("should extract URL from DDG proxy link", async () => {
+      const { extractRealUrl } = await import("./web-search.js");
+
+      const proxyUrl =
+        "//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.typescriptlang.org%2F&rut=abc123";
+      expect(extractRealUrl(proxyUrl)).toBe("https://www.typescriptlang.org/");
+    });
+
+    it("should return direct http URLs as-is", async () => {
+      const { extractRealUrl } = await import("./web-search.js");
+
+      expect(extractRealUrl("https://example.com/page")).toBe("https://example.com/page");
+      expect(extractRealUrl("http://example.com/page")).toBe("http://example.com/page");
+    });
+
+    it("should handle malformed URLs gracefully", async () => {
+      const { extractRealUrl } = await import("./web-search.js");
+
+      expect(extractRealUrl("not-a-url")).toBe("not-a-url");
+    });
+  });
+
   describe("parseDuckDuckGoResults", () => {
-    it("should parse DuckDuckGo Lite HTML results", async () => {
+    it("should parse simple nofollow link format (backward compat)", async () => {
       const { parseDuckDuckGoResults } = await import("./web-search.js");
 
       const html = `
@@ -53,6 +76,72 @@ describe("web-search", () => {
       expect(results[0].url).toBe("https://example.com/page1");
       expect(results[0].snippet).toBe("This is the first result snippet.");
       expect(results[1].title).toBe("Result Two Title");
+    });
+
+    it("should parse real DDG Lite HTML with proxy URLs and result-link class", async () => {
+      const { parseDuckDuckGoResults } = await import("./web-search.js");
+
+      // Realistic DDG Lite HTML structure (uses single quotes, proxy URLs)
+      const html = `
+        <table border="0">
+          <tr>
+            <td valign="top">1.&nbsp;</td>
+            <td>
+              <a rel="nofollow" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.typescriptlang.org%2F&amp;rut=abc123" class='result-link'>TypeScript: JavaScript With Syntax For Types.</a>
+            </td>
+          </tr>
+          <tr>
+            <td>&nbsp;&nbsp;&nbsp;</td>
+            <td class='result-snippet'>
+              <b>TypeScript</b> is a strongly typed programming language.
+            </td>
+          </tr>
+          <tr>
+            <td valign="top">2.&nbsp;</td>
+            <td>
+              <a rel="nofollow" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.w3schools.com%2Ftypescript%2F&amp;rut=def456" class='result-link'>TypeScript Tutorial - W3Schools</a>
+            </td>
+          </tr>
+          <tr>
+            <td>&nbsp;&nbsp;&nbsp;</td>
+            <td class='result-snippet'>Learn TypeScript step by step.</td>
+          </tr>
+        </table>
+      `;
+
+      const results = parseDuckDuckGoResults(html, 5);
+      expect(results).toHaveLength(2);
+      expect(results[0].title).toBe("TypeScript: JavaScript With Syntax For Types.");
+      expect(results[0].url).toBe("https://www.typescriptlang.org/");
+      expect(results[0].snippet).toContain("strongly typed programming language");
+      expect(results[1].title).toBe("TypeScript Tutorial - W3Schools");
+      expect(results[1].url).toBe("https://www.w3schools.com/typescript/");
+    });
+
+    it("should filter out sponsored results", async () => {
+      const { parseDuckDuckGoResults } = await import("./web-search.js");
+
+      const html = `
+        <table>
+          <tr class="result-sponsored">
+            <td><a rel="nofollow" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fsponsored.com" class='result-link'>Sponsored Ad</a></td>
+          </tr>
+          <tr class="result-sponsored">
+            <td class='result-snippet'>Buy now!</td>
+          </tr>
+          <tr>
+            <td><a rel="nofollow" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Forganic.com" class='result-link'>Organic Result</a></td>
+          </tr>
+          <tr>
+            <td class='result-snippet'>Real content.</td>
+          </tr>
+        </table>
+      `;
+
+      const results = parseDuckDuckGoResults(html, 5);
+      expect(results).toHaveLength(1);
+      expect(results[0].url).toBe("https://organic.com");
+      expect(results[0].title).toBe("Organic Result");
     });
 
     it("should respect maxResults limit", async () => {
@@ -84,6 +173,19 @@ describe("web-search", () => {
       const httpResults = results.filter((r) => r.url.startsWith("http"));
       expect(httpResults.length).toBeGreaterThanOrEqual(0);
     });
+
+    it("should handle snippets with single-quoted class attributes", async () => {
+      const { parseDuckDuckGoResults } = await import("./web-search.js");
+
+      const html = `
+        <a rel="nofollow" href="https://example.com">Example</a>
+        <td class='result-snippet'>Single quote snippet</td>
+      `;
+
+      const results = parseDuckDuckGoResults(html, 5);
+      expect(results).toHaveLength(1);
+      expect(results[0].snippet).toBe("Single quote snippet");
+    });
   });
 
   describe("webSearchTool", () => {
@@ -109,7 +211,7 @@ describe("web-search", () => {
       expect(empty.success).toBe(false);
     });
 
-    it("should execute search with mocked fetch", async () => {
+    it("should execute search with mocked fetch (simple format)", async () => {
       const { webSearchTool } = await import("./web-search.js");
 
       const mockHtml = `
@@ -131,6 +233,38 @@ describe("web-search", () => {
       expect(result.engine).toBe("duckduckgo");
       expect(result.duration).toBeGreaterThan(0);
       expect(Array.isArray(result.results)).toBe(true);
+    });
+
+    it("should execute search with mocked fetch (real DDG format)", async () => {
+      const { webSearchTool } = await import("./web-search.js");
+
+      const mockHtml = `
+        <table>
+          <tr>
+            <td><a rel="nofollow" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fexample.com%2Fresult&amp;rut=abc" class='result-link'>Test Result</a></td>
+          </tr>
+          <tr>
+            <td class='result-snippet'>A test snippet from DDG.</td>
+          </tr>
+        </table>
+      `;
+
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        text: () => Promise.resolve(mockHtml),
+      });
+
+      const result = await webSearchTool.execute({
+        query: "test query real",
+        maxResults: 5,
+        engine: "duckduckgo",
+      });
+
+      expect(result.engine).toBe("duckduckgo");
+      expect(result.results).toHaveLength(1);
+      expect(result.results[0].url).toBe("https://example.com/result");
+      expect(result.results[0].title).toBe("Test Result");
+      expect(result.results[0].snippet).toBe("A test snippet from DDG.");
     });
 
     it("should throw on empty query after sanitization", async () => {

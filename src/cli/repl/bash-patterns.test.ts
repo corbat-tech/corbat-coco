@@ -161,9 +161,7 @@ describe("extractBashPattern", () => {
 
 describe("getTrustPattern", () => {
   it("should extract bash pattern for bash_exec", () => {
-    expect(getTrustPattern("bash_exec", { command: "git commit -m 'x'" })).toBe(
-      "bash:git:commit",
-    );
+    expect(getTrustPattern("bash_exec", { command: "git commit -m 'x'" })).toBe("bash:git:commit");
     expect(getTrustPattern("bash_exec", { command: "curl google.com" })).toBe("bash:curl");
     expect(getTrustPattern("bash_exec", { command: "npm install" })).toBe("bash:npm:install");
   });

@@ -190,6 +190,110 @@ describe("getConversationContext", () => {
   });
 });
 
+describe("generateToolCatalog", () => {
+  it("should generate catalog from registry grouped by category", async () => {
+    const { generateToolCatalog } = await import("./session.js");
+
+    // Create a minimal mock registry
+    const mockRegistry = {
+      getAll: () => [
+        { name: "read_file", description: "Read a file from disk.", category: "file" },
+        { name: "write_file", description: "Write content to a file.", category: "file" },
+        { name: "bash_exec", description: "Execute a shell command.", category: "bash" },
+        { name: "web_search", description: "Search the web for information.", category: "web" },
+      ],
+    };
+
+    const catalog = generateToolCatalog(mockRegistry as any);
+
+    expect(catalog).toContain("### File Operations");
+    expect(catalog).toContain("### Shell Commands");
+    expect(catalog).toContain("### Web (Search & Fetch)");
+    expect(catalog).toContain("**read_file**");
+    expect(catalog).toContain("**write_file**");
+    expect(catalog).toContain("**bash_exec**");
+    expect(catalog).toContain("**web_search**");
+  });
+
+  it("should use first sentence of description", async () => {
+    const { generateToolCatalog } = await import("./session.js");
+
+    const mockRegistry = {
+      getAll: () => [
+        {
+          name: "test_tool",
+          description: "Short description. More details here. Even more.",
+          category: "file",
+        },
+      ],
+    };
+
+    const catalog = generateToolCatalog(mockRegistry as any);
+
+    expect(catalog).toContain("Short description");
+    expect(catalog).not.toContain("More details here");
+  });
+
+  it("should handle unknown categories gracefully", async () => {
+    const { generateToolCatalog } = await import("./session.js");
+
+    const mockRegistry = {
+      getAll: () => [{ name: "custom_tool", description: "A custom tool.", category: "unknown" }],
+    };
+
+    const catalog = generateToolCatalog(mockRegistry as any);
+
+    // Falls back to raw category name
+    expect(catalog).toContain("### unknown");
+    expect(catalog).toContain("**custom_tool**");
+  });
+
+  it("should return empty string for empty registry", async () => {
+    const { generateToolCatalog } = await import("./session.js");
+
+    const mockRegistry = { getAll: () => [] };
+    const catalog = generateToolCatalog(mockRegistry as any);
+
+    expect(catalog).toBe("");
+  });
+});
+
+describe("getConversationContext with toolRegistry", () => {
+  it("should inject tool catalog when registry is provided", async () => {
+    const { createSession, getConversationContext } = await import("./session.js");
+
+    const session = createSession("/project");
+
+    const mockRegistry = {
+      getAll: () => [
+        { name: "web_search", description: "Search the web.", category: "web" },
+        { name: "read_file", description: "Read a file.", category: "file" },
+      ],
+    };
+
+    const context = getConversationContext(session, mockRegistry as any);
+
+    // System prompt should contain the injected tool catalog
+    expect(context[0]?.content).toContain("**web_search**");
+    expect(context[0]?.content).toContain("**read_file**");
+    expect(context[0]?.content).toContain("Web (Search & Fetch)");
+    expect(context[0]?.content).toContain("File Operations");
+    // The placeholder should be replaced
+    expect(context[0]?.content).not.toContain("{TOOL_CATALOG}");
+  });
+
+  it("should work without registry (backward compatible)", async () => {
+    const { createSession, getConversationContext } = await import("./session.js");
+
+    const session = createSession("/project");
+    const context = getConversationContext(session);
+
+    // Should still have system prompt with placeholder unreplaced
+    expect(context[0]?.role).toBe("system");
+    expect(context[0]?.content).toContain("Corbat-Coco");
+  });
+});
+
 describe("clearSession", () => {
   it("should clear all messages", async () => {
     const { createSession, addMessage, clearSession } = await import("./session.js");

@@ -30,10 +30,7 @@ declare module "pdf-parse" {
     info: Record<string, string>;
   }
 
-  function pdfParse(
-    data: Buffer,
-    options?: Record<string, unknown>,
-  ): Promise<PdfData>;
+  function pdfParse(data: Buffer, options?: Record<string, unknown>): Promise<PdfData>;
 
   export default pdfParse;
 }
@@ -43,10 +40,7 @@ declare module "@xenova/transformers" {
     data: Float32Array | number[];
   }
 
-  type Pipeline = (
-    text: string,
-    options?: Record<string, unknown>,
-  ) => Promise<PipelineOutput>;
+  type Pipeline = (text: string, options?: Record<string, unknown>) => Promise<PipelineOutput>;
 
   function pipeline(task: string, model: string): Promise<Pipeline>;
 

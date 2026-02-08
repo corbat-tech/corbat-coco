@@ -41,9 +41,7 @@ export function jsonSchemaToZod(schema: Record<string, unknown>): z.ZodType {
     if (literals.length < 2) {
       return literals[0] ?? z.any();
     }
-    return z.union(
-      literals as unknown as [z.ZodType, z.ZodType, ...z.ZodType[]],
-    );
+    return z.union(literals as unknown as [z.ZodType, z.ZodType, ...z.ZodType[]]);
   }
 
   // Handle const

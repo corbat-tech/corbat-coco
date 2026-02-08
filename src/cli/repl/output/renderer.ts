@@ -369,11 +369,7 @@ function renderNestedCodeBlock(lang: string, lines: string[], parentWidth: numbe
   }
 
   // Inner bottom border
-  console.log(
-    chalk.magenta("│") +
-      " " +
-      chalk.cyan("╰" + "─".repeat(innerWidth - 2) + "╯"),
-  );
+  console.log(chalk.magenta("│") + " " + chalk.cyan("╰" + "─".repeat(innerWidth - 2) + "╯"));
 }
 
 function renderSimpleCodeBlock(lang: string, lines: string[]): void {
@@ -610,14 +606,30 @@ function formatHtmlLine(line: string): string | null {
 
   // Lines with mixed HTML inline tags → strip HTML and format
   if (/<[a-z][a-z0-9]*(\s[^>]*)?\s*\/?>/i.test(trimmed) && /<\/[a-z][a-z0-9]*>/i.test(trimmed)) {
-    const stripped = trimmed
+    // SECURITY: Use whitelist approach - only convert known-safe tags to markdown
+    // Extract text content and safe formatting, discard all other HTML
+    let stripped = trimmed;
+
+    // Convert safe formatting tags to markdown equivalents
+    stripped = stripped
       .replace(/<br\s*\/?>/gi, " ")
       .replace(/<\/?(?:strong|b)>/gi, "**")
       .replace(/<\/?(?:em|i)>/gi, "*")
       .replace(/<\/?code>/gi, "`")
       .replace(/<a\s[^>]*href=["']([^"']*)["'][^>]*>/gi, "")
-      .replace(/<\/a>/gi, "")
-      .replace(/<[^>]+>/g, "");
+      .replace(/<\/a>/gi, "");
+
+    // Strip ALL remaining HTML tags (including script, style, iframe, etc.)
+    // This catches any dangerous tags that weren't in our safe list
+    stripped = stripped.replace(/<[^>]*>/g, "");
+
+    // Decode entities AFTER stripping tags to prevent entity-based injection
+    stripped = stripped
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/&amp;/g, "&");
+
     return formatInlineMarkdown(stripped);
   }
 

@@ -29,7 +29,10 @@ import {
   parseSlashCommand,
   executeSlashCommand,
   addTokenUsage,
+  hasPendingImage,
+  consumePendingImage,
 } from "./commands/index.js";
+import type { MessageContent, ImageContent, TextContent } from "../../providers/types.js";
 import type { ReplConfig } from "./types.js";
 import { VERSION } from "../../version.js";
 import { createTrustStore, type TrustLevel } from "./trust-store.js";
@@ -149,36 +152,86 @@ export async function startRepl(
   while (true) {
     const input = await inputHandler.prompt();
 
-    // Handle EOF (Ctrl+D)
-    if (input === null) {
+    // Handle EOF (Ctrl+D) — but not if Ctrl+V set a pending image
+    if (input === null && !hasPendingImage()) {
       console.log(chalk.dim("\nGoodbye!"));
       break;
     }
 
-    // Skip empty input
-    if (!input) continue;
+    // Skip empty input — but not if Ctrl+V set a pending image
+    if (!input && !hasPendingImage()) continue;
 
     // Handle slash commands
-    if (isSlashCommand(input)) {
+    let agentMessage: string | MessageContent | null = null;
+
+    if (input && isSlashCommand(input)) {
       const { command, args } = parseSlashCommand(input);
       const shouldExit = await executeSlashCommand(command, args, session);
       if (shouldExit) break;
-      continue;
-    }
 
-    // Detect intent from natural language
-    const intent = await intentRecognizer.recognize(input);
-
-    // If intent is not chat and has good confidence, offer to execute as command
-    if (intent.type !== "chat" && intent.confidence >= 0.6) {
-      const shouldExecute = await handleIntentConfirmation(intent, intentRecognizer);
-      if (shouldExecute) {
-        const { command, args } = intentRecognizer.intentToCommand(intent)!;
-        const shouldExit = await executeSlashCommand(command, args, session);
-        if (shouldExit) break;
+      // Check if slash command queued a multimodal message (e.g., /image)
+      if (hasPendingImage()) {
+        const pending = consumePendingImage()!;
+        agentMessage = [
+          {
+            type: "image",
+            source: {
+              type: "base64",
+              media_type: pending.media_type,
+              data: pending.data,
+            },
+          } as ImageContent,
+          {
+            type: "text",
+            text: pending.prompt,
+          } as TextContent,
+        ];
+        // Fall through to agent turn execution below
+      } else {
         continue;
       }
-      // If user chose not to execute, fall through to normal chat
+    }
+
+    // Check if Ctrl+V set a pending image (outside slash command flow)
+    // This must run before intent recognition to avoid passing empty/null input
+    if (agentMessage === null && hasPendingImage()) {
+      const pending = consumePendingImage()!;
+      agentMessage = [
+        {
+          type: "image",
+          source: {
+            type: "base64",
+            media_type: pending.media_type,
+            data: pending.data,
+          },
+        } as ImageContent,
+        {
+          type: "text",
+          text: pending.prompt,
+        } as TextContent,
+      ];
+    }
+
+    // Detect intent from natural language (skip for image-only messages)
+    if (agentMessage === null && input) {
+      const intent = await intentRecognizer.recognize(input);
+
+      // If intent is not chat and has good confidence, offer to execute as command
+      if (intent.type !== "chat" && intent.confidence >= 0.6) {
+        const shouldExecute = await handleIntentConfirmation(intent, intentRecognizer);
+        if (shouldExecute) {
+          const { command, args } = intentRecognizer.intentToCommand(intent)!;
+          const shouldExit = await executeSlashCommand(command, args, session);
+          if (shouldExit) break;
+          continue;
+        }
+        // If user chose not to execute, fall through to normal chat
+      }
+    }
+
+    // Use agentMessage if set by /image or Ctrl+V, otherwise use the raw text input
+    if (agentMessage === null) {
+      agentMessage = input ?? "";
     }
 
     // Execute agent turn
@@ -205,7 +258,12 @@ export async function startRepl(
 
     try {
       // Show contextual hint for first feature-like prompt when COCO mode is off
-      if (!isCocoMode() && !wasHintShown() && looksLikeFeatureRequest(input)) {
+      if (
+        typeof agentMessage === "string" &&
+        !isCocoMode() &&
+        !wasHintShown() &&
+        looksLikeFeatureRequest(agentMessage)
+      ) {
         markHintShown();
         console.log(formatCocoHint());
       }
@@ -216,8 +274,7 @@ export async function startRepl(
       let originalSystemPrompt: string | undefined;
       if (isCocoMode()) {
         originalSystemPrompt = session.config.agent.systemPrompt;
-        session.config.agent.systemPrompt =
-          originalSystemPrompt + "\n" + getCocoModeSystemPrompt();
+        session.config.agent.systemPrompt = originalSystemPrompt + "\n" + getCocoModeSystemPrompt();
       }
 
       // Pause input to prevent typing interference during agent response
@@ -236,12 +293,15 @@ export async function startRepl(
 
       process.once("SIGINT", sigintHandler);
 
-      const result = await executeAgentTurn(session, input, provider, toolRegistry, {
+      const result = await executeAgentTurn(session, agentMessage, provider, toolRegistry, {
         onStream: renderStreamChunk,
         onToolStart: (tc, index, total) => {
-          // Update spinner to show running tool
-          const msg =
-            total > 1 ? `Running ${tc.name}... [${index}/${total}]` : `Running ${tc.name}...`;
+          // Update spinner with descriptive message about what tool is doing
+          const desc = getToolRunningDescription(
+            tc.name,
+            (tc.input ?? {}) as Record<string, unknown>,
+          );
+          const msg = total > 1 ? `${desc} [${index}/${total}]` : desc;
           setSpinner(msg);
         },
         onToolEnd: (result) => {
@@ -263,7 +323,7 @@ export async function startRepl(
           clearSpinner();
         },
         onToolPreparing: (toolName) => {
-          setSpinner(`Preparing ${toolName}...`);
+          setSpinner(`Preparing: ${toolName}…`);
         },
         onBeforeConfirmation: () => {
           // Clear spinner before showing confirmation dialog
@@ -468,7 +528,9 @@ async function printWelcome(session: { projectPath: string; config: ReplConfig }
   );
   // Show COCO mode status
   const cocoStatus = isCocoMode()
-    ? chalk.magenta("  🔄 quality mode: ") + chalk.green.bold("on") + chalk.dim(" (/coco to toggle)")
+    ? chalk.magenta("  🔄 quality mode: ") +
+      chalk.green.bold("on") +
+      chalk.dim(" (/coco to toggle)")
     : chalk.dim("  💡 /coco — enable auto-test & quality iteration");
   console.log(cocoStatus);
 
@@ -476,6 +538,11 @@ async function printWelcome(session: { projectPath: string; config: ReplConfig }
   console.log(
     chalk.dim("  Type your request or ") + chalk.magenta("/help") + chalk.dim(" for commands"),
   );
+  const pasteHint =
+    process.platform === "darwin"
+      ? chalk.dim("  📋 ⌘V paste text • ⌃V paste image")
+      : chalk.dim("  📋 Ctrl+V paste image from clipboard");
+  console.log(pasteHint);
   console.log();
 }
 
@@ -563,7 +630,7 @@ function parseCocoQualityReport(content: string): CocoQualityResult | null {
 
   // Parse [72, 84, 87, 88]
   const scores = scoreHistoryRaw
-    .replace(/[\[\]]/g, "")
+    .replace(/[[\]]/g, "")
     .split(",")
     .map((s) => parseFloat(s.trim()))
     .filter((n) => !isNaN(n));
@@ -587,6 +654,84 @@ function parseCocoQualityReport(content: string): CocoQualityResult | null {
     coverage: isNaN(coverage) ? undefined : coverage,
     securityScore: isNaN(security) ? undefined : security,
   };
+}
+
+/**
+ * Get a human-readable description of what a tool is doing.
+ * Used for spinner messages during tool execution to give the user
+ * meaningful feedback instead of generic "Running tool_name..." messages.
+ */
+function getToolRunningDescription(name: string, input: Record<string, unknown>): string {
+  switch (name) {
+    case "codebase_map":
+      return "Analyzing codebase structure…";
+    case "web_search": {
+      const query = typeof input.query === "string" ? input.query.slice(0, 40) : "";
+      return query ? `Searching the web: "${query}"…` : "Searching the web…";
+    }
+    case "web_fetch": {
+      const url = typeof input.url === "string" ? input.url.slice(0, 50) : "";
+      return url ? `Fetching ${url}…` : "Fetching web page…";
+    }
+    case "read_file": {
+      const filePath = typeof input.path === "string" ? input.path.split("/").pop() : "";
+      return filePath ? `Reading ${filePath}…` : "Reading file…";
+    }
+    case "write_file": {
+      const filePath = typeof input.path === "string" ? input.path.split("/").pop() : "";
+      return filePath ? `Writing ${filePath}…` : "Writing file…";
+    }
+    case "edit_file": {
+      const filePath = typeof input.path === "string" ? input.path.split("/").pop() : "";
+      return filePath ? `Editing ${filePath}…` : "Editing file…";
+    }
+    case "list_directory":
+      return "Listing directory…";
+    case "bash_exec":
+      return "Running command…";
+    case "run_tests":
+      return "Running tests…";
+    case "git_status":
+      return "Checking git status…";
+    case "git_diff":
+      return "Computing diff…";
+    case "git_log":
+      return "Reading git history…";
+    case "git_commit":
+      return "Creating commit…";
+    case "semantic_search": {
+      const query = typeof input.query === "string" ? input.query.slice(0, 40) : "";
+      return query ? `Searching code: "${query}"…` : "Searching code…";
+    }
+    case "grep_search": {
+      const pattern = typeof input.pattern === "string" ? input.pattern.slice(0, 40) : "";
+      return pattern ? `Searching for: "${pattern}"…` : "Searching files…";
+    }
+    case "generate_diagram":
+      return "Generating diagram…";
+    case "read_pdf":
+      return "Reading PDF…";
+    case "read_image":
+      return "Analyzing image…";
+    case "sql_query":
+      return "Executing SQL query…";
+    case "code_review":
+      return "Reviewing code…";
+    case "create_memory":
+      return "Saving memory…";
+    case "recall_memory":
+      return "Searching memories…";
+    case "create_checkpoint":
+      return "Creating checkpoint…";
+    case "restore_checkpoint":
+      return "Restoring checkpoint…";
+    case "glob_files":
+      return "Finding files…";
+    case "tree":
+      return "Building directory tree…";
+    default:
+      return `Running ${name}…`;
+  }
 }
 
 /**

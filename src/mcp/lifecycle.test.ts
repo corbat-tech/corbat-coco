@@ -250,9 +250,7 @@ describe("MCPServerManager", () => {
       const { MCPServerManager } = await import("./lifecycle.js");
       const manager = new MCPServerManager();
 
-      await expect(manager.restartServer("unknown")).rejects.toThrow(
-        "not found",
-      );
+      await expect(manager.restartServer("unknown")).rejects.toThrow("not found");
     });
   });
 

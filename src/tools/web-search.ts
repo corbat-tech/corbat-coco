@@ -48,6 +48,7 @@ export interface WebSearchOutput {
  */
 function sanitizeQuery(query: string): string {
   // Strip control characters
+  // eslint-disable-next-line no-control-regex
   const cleaned = query.replace(/[\x00-\x1F\x7F]/g, " ").trim();
   // Limit length
   return cleaned.slice(0, MAX_QUERY_LENGTH);
@@ -60,45 +61,107 @@ async function enforceRateLimit(): Promise<void> {
   const now = Date.now();
   const elapsed = now - lastRequestTime;
   if (elapsed < MIN_REQUEST_INTERVAL_MS) {
-    await new Promise((resolve) =>
-      setTimeout(resolve, MIN_REQUEST_INTERVAL_MS - elapsed),
-    );
+    await new Promise((resolve) => setTimeout(resolve, MIN_REQUEST_INTERVAL_MS - elapsed));
   }
   lastRequestTime = Date.now();
 }
 
 /**
- * Parse DuckDuckGo Lite HTML results
+ * Extract the real URL from a DuckDuckGo redirect/proxy URL.
+ *
+ * DDG Lite wraps all result URLs in a proxy like:
+ *   //duckduckgo.com/l/?uddg=https%3A%2F%2Fexample.com&rut=...
+ *
+ * This function extracts and decodes the `uddg` parameter to get the real URL.
+ * Falls back to the original URL if it's already a direct link.
  */
-export function parseDuckDuckGoResults(
-  html: string,
-  maxResults: number,
-): WebSearchResultItem[] {
+export function extractRealUrl(rawUrl: string): string {
+  // If already a direct http(s) URL, return as-is
+  if (rawUrl.startsWith("http://") || rawUrl.startsWith("https://")) {
+    return rawUrl;
+  }
+
+  // Handle DDG proxy URLs (start with // or /l/?)
+  try {
+    // Normalize protocol-relative URLs
+    const fullUrl = rawUrl.startsWith("//") ? `https:${rawUrl}` : rawUrl;
+    const urlObj = new URL(fullUrl);
+    const uddg = urlObj.searchParams.get("uddg");
+    if (uddg) {
+      return decodeURIComponent(uddg);
+    }
+  } catch {
+    // URL parsing failed, fall through
+  }
+
+  return rawUrl;
+}
+
+/**
+ * Parse DuckDuckGo Lite HTML results.
+ *
+ * DDG Lite uses a table-based layout where:
+ * - Organic results are in `<tr>` (no class) or `<tr class="">` rows
+ * - Sponsored results are in `<tr class="result-sponsored">` rows
+ * - Links have: `<a rel="nofollow" href="..." class='result-link'>Title</a>`
+ * - Snippets are in: `<td class='result-snippet'>...</td>`
+ * - Both single and double quotes may be used for HTML attributes
+ *
+ * We skip sponsored results and extract the real URL from DDG proxy links.
+ */
+export function parseDuckDuckGoResults(html: string, maxResults: number): WebSearchResultItem[] {
   const results: WebSearchResultItem[] = [];
 
-  // DuckDuckGo Lite uses a table-based layout
-  // Each result has a link in a <a class="result-link"> or similar pattern
-  // We parse using regex since we don't want a DOM dependency here
-  const resultPattern =
-    /<a\s+[^>]*rel="nofollow"\s+[^>]*href="([^"]+)"[^>]*>\s*([\s\S]*?)\s*<\/a>/gi;
-  const snippetPattern =
-    /<td\s+class="result-snippet"[^>]*>([\s\S]*?)<\/td>/gi;
+  // Remove sponsored result blocks first to avoid picking them up.
+  // Sponsored results are wrapped in <tr class="result-sponsored">...</tr> rows.
+  const cleanHtml = html.replace(/<tr\s+class=["']result-sponsored["'][^>]*>[\s\S]*?<\/tr>/gi, "");
 
-  // Extract URLs and titles
+  // Match result links: <a rel="nofollow" href="URL" class='result-link'>Title</a>
+  // Handles both single and double quotes, and attributes in any order
+  const resultPattern =
+    /<a\s+[^>]*rel=["']nofollow["'][^>]*href=["']([^"']+)["'][^>]*class=["']result-link["'][^>]*>([\s\S]*?)<\/a>/gi;
+
+  // Also match the older/simpler format: <a rel="nofollow" href="URL">Title</a>
+  // (without result-link class, for backward compatibility with tests)
+  const simpleLinkPattern =
+    /<a\s+[^>]*rel=["']nofollow["'][^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
+
+  // Match snippets: <td class='result-snippet'>...</td> (single or double quotes)
+  const snippetPattern = /<td\s+class=["']result-snippet["'][^>]*>([\s\S]*?)<\/td>/gi;
+
+  // Extract URLs and titles from result-link matches first
   const links: Array<{ url: string; title: string }> = [];
   let match: RegExpExecArray | null;
+  const seenUrls = new Set<string>();
 
-  while ((match = resultPattern.exec(html)) !== null) {
-    const url = (match[1] ?? "").trim();
+  // Try result-link pattern first (matches real DDG Lite output)
+  while ((match = resultPattern.exec(cleanHtml)) !== null) {
+    const rawUrl = (match[1] ?? "").trim();
+    const realUrl = extractRealUrl(rawUrl);
     const title = (match[2] ?? "").replace(/<[^>]*>/g, "").trim();
-    if (url.startsWith("http") && title.length > 0) {
-      links.push({ url, title });
+    if (realUrl.startsWith("http") && title.length > 0 && !seenUrls.has(realUrl)) {
+      seenUrls.add(realUrl);
+      links.push({ url: realUrl, title });
+    }
+  }
+
+  // Fallback: if no result-link matches found, try the simpler nofollow pattern
+  // (backward compat with tests using simple <a rel="nofollow" href="..."> format)
+  if (links.length === 0) {
+    while ((match = simpleLinkPattern.exec(cleanHtml)) !== null) {
+      const rawUrl = (match[1] ?? "").trim();
+      const realUrl = extractRealUrl(rawUrl);
+      const title = (match[2] ?? "").replace(/<[^>]*>/g, "").trim();
+      if (realUrl.startsWith("http") && title.length > 0 && !seenUrls.has(realUrl)) {
+        seenUrls.add(realUrl);
+        links.push({ url: realUrl, title });
+      }
     }
   }
 
   // Extract snippets
   const snippets: string[] = [];
-  while ((match = snippetPattern.exec(html)) !== null) {
+  while ((match = snippetPattern.exec(cleanHtml)) !== null) {
     const snippet = (match[1] ?? "").replace(/<[^>]*>/g, "").trim();
     if (snippet.length > 0) {
       snippets.push(snippet);
@@ -146,10 +209,9 @@ async function searchDuckDuckGo(
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      throw new ToolError(
-        `DuckDuckGo search failed with status ${response.status}`,
-        { tool: "web_search" },
-      );
+      throw new ToolError(`DuckDuckGo search failed with status ${response.status}`, {
+        tool: "web_search",
+      });
     }
 
     const html = await response.text();
@@ -169,10 +231,9 @@ async function searchBrave(
 ): Promise<WebSearchResultItem[]> {
   const apiKey = process.env.BRAVE_SEARCH_API_KEY;
   if (!apiKey) {
-    throw new ToolError(
-      "BRAVE_SEARCH_API_KEY environment variable is required for Brave search",
-      { tool: "web_search" },
-    );
+    throw new ToolError("BRAVE_SEARCH_API_KEY environment variable is required for Brave search", {
+      tool: "web_search",
+    });
   }
 
   const encodedQuery = encodeURIComponent(query);
@@ -195,10 +256,9 @@ async function searchBrave(
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      throw new ToolError(
-        `Brave search failed with status ${response.status}`,
-        { tool: "web_search" },
-      );
+      throw new ToolError(`Brave search failed with status ${response.status}`, {
+        tool: "web_search",
+      });
     }
 
     const data = (await response.json()) as {
@@ -231,10 +291,9 @@ async function searchSerpApi(
 ): Promise<WebSearchResultItem[]> {
   const apiKey = process.env.SERPAPI_KEY;
   if (!apiKey) {
-    throw new ToolError(
-      "SERPAPI_KEY environment variable is required for SerpAPI search",
-      { tool: "web_search" },
-    );
+    throw new ToolError("SERPAPI_KEY environment variable is required for SerpAPI search", {
+      tool: "web_search",
+    });
   }
 
   const encodedQuery = encodeURIComponent(query);
@@ -256,10 +315,9 @@ async function searchSerpApi(
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      throw new ToolError(
-        `SerpAPI search failed with status ${response.status}`,
-        { tool: "web_search" },
-      );
+      throw new ToolError(`SerpAPI search failed with status ${response.status}`, {
+        tool: "web_search",
+      });
     }
 
     const data = (await response.json()) as {
@@ -332,26 +390,14 @@ Examples:
 
       switch (engine) {
         case "brave":
-          results = await searchBrave(
-            sanitizedQuery,
-            maxResults,
-            DEFAULT_SEARCH_TIMEOUT_MS,
-          );
+          results = await searchBrave(sanitizedQuery, maxResults, DEFAULT_SEARCH_TIMEOUT_MS);
           break;
         case "serpapi":
-          results = await searchSerpApi(
-            sanitizedQuery,
-            maxResults,
-            DEFAULT_SEARCH_TIMEOUT_MS,
-          );
+          results = await searchSerpApi(sanitizedQuery, maxResults, DEFAULT_SEARCH_TIMEOUT_MS);
           break;
         case "duckduckgo":
         default:
-          results = await searchDuckDuckGo(
-            sanitizedQuery,
-            maxResults,
-            DEFAULT_SEARCH_TIMEOUT_MS,
-          );
+          results = await searchDuckDuckGo(sanitizedQuery, maxResults, DEFAULT_SEARCH_TIMEOUT_MS);
           break;
       }
 
@@ -367,13 +413,10 @@ Examples:
       }
 
       if ((error as Error).name === "AbortError") {
-        throw new TimeoutError(
-          `Search timed out after ${DEFAULT_SEARCH_TIMEOUT_MS}ms`,
-          {
-            timeoutMs: DEFAULT_SEARCH_TIMEOUT_MS,
-            operation: `web_search: ${sanitizedQuery}`,
-          },
-        );
+        throw new TimeoutError(`Search timed out after ${DEFAULT_SEARCH_TIMEOUT_MS}ms`, {
+          timeoutMs: DEFAULT_SEARCH_TIMEOUT_MS,
+          operation: `web_search: ${sanitizedQuery}`,
+        });
       }
 
       throw new ToolError(

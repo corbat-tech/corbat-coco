@@ -11,6 +11,7 @@ import type {
   ToolResultContent,
   ToolUseContent,
   ToolDefinition,
+  MessageContent,
 } from "../../providers/types.js";
 import type { ToolRegistry } from "../../tools/registry.js";
 import type { ReplSession, AgentTurnResult, ExecutedToolCall } from "./types.js";
@@ -63,7 +64,7 @@ export interface AgentTurnOptions {
  */
 export async function executeAgentTurn(
   session: ReplSession,
-  userMessage: string,
+  userMessage: string | MessageContent,
   provider: LLMProvider,
   toolRegistry: ToolRegistry,
   options: AgentTurnOptions = {},
@@ -101,8 +102,8 @@ export async function executeAgentTurn(
       };
     }
 
-    // Call LLM with tools using streaming
-    const messages = getConversationContext(session);
+    // Call LLM with tools using streaming (pass toolRegistry for dynamic prompt)
+    const messages = getConversationContext(session, toolRegistry);
 
     // Notify thinking started
     options.onThinkingStart?.();

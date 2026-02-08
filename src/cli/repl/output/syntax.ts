@@ -143,33 +143,55 @@ const TOKEN_COLORS: Record<string, (text: string) => string> = {
  *
  * highlight.js outputs: <span class="hljs-keyword">const</span>
  * We convert to: chalk.blue("const")
+ *
+ * Security: Only processes safe <span class="hljs-*"> tags from highlight.js.
+ * All other HTML is stripped before any processing occurs.
  */
 function hljsToChalk(html: string): string {
-  // Decode HTML entities first
-  let result = html
-    .replace(/&amp;/g, "&")
+  // SECURITY: Extract only safe hljs spans, discard everything else
+  // This prevents any HTML injection since we never process untrusted tags
+  const safeSpans: Array<{ match: string; className: string; content: string }> = [];
+  const spanRegex = /<span class="hljs-([a-z-]+)">([^<]*)<\/span>/g;
+  let match;
+
+  // Extract all safe spans with their positions
+  while ((match = spanRegex.exec(html)) !== null) {
+    const className = match[1];
+    const content = match[2];
+    if (className && content !== undefined) {
+      safeSpans.push({
+        match: match[0],
+        className,
+        content,
+      });
+    }
+  }
+
+  // Start with the original HTML
+  let result = html;
+
+  // Replace each safe span with colored text
+  // Process in reverse order to preserve positions
+  for (let i = safeSpans.length - 1; i >= 0; i--) {
+    const span = safeSpans[i];
+    if (!span) continue;
+    const colorFn = TOKEN_COLORS[span.className] ?? ((t: string) => t);
+    const colored = colorFn(span.content);
+    result = result.replace(span.match, colored);
+  }
+
+  // Now strip ALL remaining HTML tags - anything left is not a safe hljs span
+  // This includes any script/style/iframe/etc that might have been in the input
+  result = result.replace(/<[^>]*>/g, "");
+
+  // Decode HTML entities AFTER stripping tags to prevent entity-based injection
+  result = result
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
     .replace(/&#x27;/g, "'")
-    .replace(/&#39;/g, "'");
-
-  // Replace <span class="hljs-XXX">...</span> with chalk colors
-  // Handle nested spans by processing from innermost to outermost
-  let prevResult = "";
-  while (prevResult !== result) {
-    prevResult = result;
-    result = result.replace(
-      /<span class="hljs-([^"]+)">([^<]*)<\/span>/g,
-      (_, className: string, content: string) => {
-        const colorFn = TOKEN_COLORS[className] ?? ((t: string) => t);
-        return colorFn(content);
-      },
-    );
-  }
-
-  // Clean up any remaining HTML tags (shouldn't happen, but safety)
-  result = result.replace(/<[^>]+>/g, "");
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, "&"); // Must be last to avoid double-unescaping
 
   return result;
 }

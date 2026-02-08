@@ -122,8 +122,7 @@ describe("review tool: pattern detection via parseDiff", () => {
     expect(
       addedLines.some(
         (l) =>
-          /catch\s*\(\s*\w*\s*\)\s*\{\s*\}/.test(l.content) ||
-          /catch\s*\{\s*\}/.test(l.content),
+          /catch\s*\(\s*\w*\s*\)\s*\{\s*\}/.test(l.content) || /catch\s*\{\s*\}/.test(l.content),
       ),
     ).toBe(true);
   });

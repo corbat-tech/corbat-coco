@@ -50,8 +50,13 @@ export async function detectMaturity(cwd: string): Promise<MaturityInfo> {
   if (!hasPackageJson) {
     // Check for other project indicators (go.mod, Cargo.toml, pyproject.toml, etc.)
     const otherManifests = [
-      "go.mod", "Cargo.toml", "pyproject.toml", "pom.xml",
-      "build.gradle", "Makefile", "CMakeLists.txt",
+      "go.mod",
+      "Cargo.toml",
+      "pyproject.toml",
+      "pom.xml",
+      "build.gradle",
+      "Makefile",
+      "CMakeLists.txt",
     ];
     let hasAnyManifest = false;
     for (const m of otherManifests) {
@@ -61,12 +66,25 @@ export async function detectMaturity(cwd: string): Promise<MaturityInfo> {
       }
     }
     if (!hasAnyManifest) {
-      return { level: "empty", sourceFiles: 0, testFiles: 0, hasPackageJson: false, hasCI: false, hasLintConfig: false };
+      return {
+        level: "empty",
+        sourceFiles: 0,
+        testFiles: 0,
+        hasPackageJson: false,
+        hasCI: false,
+        hasLintConfig: false,
+      };
     }
   }
 
   // Count source files
-  const sourcePatterns = ["**/*.{ts,tsx,js,jsx,py,go,rs,java}", "!node_modules/**", "!dist/**", "!build/**", "!.git/**"];
+  const sourcePatterns = [
+    "**/*.{ts,tsx,js,jsx,py,go,rs,java}",
+    "!node_modules/**",
+    "!dist/**",
+    "!build/**",
+    "!.git/**",
+  ];
   const sourceFiles = await glob(sourcePatterns[0]!, {
     cwd,
     ignore: ["node_modules/**", "dist/**", "build/**", ".git/**"],
@@ -96,8 +114,14 @@ export async function detectMaturity(cwd: string): Promise<MaturityInfo> {
 
   // Check for lint config
   const lintConfigs = [
-    ".eslintrc.js", ".eslintrc.json", ".eslintrc.yaml", ".eslintrc.yml", ".eslintrc",
-    "biome.json", "biome.jsonc", ".oxlintrc.json",
+    ".eslintrc.js",
+    ".eslintrc.json",
+    ".eslintrc.yaml",
+    ".eslintrc.yml",
+    ".eslintrc",
+    "biome.json",
+    "biome.jsonc",
+    ".oxlintrc.json",
   ];
   let hasLintConfig = false;
   for (const config of lintConfigs) {
@@ -124,9 +148,7 @@ export async function detectMaturity(cwd: string): Promise<MaturityInfo> {
 
   // Determine level
   const isEstablished =
-    sourceFiles.length >= 50 &&
-    testFiles.length >= 5 &&
-    (hasCI || hasLintConfig);
+    sourceFiles.length >= 50 && testFiles.length >= 5 && (hasCI || hasLintConfig);
 
   const level: MaturityLevel = isEstablished ? "established" : "new";
 

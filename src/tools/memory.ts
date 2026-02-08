@@ -66,9 +66,7 @@ function getMemoriesDir(scope: "global" | "project"): string {
 /**
  * Load memory index
  */
-async function loadIndex(
-  scope: "global" | "project",
-): Promise<MemoryIndexEntry[]> {
+async function loadIndex(scope: "global" | "project"): Promise<MemoryIndexEntry[]> {
   const dir = getMemoriesDir(scope);
   const indexPath = path.join(dir, "index.json");
 
@@ -83,10 +81,7 @@ async function loadIndex(
 /**
  * Save memory index
  */
-async function saveIndex(
-  scope: "global" | "project",
-  index: MemoryIndexEntry[],
-): Promise<void> {
+async function saveIndex(scope: "global" | "project", index: MemoryIndexEntry[]): Promise<void> {
   const dir = getMemoriesDir(scope);
   await ensureDir(dir);
   const indexPath = path.join(dir, "index.json");
@@ -96,10 +91,7 @@ async function saveIndex(
 /**
  * Load a single memory
  */
-async function loadMemory(
-  scope: "global" | "project",
-  id: string,
-): Promise<Memory | null> {
+async function loadMemory(scope: "global" | "project", id: string): Promise<Memory | null> {
   const dir = getMemoriesDir(scope);
   const memPath = path.join(dir, `${id}.json`);
 
@@ -114,10 +106,7 @@ async function loadMemory(
 /**
  * Save a single memory
  */
-async function saveMemory(
-  scope: "global" | "project",
-  memory: Memory,
-): Promise<void> {
+async function saveMemory(scope: "global" | "project", memory: Memory): Promise<void> {
   const dir = getMemoriesDir(scope);
   await ensureDir(dir);
   const memPath = path.join(dir, `${memory.id}.json`);
@@ -146,11 +135,7 @@ Examples:
 - Global memory: { "key": "preferred-test-framework", "value": "vitest", "scope": "global" }`,
   category: "memory",
   parameters: z.object({
-    key: z
-      .string()
-      .min(1)
-      .max(200)
-      .describe("Memory key/name (unique identifier)"),
+    key: z.string().min(1).max(200).describe("Memory key/name (unique identifier)"),
     value: z.string().min(1).max(10000).describe("Memory content"),
     tags: z
       .array(z.string().max(50))
@@ -244,26 +229,14 @@ Examples:
 - Combined: { "query": "test", "tags": ["performance"], "scope": "project" }`,
   category: "memory",
   parameters: z.object({
-    query: z
-      .string()
-      .optional()
-      .describe("Search query (matches key and value)"),
-    tags: z
-      .array(z.string())
-      .optional()
-      .describe("Filter by tags (matches any)"),
+    query: z.string().optional().describe("Search query (matches key and value)"),
+    tags: z.array(z.string()).optional().describe("Filter by tags (matches any)"),
     scope: z
       .enum(["global", "project", "all"])
       .optional()
       .default("all")
       .describe("Which scope to search"),
-    limit: z
-      .number()
-      .min(1)
-      .max(100)
-      .optional()
-      .default(10)
-      .describe("Maximum results"),
+    limit: z.number().min(1).max(100).optional().default(10).describe("Maximum results"),
   }),
   async execute({ query, tags, scope, limit }) {
     const effectiveScope = scope ?? "all";
@@ -281,15 +254,11 @@ Examples:
 
       if (query) {
         const lowerQuery = query.toLowerCase();
-        filtered = filtered.filter((e) =>
-          e.key.toLowerCase().includes(lowerQuery),
-        );
+        filtered = filtered.filter((e) => e.key.toLowerCase().includes(lowerQuery));
       }
 
       if (tags && tags.length > 0) {
-        filtered = filtered.filter((e) =>
-          tags.some((tag) => e.tags.includes(tag)),
-        );
+        filtered = filtered.filter((e) => tags.some((tag) => e.tags.includes(tag)));
       }
 
       // Load full memories for matching entries
@@ -322,10 +291,7 @@ Examples:
     }
 
     // Sort by most recently updated
-    allMemories.sort(
-      (a, b) =>
-        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
-    );
+    allMemories.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 
     const limited = allMemories.slice(0, effectiveLimit);
 
@@ -369,10 +335,7 @@ Examples:
       .optional()
       .default("all")
       .describe("Which scope to list"),
-    tags: z
-      .array(z.string())
-      .optional()
-      .describe("Filter by tags"),
+    tags: z.array(z.string()).optional().describe("Filter by tags"),
   }),
   async execute({ scope, tags }) {
     const scopes: Array<"global" | "project"> =
@@ -388,9 +351,7 @@ Examples:
     // Filter by tags if provided
     let filtered = allEntries;
     if (tags && tags.length > 0) {
-      filtered = allEntries.filter((e) =>
-        tags.some((tag) => e.tags.includes(tag)),
-      );
+      filtered = allEntries.filter((e) => tags.some((tag) => e.tags.includes(tag)));
     }
 
     return {

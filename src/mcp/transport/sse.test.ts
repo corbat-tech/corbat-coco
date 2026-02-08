@@ -35,7 +35,7 @@ function createMockSSEResponse(sseText: string): Response {
     redirected: false,
     type: "basic" as ResponseType,
     url: "",
-    clone: () => ({ body } as unknown as Response),
+    clone: () => ({ body }) as unknown as Response,
     text: async () => sseText,
     json: async () => ({}),
     arrayBuffer: async () => new ArrayBuffer(0),
@@ -122,9 +122,7 @@ describe("SSETransport", () => {
 
   describe("connect", () => {
     it("should connect to SSE endpoint", async () => {
-      const response = createMockSSEResponse(
-        "event: endpoint\ndata: /message\n\n",
-      );
+      const response = createMockSSEResponse("event: endpoint\ndata: /message\n\n");
 
       vi.mocked(fetch).mockResolvedValueOnce(response);
 
@@ -197,9 +195,7 @@ describe("SSETransport", () => {
   describe("send", () => {
     it("should send message via HTTP POST", async () => {
       vi.mocked(fetch)
-        .mockResolvedValueOnce(
-          createOpenSSEResponse("event: endpoint\ndata: /message\n\n"),
-        )
+        .mockResolvedValueOnce(createOpenSSEResponse("event: endpoint\ndata: /message\n\n"))
         .mockResolvedValueOnce({
           ok: true,
           status: 200,
@@ -228,16 +224,14 @@ describe("SSETransport", () => {
         url: "https://api.example.com/sse",
       });
 
-      await expect(
-        transport.send({ jsonrpc: "2.0", id: 1, method: "test" }),
-      ).rejects.toThrow(MCPConnectionError);
+      await expect(transport.send({ jsonrpc: "2.0", id: 1, method: "test" })).rejects.toThrow(
+        MCPConnectionError,
+      );
     });
 
     it("should throw on HTTP POST failure", async () => {
       vi.mocked(fetch)
-        .mockResolvedValueOnce(
-          createOpenSSEResponse("event: endpoint\ndata: /msg\n\n"),
-        )
+        .mockResolvedValueOnce(createOpenSSEResponse("event: endpoint\ndata: /msg\n\n"))
         .mockResolvedValueOnce({
           ok: false,
           status: 500,
@@ -251,16 +245,14 @@ describe("SSETransport", () => {
       await transport.connect();
       await waitForProcessing();
 
-      await expect(
-        transport.send({ jsonrpc: "2.0", id: 1, method: "test" }),
-      ).rejects.toThrow(MCPTransportError);
+      await expect(transport.send({ jsonrpc: "2.0", id: 1, method: "test" })).rejects.toThrow(
+        MCPTransportError,
+      );
     });
 
     it("should throw on network error", async () => {
       vi.mocked(fetch)
-        .mockResolvedValueOnce(
-          createOpenSSEResponse("event: endpoint\ndata: /msg\n\n"),
-        )
+        .mockResolvedValueOnce(createOpenSSEResponse("event: endpoint\ndata: /msg\n\n"))
         .mockRejectedValueOnce(new Error("Network error"));
 
       transport = new SSETransport({
@@ -270,9 +262,9 @@ describe("SSETransport", () => {
       await transport.connect();
       await waitForProcessing();
 
-      await expect(
-        transport.send({ jsonrpc: "2.0", id: 1, method: "test" }),
-      ).rejects.toThrow(MCPTransportError);
+      await expect(transport.send({ jsonrpc: "2.0", id: 1, method: "test" })).rejects.toThrow(
+        MCPTransportError,
+      );
     });
   });
 
@@ -281,9 +273,7 @@ describe("SSETransport", () => {
       const message = { jsonrpc: "2.0", id: 1, result: { tools: [] } };
       const sseData = `data: ${JSON.stringify(message)}\n\n`;
 
-      vi.mocked(fetch).mockResolvedValueOnce(
-        createMockSSEResponse(sseData),
-      );
+      vi.mocked(fetch).mockResolvedValueOnce(createMockSSEResponse(sseData));
 
       transport = new SSETransport({
         url: "https://api.example.com/sse",
@@ -302,9 +292,7 @@ describe("SSETransport", () => {
     it("should handle endpoint event and use it for POST", async () => {
       vi.mocked(fetch)
         .mockResolvedValueOnce(
-          createOpenSSEResponse(
-            "event: endpoint\ndata: https://api.example.com/msg\n\n",
-          ),
+          createOpenSSEResponse("event: endpoint\ndata: https://api.example.com/msg\n\n"),
         )
         .mockResolvedValueOnce({
           ok: true,
@@ -325,9 +313,7 @@ describe("SSETransport", () => {
     });
 
     it("should handle invalid JSON in SSE data", async () => {
-      vi.mocked(fetch).mockResolvedValueOnce(
-        createMockSSEResponse("data: not-valid-json\n\n"),
-      );
+      vi.mocked(fetch).mockResolvedValueOnce(createMockSSEResponse("data: not-valid-json\n\n"));
 
       transport = new SSETransport({
         url: "https://api.example.com/sse",
@@ -351,9 +337,7 @@ describe("SSETransport", () => {
       const message = { jsonrpc: "2.0", id: 1, result: {} };
       const sseData = `: this is a comment\ndata: ${JSON.stringify(message)}\n\n`;
 
-      vi.mocked(fetch).mockResolvedValueOnce(
-        createMockSSEResponse(sseData),
-      );
+      vi.mocked(fetch).mockResolvedValueOnce(createMockSSEResponse(sseData));
 
       transport = new SSETransport({
         url: "https://api.example.com/sse",
@@ -373,9 +357,7 @@ describe("SSETransport", () => {
       const message = { jsonrpc: "2.0", id: 1, result: {} };
       const sseData = `id: evt-42\ndata: ${JSON.stringify(message)}\n\n`;
 
-      vi.mocked(fetch).mockResolvedValueOnce(
-        createMockSSEResponse(sseData),
-      );
+      vi.mocked(fetch).mockResolvedValueOnce(createMockSSEResponse(sseData));
 
       transport = new SSETransport({
         url: "https://api.example.com/sse",
@@ -452,9 +434,7 @@ describe("SSETransport", () => {
     it("should use default /message endpoint when no endpoint event received", async () => {
       const message = { jsonrpc: "2.0", id: 1, result: {} };
       vi.mocked(fetch)
-        .mockResolvedValueOnce(
-          createOpenSSEResponse(`data: ${JSON.stringify(message)}\n\n`),
-        )
+        .mockResolvedValueOnce(createOpenSSEResponse(`data: ${JSON.stringify(message)}\n\n`))
         .mockResolvedValueOnce({
           ok: true,
           status: 200,

@@ -28,6 +28,7 @@ import type {
   ToolCall,
   ToolDefinition,
   MessageContent,
+  ImageContent,
   ToolResultContent,
 } from "./types.js";
 import { ProviderError } from "../utils/errors.js";
@@ -432,6 +433,14 @@ export class GeminiProvider implements LLMProvider {
     for (const block of content) {
       if (block.type === "text") {
         parts.push({ text: block.text });
+      } else if (block.type === "image") {
+        const imgBlock = block as ImageContent;
+        parts.push({
+          inlineData: {
+            data: imgBlock.source.data,
+            mimeType: imgBlock.source.media_type,
+          },
+        });
       } else if (block.type === "tool_use") {
         parts.push({
           functionCall: {

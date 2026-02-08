@@ -62,10 +62,12 @@ function createMockStdin() {
   const emitter = new EventEmitter();
 
   // Patch process.stdin methods for the confirmation system
-  const onSpy = vi.spyOn(process.stdin, "on").mockImplementation((event: string, handler: (...args: unknown[]) => void) => {
-    emitter.on(event, handler);
-    return process.stdin;
-  });
+  const onSpy = vi
+    .spyOn(process.stdin, "on")
+    .mockImplementation((event: string, handler: (...args: unknown[]) => void) => {
+      emitter.on(event, handler);
+      return process.stdin;
+    });
 
   const removeListenerSpy = vi
     .spyOn(process.stdin, "removeListener")
@@ -81,7 +83,11 @@ function createMockStdin() {
   const originalIsTTY = process.stdin.isTTY;
   const originalIsRaw = (process.stdin as NodeJS.ReadStream).isRaw;
   Object.defineProperty(process.stdin, "isTTY", { value: true, configurable: true });
-  Object.defineProperty(process.stdin, "isRaw", { value: false, configurable: true, writable: true });
+  Object.defineProperty(process.stdin, "isRaw", {
+    value: false,
+    configurable: true,
+    writable: true,
+  });
   const setRawModeSpy = vi.fn((_mode: boolean) => process.stdin);
   Object.defineProperty(process.stdin, "setRawMode", { value: setRawModeSpy, configurable: true });
 
@@ -98,7 +104,11 @@ function createMockStdin() {
     isPausedSpy.mockRestore();
     resumeSpy.mockRestore();
     Object.defineProperty(process.stdin, "isTTY", { value: originalIsTTY, configurable: true });
-    Object.defineProperty(process.stdin, "isRaw", { value: originalIsRaw, configurable: true, writable: true });
+    Object.defineProperty(process.stdin, "isRaw", {
+      value: originalIsRaw,
+      configurable: true,
+      writable: true,
+    });
     emitter.removeAllListeners();
   };
 

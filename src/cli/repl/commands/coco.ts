@@ -7,11 +7,7 @@
 
 import chalk from "chalk";
 import type { SlashCommand, ReplSession } from "../types.js";
-import {
-  isCocoMode,
-  setCocoMode,
-  saveCocoModePreference,
-} from "../coco-mode.js";
+import { isCocoMode, setCocoMode, saveCocoModePreference } from "../coco-mode.js";
 
 export const cocoCommand: SlashCommand = {
   name: "coco",
@@ -57,16 +53,12 @@ export const cocoCommand: SlashCommand = {
 
     console.log();
     if (newState) {
-      console.log(
-        chalk.magenta("  COCO quality mode: ") + chalk.green.bold("ON"),
-      );
+      console.log(chalk.magenta("  COCO quality mode: ") + chalk.green.bold("ON"));
       console.log(
         chalk.dim("  Agent will auto-test, self-review, and iterate until quality ≥ 85/100"),
       );
     } else {
-      console.log(
-        chalk.magenta("  COCO quality mode: ") + chalk.dim("OFF"),
-      );
+      console.log(chalk.magenta("  COCO quality mode: ") + chalk.dim("OFF"));
       console.log(chalk.dim("  Fast mode — agent responds without quality iteration"));
     }
     console.log();

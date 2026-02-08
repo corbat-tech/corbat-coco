@@ -129,9 +129,7 @@ export type MCPConfig = z.infer<typeof MCPConfigSchema>;
 export const ToolsConfigSchema = z.object({
   webSearch: z
     .object({
-      engine: z
-        .enum(["duckduckgo", "brave", "serpapi"])
-        .default("duckduckgo"),
+      engine: z.enum(["duckduckgo", "brave", "serpapi"]).default("duckduckgo"),
       apiKey: z.string().optional(),
       maxResults: z.number().min(1).max(20).default(5),
     })

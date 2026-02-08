@@ -49,9 +49,7 @@ export class MCPServerManager {
     switch (config.transport) {
       case "stdio": {
         if (!config.stdio?.command) {
-          throw new MCPConnectionError(
-            `Server '${config.name}' requires stdio.command`,
-          );
+          throw new MCPConnectionError(`Server '${config.name}' requires stdio.command`);
         }
         return new StdioTransport({
           command: config.stdio.command,
@@ -61,9 +59,7 @@ export class MCPServerManager {
       }
       case "http": {
         if (!config.http?.url) {
-          throw new MCPConnectionError(
-            `Server '${config.name}' requires http.url`,
-          );
+          throw new MCPConnectionError(`Server '${config.name}' requires http.url`);
         }
         return new HTTPTransport({
           url: config.http.url,
@@ -73,9 +69,7 @@ export class MCPServerManager {
       }
       case "sse": {
         if (!config.http?.url) {
-          throw new MCPConnectionError(
-            `Server '${config.name}' requires http.url for SSE`,
-          );
+          throw new MCPConnectionError(`Server '${config.name}' requires http.url for SSE`);
         }
         return new SSETransport({
           url: config.http.url,
@@ -83,9 +77,7 @@ export class MCPServerManager {
         });
       }
       default:
-        throw new MCPConnectionError(
-          `Unsupported transport: ${config.transport}`,
-        );
+        throw new MCPConnectionError(`Unsupported transport: ${config.transport}`);
     }
   }
 
@@ -132,9 +124,7 @@ export class MCPServerManager {
     };
 
     this.connections.set(config.name, connection);
-    this.logger.info(
-      `Server '${config.name}' started with ${toolCount} tools`,
-    );
+    this.logger.info(`Server '${config.name}' started with ${toolCount} tools`);
 
     return connection;
   }
@@ -232,9 +222,7 @@ export class MCPServerManager {
   /**
    * Start all servers from config list
    */
-  async startAll(
-    configs: MCPServerConfig[],
-  ): Promise<Map<string, ServerConnection>> {
+  async startAll(configs: MCPServerConfig[]): Promise<Map<string, ServerConnection>> {
     const results = new Map<string, ServerConnection>();
 
     for (const config of configs) {

@@ -83,10 +83,7 @@ Examples:
   category: "document",
   parameters: z.object({
     path: z.string().min(1).describe("Path to PDF file"),
-    pages: z
-      .string()
-      .optional()
-      .describe("Page range (e.g., '1-5', '3')"),
+    pages: z.string().optional().describe("Page range (e.g., '1-5', '3')"),
     maxPages: z
       .number()
       .min(1)
@@ -187,10 +184,9 @@ Examples:
         (error as Error).message?.includes("Cannot find module") ||
         (error as Error).message?.includes("MODULE_NOT_FOUND")
       ) {
-        throw new ToolError(
-          "pdf-parse package is not installed. Run: pnpm add pdf-parse",
-          { tool: "read_pdf" },
-        );
+        throw new ToolError("pdf-parse package is not installed. Run: pnpm add pdf-parse", {
+          tool: "read_pdf",
+        });
       }
 
       throw new ToolError(

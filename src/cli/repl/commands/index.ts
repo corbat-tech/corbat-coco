@@ -29,6 +29,7 @@ import { copyCommand } from "./copy.js";
 import { allowPathCommand } from "./allow-path.js";
 import { permissionsCommand } from "./permissions.js";
 import { cocoCommand } from "./coco.js";
+import { imageCommand } from "./image.js";
 import { renderError } from "../output/renderer.js";
 
 /**
@@ -61,6 +62,7 @@ const commands: SlashCommand[] = [
   allowPathCommand,
   permissionsCommand,
   cocoCommand,
+  imageCommand,
 ];
 
 /**
@@ -120,3 +122,4 @@ export function getAllCommands(): SlashCommand[] {
 // Re-export utilities
 export { addTokenUsage, resetTokenUsage, getTokenUsage } from "./cost.js";
 export { isCompactMode } from "./compact.js";
+export { consumePendingImage, hasPendingImage, setPendingImage } from "./image.js";

@@ -97,7 +97,9 @@ function renderResults(result: ReviewResult): void {
   // Header
   console.log(chalk.cyan.bold(`\n═══ Code Review ═══\n`));
 
-  console.log(`  ${chalk.dim("Branch:")} ${chalk.white(summary.branch)} → ${chalk.white(summary.baseBranch)}`);
+  console.log(
+    `  ${chalk.dim("Branch:")} ${chalk.white(summary.branch)} → ${chalk.white(summary.baseBranch)}`,
+  );
   console.log(
     `  ${chalk.dim("Files:")} ${summary.filesChanged} changed | ` +
       chalk.green(`+${summary.additions}`) +
@@ -107,7 +109,8 @@ function renderResults(result: ReviewResult): void {
   console.log(`  ${chalk.dim("Maturity:")} ${maturity}`);
 
   // Status
-  const statusIcon = summary.status === "approved" ? chalk.green("Approved") : chalk.yellow("Needs Work");
+  const statusIcon =
+    summary.status === "approved" ? chalk.green("Approved") : chalk.yellow("Needs Work");
   console.log(`  ${chalk.dim("Status:")} ${statusIcon}`);
 
   // Required changes
@@ -129,10 +132,14 @@ function renderResults(result: ReviewResult): void {
   // Summary
   console.log(chalk.dim(`\n──── Summary ────\n`));
   if (required.length > 0) {
-    console.log(`  Fix ${chalk.red.bold(String(required.length))} required issue${required.length !== 1 ? "s" : ""} before merging.`);
+    console.log(
+      `  Fix ${chalk.red.bold(String(required.length))} required issue${required.length !== 1 ? "s" : ""} before merging.`,
+    );
   }
   if (suggestions.length > 0) {
-    console.log(`  ${chalk.yellow(String(suggestions.length))} suggestion${suggestions.length !== 1 ? "s" : ""} to improve quality.`);
+    console.log(
+      `  ${chalk.yellow(String(suggestions.length))} suggestion${suggestions.length !== 1 ? "s" : ""} to improve quality.`,
+    );
   }
   if (required.length === 0 && suggestions.length === 0) {
     console.log(chalk.green("  No issues found. Looks good!"));

@@ -287,9 +287,7 @@ function checkDocumentation(diff: ParsedDiff): ReviewFinding[] {
         // Check if previous line is a JSDoc comment closing
         const prevLine = hunk.lines[i - 1];
         const hasDoc =
-          prevLine &&
-          prevLine.type === "add" &&
-          /\*\/\s*$/.test(prevLine.content.trim());
+          prevLine && prevLine.type === "add" && /\*\/\s*$/.test(prevLine.content.trim());
 
         if (!hasDoc) {
           findings.push({
@@ -338,10 +336,7 @@ function filterLintIssues(
 /**
  * Adjust findings based on project maturity level.
  */
-function adjustForMaturity(
-  findings: ReviewFinding[],
-  maturity: MaturityLevel,
-): ReviewFinding[] {
+function adjustForMaturity(findings: ReviewFinding[], maturity: MaturityLevel): ReviewFinding[] {
   if (maturity === "established") {
     // In established projects, promote some minor issues to major
     return findings.map((f) => {
@@ -368,10 +363,7 @@ function adjustForMaturity(
 /**
  * Add maturity-specific recommendations.
  */
-function getMaturityRecommendations(
-  maturity: MaturityLevel,
-  diff: ParsedDiff,
-): ReviewFinding[] {
+function getMaturityRecommendations(maturity: MaturityLevel, diff: ParsedDiff): ReviewFinding[] {
   if (maturity !== "empty" && maturity !== "new") return [];
 
   const findings: ReviewFinding[] = [];
@@ -446,7 +438,11 @@ Examples:
   category: "quality",
   parameters: z.object({
     baseBranch: z.string().optional().default("main").describe("Base branch to compare against"),
-    includeUncommitted: z.boolean().optional().default(true).describe("Include uncommitted changes"),
+    includeUncommitted: z
+      .boolean()
+      .optional()
+      .default(true)
+      .describe("Include uncommitted changes"),
     runLinter: z.boolean().optional().default(true).describe("Run linter on changed files"),
     cwd: z.string().optional().describe("Repository directory"),
   }),
@@ -499,9 +495,7 @@ Examples:
       // 4. Linter (optional)
       if (runLinter) {
         try {
-          const changedFiles = diff.files
-            .filter((f) => f.type !== "deleted")
-            .map((f) => f.path);
+          const changedFiles = diff.files.filter((f) => f.type !== "deleted").map((f) => f.path);
 
           if (changedFiles.length > 0) {
             const lintResult = await runLinterTool.execute({
@@ -536,10 +530,11 @@ Examples:
         (f) => f.severity === "minor" || f.severity === "info",
       );
 
-      const status_result: ReviewSummary["status"] =
-        required.some((f) => f.severity === "critical") ? "needs_work" :
-        required.length > 0 ? "needs_work" :
-        "approved";
+      const status_result: ReviewSummary["status"] = required.some((f) => f.severity === "critical")
+        ? "needs_work"
+        : required.length > 0
+          ? "needs_work"
+          : "approved";
 
       return {
         summary: {

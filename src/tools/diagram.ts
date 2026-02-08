@@ -81,9 +81,7 @@ async function parseClassRelationships(
         if (classMatch) {
           const methods: string[] = [];
           const properties: string[] = [];
-          const implementsList = classMatch[3]
-            ? classMatch[3].split(",").map((s) => s.trim())
-            : [];
+          const implementsList = classMatch[3] ? classMatch[3].split(",").map((s) => s.trim()) : [];
 
           // Scan class body (basic)
           let braceCount = 0;
@@ -126,9 +124,7 @@ async function parseClassRelationships(
         }
 
         // Interface
-        const ifaceMatch = line.match(
-          /(?:export\s+)?interface\s+(\w+)/,
-        );
+        const ifaceMatch = line.match(/(?:export\s+)?interface\s+(\w+)/);
         if (ifaceMatch) {
           const methods: string[] = [];
           let braceCount = 0;
@@ -168,14 +164,8 @@ async function parseClassRelationships(
 /**
  * Generate class diagram in Mermaid
  */
-async function generateClassDiagram(
-  rootPath: string,
-  include?: string,
-): Promise<DiagramOutput> {
-  const { classes, interfaces } = await parseClassRelationships(
-    rootPath,
-    include,
-  );
+async function generateClassDiagram(rootPath: string, include?: string): Promise<DiagramOutput> {
+  const { classes, interfaces } = await parseClassRelationships(rootPath, include);
 
   const lines: string[] = ["classDiagram"];
   let nodeCount = 0;
@@ -229,9 +219,7 @@ async function generateClassDiagram(
 /**
  * Generate architecture diagram from directory structure
  */
-async function generateArchitectureDiagram(
-  rootPath: string,
-): Promise<DiagramOutput> {
+async function generateArchitectureDiagram(rootPath: string): Promise<DiagramOutput> {
   const entries = await fs.readdir(rootPath, { withFileTypes: true });
   const dirs = entries.filter(
     (e) =>
@@ -263,9 +251,7 @@ async function generateArchitectureDiagram(
       });
       const subDirs = subEntries.filter(
         (e) =>
-          e.isDirectory() &&
-          !e.name.startsWith(".") &&
-          !["node_modules", "dist"].includes(e.name),
+          e.isDirectory() && !e.name.startsWith(".") && !["node_modules", "dist"].includes(e.name),
       );
 
       for (const subDir of subDirs.slice(0, 8)) {
@@ -292,9 +278,7 @@ async function generateArchitectureDiagram(
 /**
  * Generate flowchart from description
  */
-function generateFlowchartFromDescription(
-  description: string,
-): DiagramOutput {
+function generateFlowchartFromDescription(description: string): DiagramOutput {
   // Parse steps from description
   const steps = description
     .split(/[.\n;]/)
@@ -349,9 +333,7 @@ function generateFlowchartFromDescription(
 /**
  * Generate sequence diagram from description
  */
-function generateSequenceDiagramFromDescription(
-  description: string,
-): DiagramOutput {
+function generateSequenceDiagramFromDescription(description: string): DiagramOutput {
   const steps = description
     .split(/[.\n;]/)
     .map((s) => s.trim())
@@ -366,7 +348,11 @@ function generateSequenceDiagramFromDescription(
   const actorPattern = /\b([A-Z][a-zA-Z]+)\b/g;
   let match: RegExpExecArray | null;
   while ((match = actorPattern.exec(description)) !== null) {
-    if (!["The", "This", "That", "When", "Then", "If", "And", "Or", "But", "For"].includes(match[1] ?? "")) {
+    if (
+      !["The", "This", "That", "When", "Then", "If", "And", "Or", "But", "For"].includes(
+        match[1] ?? "",
+      )
+    ) {
       actors.add(match[1] ?? "");
     }
   }
@@ -388,7 +374,8 @@ function generateSequenceDiagramFromDescription(
     const from = actorList.find((a) => step.includes(a)) ?? actorList[0] ?? "Client";
     const to =
       actorList.find((a) => a !== from && step.includes(a)) ??
-      actorList[actorList.indexOf(from) === 0 ? 1 : 0] ?? "Server";
+      actorList[actorList.indexOf(from) === 0 ? 1 : 0] ??
+      "Server";
 
     const shortStep = step.length > 40 ? step.slice(0, 40) + "..." : step;
     lines.push(`  ${from}->>+${to}: ${shortStep}`);
@@ -434,26 +421,15 @@ Examples:
       .string()
       .optional()
       .describe("Natural language description (for flowchart, sequence, er, mindmap)"),
-    path: z
-      .string()
-      .optional()
-      .describe("Source path to analyze (for class, architecture)"),
-    include: z
-      .string()
-      .optional()
-      .describe("File glob pattern for code analysis"),
-    format: z
-      .enum(["mermaid", "plantuml"])
-      .optional()
-      .default("mermaid")
-      .describe("Output format"),
+    path: z.string().optional().describe("Source path to analyze (for class, architecture)"),
+    include: z.string().optional().describe("File glob pattern for code analysis"),
+    format: z.enum(["mermaid", "plantuml"]).optional().default("mermaid").describe("Output format"),
   }),
   async execute({ type, description, path: rootPath, include, format }) {
     if (format === "plantuml") {
-      throw new ToolError(
-        "PlantUML format is not yet supported. Use 'mermaid' format.",
-        { tool: "generate_diagram" },
-      );
+      throw new ToolError("PlantUML format is not yet supported. Use 'mermaid' format.", {
+        tool: "generate_diagram",
+      });
     }
 
     const absPath = rootPath ? path.resolve(rootPath) : process.cwd();
@@ -467,28 +443,25 @@ Examples:
 
       case "flowchart":
         if (!description) {
-          throw new ToolError(
-            "A 'description' is required for flowchart diagrams",
-            { tool: "generate_diagram" },
-          );
+          throw new ToolError("A 'description' is required for flowchart diagrams", {
+            tool: "generate_diagram",
+          });
         }
         return generateFlowchartFromDescription(description);
 
       case "sequence":
         if (!description) {
-          throw new ToolError(
-            "A 'description' is required for sequence diagrams",
-            { tool: "generate_diagram" },
-          );
+          throw new ToolError("A 'description' is required for sequence diagrams", {
+            tool: "generate_diagram",
+          });
         }
         return generateSequenceDiagramFromDescription(description);
 
       case "er":
         if (!description) {
-          throw new ToolError(
-            "A 'description' is required for ER diagrams",
-            { tool: "generate_diagram" },
-          );
+          throw new ToolError("A 'description' is required for ER diagrams", {
+            tool: "generate_diagram",
+          });
         }
         // Simple ER from description
         return {
@@ -501,10 +474,9 @@ Examples:
 
       case "mindmap":
         if (!description) {
-          throw new ToolError(
-            "A 'description' is required for mindmap diagrams",
-            { tool: "generate_diagram" },
-          );
+          throw new ToolError("A 'description' is required for mindmap diagrams", {
+            tool: "generate_diagram",
+          });
         }
         // Simple mindmap from description
         const topics = description

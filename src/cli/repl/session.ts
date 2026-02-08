@@ -12,6 +12,7 @@ import { createContextManager } from "./context/manager.js";
 import { createContextCompactor, type CompactionResult } from "./context/compactor.js";
 import { createMemoryLoader, type MemoryContext } from "./memory/index.js";
 import { CONFIG_PATHS } from "../../config/paths.js";
+import type { ToolRegistry } from "../../tools/registry.js";
 
 /**
  * Trust settings file location
@@ -34,24 +35,87 @@ interface TrustSettings {
 }
 
 /**
- * System prompt for the coding agent
+ * Category labels for tool catalog display
  */
-const COCO_SYSTEM_PROMPT = `You are Corbat-Coco, an autonomous coding assistant.
+const CATEGORY_LABELS: Record<string, string> = {
+  file: "File Operations",
+  bash: "Shell Commands",
+  git: "Git & Version Control",
+  test: "Testing",
+  quality: "Code Quality",
+  build: "Build & Deploy",
+  deploy: "Deployment",
+  config: "Configuration & Permissions",
+  web: "Web (Search & Fetch)",
+  search: "Code & Semantic Search",
+  memory: "Memory, Checkpoints & Persistence",
+  document: "Documents (PDF, Images, Diagrams)",
+};
 
-You have access to tools for:
-- Reading and writing files (read_file, write_file, edit_file, glob, list_dir)
-- Executing bash commands (bash_exec, command_exists)
-- Git operations (git_status, git_diff, git_add, git_commit, git_log, git_branch, git_checkout, git_push, git_pull)
-- Running tests (run_tests, get_coverage, run_test_file)
-- Analyzing code quality (run_linter, analyze_complexity, calculate_quality)
+/**
+ * Generate a tool catalog from the registry for inclusion in the system prompt.
+ * Groups tools by category and lists name + short description.
+ */
+export function generateToolCatalog(registry: ToolRegistry): string {
+  const tools = registry.getAll();
+  const byCategory = new Map<string, Array<{ name: string; description: string }>>();
 
-When the user asks you to do something:
-1. Understand their intent
-2. Use the appropriate tools to accomplish the task
-3. Explain what you did concisely
+  for (const tool of tools) {
+    const cat = tool.category;
+    if (!byCategory.has(cat)) byCategory.set(cat, []);
+    byCategory.get(cat)!.push({ name: tool.name, description: tool.description });
+  }
 
-Be helpful and direct. If a task requires multiple steps, execute them one by one.
-Always verify your work by reading files after editing or running tests after changes.
+  let catalog = "";
+  for (const [category, toolList] of byCategory) {
+    const label = CATEGORY_LABELS[category] ?? category;
+    catalog += `\n### ${label}\n`;
+    for (const t of toolList) {
+      // Take only the first sentence of description for brevity
+      const shortDesc = t.description.split(".")[0] || t.description;
+      catalog += `- **${t.name}**: ${shortDesc}\n`;
+    }
+  }
+  return catalog;
+}
+
+/**
+ * System prompt template for the coding agent.
+ * Contains a {TOOL_CATALOG} placeholder that gets replaced dynamically
+ * with the actual registered tools from the ToolRegistry.
+ */
+const COCO_SYSTEM_PROMPT = `You are Corbat-Coco, an autonomous coding assistant with an extensive toolkit.
+
+## Your Approach: Tool-Aware Problem Solving
+
+When the user asks you to do something, follow this process:
+1. **Analyze the request**: Understand what the user needs
+2. **Scan your tools**: Review which of your available tools can help accomplish the task
+3. **Plan your approach**: Decide which tools to use and in what order
+4. **Execute**: Use the appropriate tools, combining multiple when needed
+5. **Verify**: Check your work (read files after editing, run tests after changes)
+
+**IMPORTANT**: You have many tools beyond basic file/bash/git. Before answering "I can't do that", check if any of your tools can help. For example:
+- Need information from the internet? Use **web_search** and **web_fetch**
+- Need to understand a codebase structure? Use **codebase_map** or **semantic_search**
+- Need to remember something across sessions? Use **create_memory** / **recall_memory**
+- Need to generate a diagram? Use **generate_diagram**
+- Need to read a PDF or image? Use **read_pdf** or **read_image**
+- Need to query a database? Use **sql_query**
+- Need to save/restore project state? Use **create_checkpoint** / **restore_checkpoint**
+- Need to do a code review? Use **code_review**
+- Need to search code semantically? Use **semantic_search**
+- Need to show a diff visually? Use **show_diff**
+
+## Available Tools
+{TOOL_CATALOG}
+
+## Guidelines
+- Be helpful and direct
+- If a task requires multiple steps, execute them one by one
+- Always verify your work by reading files after editing or running tests after changes
+- You can use multiple tools together for complex tasks
+- When uncertain which tool to use, check the full list above
 
 ## File Access
 File operations are restricted to the project directory by default.
@@ -154,12 +218,26 @@ export function addMessage(session: ReplSession, message: Message): void {
 }
 
 /**
- * Get conversation context for LLM (with system prompt and memory)
+ * Get conversation context for LLM (with system prompt, tool catalog, and memory)
+ *
+ * When a toolRegistry is provided and the system prompt contains the {TOOL_CATALOG}
+ * placeholder, it will be replaced with a dynamically generated catalog of all
+ * registered tools grouped by category. This ensures the LLM always knows about
+ * every available tool.
  */
-export function getConversationContext(session: ReplSession): Message[] {
-  // Build system prompt with memory if available
+export function getConversationContext(
+  session: ReplSession,
+  toolRegistry?: ToolRegistry,
+): Message[] {
+  // Build system prompt with dynamic tool catalog
   let systemPrompt = session.config.agent.systemPrompt;
 
+  // Inject dynamic tool catalog if registry provided
+  if (toolRegistry && systemPrompt.includes("{TOOL_CATALOG}")) {
+    systemPrompt = systemPrompt.replace("{TOOL_CATALOG}", generateToolCatalog(toolRegistry));
+  }
+
+  // Append memory/project instructions if available
   if (session.memoryContext?.combinedContent) {
     systemPrompt = `${systemPrompt}\n\n# Project Instructions (from COCO.md/CLAUDE.md)\n\n${session.memoryContext.combinedContent}`;
   }
@@ -296,10 +374,7 @@ export async function removeTrustedTool(
  * Save a tool to the project deny list (overrides global allow).
  * Also removes from projectTrusted for consistency.
  */
-export async function saveDeniedTool(
-  toolName: string,
-  projectPath: string,
-): Promise<void> {
+export async function saveDeniedTool(toolName: string, projectPath: string): Promise<void> {
   const settings = await loadTrustSettings();
 
   if (!settings.projectDenied[projectPath]) {
@@ -322,10 +397,7 @@ export async function saveDeniedTool(
 /**
  * Remove a tool from the project deny list
  */
-export async function removeDeniedTool(
-  toolName: string,
-  projectPath: string,
-): Promise<void> {
+export async function removeDeniedTool(toolName: string, projectPath: string): Promise<void> {
   const settings = await loadTrustSettings();
 
   const denied = settings.projectDenied[projectPath];

@@ -6,6 +6,11 @@
  * - Inline ghost-text autocompletion (like Claude Code/VS Code)
  * - Dropdown menu showing matching commands
  * - Tab to accept completion
+ * - Full cursor movement (arrows, Home/End, Ctrl+A/E)
+ * - Line editing (Ctrl+U/K/W, Delete, insert at cursor)
+ * - Word navigation (Option+Left/Right)
+ * - Text paste support (Cmd+V / bracketed paste mode)
+ * - Image paste from clipboard (Ctrl+V)
  * - Graceful Ctrl+C/Ctrl+D handling
  *
  * @module cli/repl/input/handler
@@ -17,8 +22,9 @@ import * as os from "node:os";
 import chalk from "chalk";
 import ansiEscapes from "ansi-escapes";
 import type { ReplSession } from "../types.js";
-import { getAllCommands } from "../commands/index.js";
+import { getAllCommands, setPendingImage } from "../commands/index.js";
 import { isCocoMode } from "../coco-mode.js";
+import { readClipboardImage } from "../output/clipboard.js";
 
 /**
  * Input handler interface for REPL
@@ -93,6 +99,32 @@ function findCompletions(line: string): Array<{ cmd: string; desc: string }> {
 }
 
 /**
+ * Find the start of the previous word boundary from cursor position.
+ * Skips whitespace first, then skips word characters.
+ */
+function findPrevWordBoundary(line: string, pos: number): number {
+  let i = pos - 1;
+  // Skip whitespace
+  while (i > 0 && line[i - 1] === " ") i--;
+  // Skip word characters
+  while (i > 0 && line[i - 1] !== " ") i--;
+  return Math.max(0, i);
+}
+
+/**
+ * Find the end of the next word boundary from cursor position.
+ * Skips word characters first, then skips whitespace.
+ */
+function findNextWordBoundary(line: string, pos: number): number {
+  let i = pos;
+  // Skip word characters
+  while (i < line.length && line[i] !== " ") i++;
+  // Skip whitespace
+  while (i < line.length && line[i] === " ") i++;
+  return i;
+}
+
+/**
  * Create readline-based input handler with ghost-text completion and dropdown
  */
 export function createInputHandler(_session: ReplSession): InputHandler {
@@ -101,11 +133,19 @@ export function createInputHandler(_session: ReplSession): InputHandler {
 
   let closed = false;
   let currentLine = "";
+  let cursorPos = 0;
   let completions: Array<{ cmd: string; desc: string }> = [];
   let selectedCompletion = 0;
   let historyIndex = -1;
   let tempLine = "";
   let lastMenuLines = 0;
+
+  // Bracketed paste mode state
+  let isPasting = false;
+  let pasteBuffer = "";
+
+  // Clipboard image read state (Ctrl+V)
+  let isReadingClipboard = false;
 
   // Prompt changes dynamically based on COCO mode
   // Visual length must be tracked separately from ANSI-colored string
@@ -154,8 +194,12 @@ export function createInputHandler(_session: ReplSession): InputHandler {
     completions = findCompletions(currentLine);
     selectedCompletion = Math.min(selectedCompletion, Math.max(0, completions.length - 1));
 
-    // Show ghost text from selected completion
-    if (completions.length > 0 && completions[selectedCompletion]) {
+    // Show ghost text from selected completion (only when cursor is at the end)
+    if (
+      cursorPos === currentLine.length &&
+      completions.length > 0 &&
+      completions[selectedCompletion]
+    ) {
       const ghost = completions[selectedCompletion]!.cmd.slice(currentLine.length);
       if (ghost) {
         output += chalk.dim.gray(ghost);
@@ -239,8 +283,8 @@ export function createInputHandler(_session: ReplSession): InputHandler {
       output += ansiEscapes.cursorUp(BOTTOM_MARGIN);
     }
 
-    // Move cursor to end of actual input (after prompt, after typed text, before ghost)
-    output += `\r${ansiEscapes.cursorForward(prompt.visualLen + currentLine.length)}`;
+    // Move cursor to the correct position within the input
+    output += `\r${ansiEscapes.cursorForward(prompt.visualLen + cursorPos)}`;
 
     // Write everything at once
     process.stdout.write(output);
@@ -255,12 +299,33 @@ export function createInputHandler(_session: ReplSession): InputHandler {
     lastMenuLines = 0;
   }
 
+  /**
+   * Insert text at current cursor position.
+   * Handles both single characters and multi-character paste.
+   * Collapses newlines into spaces for single-line input.
+   * Strips non-printable control characters.
+   */
+  function insertTextAtCursor(text: string): void {
+    // Replace newlines/carriage returns with spaces (single-line input)
+    const cleaned = text.replace(/[\r\n]+/g, " ");
+    // Filter out non-printable control characters (keep space and above, including Unicode)
+    const printable = cleaned.replace(/[^\x20-\x7E\u00A0-\uFFFF]/g, "");
+
+    if (printable.length === 0) return;
+
+    currentLine = currentLine.slice(0, cursorPos) + printable + currentLine.slice(cursorPos);
+    cursorPos += printable.length;
+    selectedCompletion = 0;
+    render();
+  }
+
   return {
     async prompt(): Promise<string | null> {
       if (closed) return null;
 
       return new Promise((resolve) => {
         currentLine = "";
+        cursorPos = 0;
         completions = [];
         selectedCompletion = 0;
         historyIndex = -1;
@@ -276,7 +341,13 @@ export function createInputHandler(_session: ReplSession): InputHandler {
         }
         process.stdin.resume();
 
+        // Enable bracketed paste mode — terminal will wrap pasted text
+        // between \x1b[200~ and \x1b[201~ markers
+        process.stdout.write("\x1b[?2004h");
+
         const cleanup = () => {
+          // Disable bracketed paste mode
+          process.stdout.write("\x1b[?2004l");
           process.stdin.removeListener("data", onData);
           if (process.stdin.isTTY) {
             process.stdin.setRawMode(false);
@@ -287,6 +358,41 @@ export function createInputHandler(_session: ReplSession): InputHandler {
         const onData = (data: Buffer) => {
           const key = data.toString();
 
+          // --- Bracketed paste handling ---
+          // Modern terminals wrap pasted text in \x1b[200~ ... \x1b[201~ markers
+          if (key.includes("\x1b[200~")) {
+            isPasting = true;
+            // Extract content after the paste-start marker
+            const afterMarker = key.split("\x1b[200~").slice(1).join("");
+            // Check if paste-end marker is in the same chunk
+            if (afterMarker.includes("\x1b[201~")) {
+              const pastedText = afterMarker.split("\x1b[201~")[0] ?? "";
+              isPasting = false;
+              pasteBuffer = "";
+              insertTextAtCursor(pastedText);
+            } else {
+              pasteBuffer = afterMarker;
+            }
+            return;
+          }
+
+          // Accumulate data during bracketed paste
+          if (isPasting) {
+            if (key.includes("\x1b[201~")) {
+              // End of paste
+              const beforeMarker = key.split("\x1b[201~")[0] ?? "";
+              pasteBuffer += beforeMarker;
+              const pastedText = pasteBuffer;
+              isPasting = false;
+              pasteBuffer = "";
+              insertTextAtCursor(pastedText);
+            } else {
+              pasteBuffer += key;
+            }
+            return;
+          }
+          // --- End bracketed paste handling ---
+
           // Ctrl+C - exit
           if (key === "\x03") {
             cleanup();
@@ -295,7 +401,7 @@ export function createInputHandler(_session: ReplSession): InputHandler {
             process.exit(0);
           }
 
-          // Ctrl+D - exit if line is empty
+          // Ctrl+D - exit if line is empty, else delete char at cursor
           if (key === "\x04") {
             if (currentLine.length === 0) {
               cleanup();
@@ -303,6 +409,117 @@ export function createInputHandler(_session: ReplSession): InputHandler {
               saveHistory(sessionHistory);
               process.exit(0);
             }
+            // Delete character at cursor (forward delete)
+            if (cursorPos < currentLine.length) {
+              currentLine = currentLine.slice(0, cursorPos) + currentLine.slice(cursorPos + 1);
+              selectedCompletion = 0;
+              render();
+            }
+            return;
+          }
+
+          // Ctrl+A - move cursor to beginning of line
+          if (key === "\x01") {
+            cursorPos = 0;
+            render();
+            return;
+          }
+
+          // Ctrl+E - move cursor to end of line
+          if (key === "\x05") {
+            cursorPos = currentLine.length;
+            render();
+            return;
+          }
+
+          // Ctrl+U - delete from beginning to cursor
+          if (key === "\x15") {
+            currentLine = currentLine.slice(cursorPos);
+            cursorPos = 0;
+            selectedCompletion = 0;
+            render();
+            return;
+          }
+
+          // Ctrl+K - delete from cursor to end
+          if (key === "\x0b") {
+            currentLine = currentLine.slice(0, cursorPos);
+            selectedCompletion = 0;
+            render();
+            return;
+          }
+
+          // Ctrl+W - delete previous word
+          if (key === "\x17") {
+            if (cursorPos > 0) {
+              const newPos = findPrevWordBoundary(currentLine, cursorPos);
+              currentLine = currentLine.slice(0, newPos) + currentLine.slice(cursorPos);
+              cursorPos = newPos;
+              selectedCompletion = 0;
+              render();
+            }
+            return;
+          }
+
+          // Ctrl+V (\x16) - paste image from clipboard
+          if (key === "\x16") {
+            if (isReadingClipboard) return;
+            isReadingClipboard = true;
+
+            // Visual feedback while reading clipboard
+            const promptInfo = getPrompt();
+            process.stdout.write("\r" + ansiEscapes.eraseDown);
+            process.stdout.write(
+              promptInfo.str + currentLine + chalk.dim(" 📋 reading clipboard…"),
+            );
+
+            readClipboardImage()
+              .then((imageData) => {
+                isReadingClipboard = false;
+
+                if (!imageData) {
+                  // No image → brief feedback, then restore prompt
+                  process.stdout.write("\r" + ansiEscapes.eraseDown);
+                  process.stdout.write(
+                    promptInfo.str + currentLine + chalk.yellow(" ⚠ no image in clipboard"),
+                  );
+                  setTimeout(() => render(), 1500);
+                  return;
+                }
+
+                const sizeKB = Math.round((imageData.data.length * 3) / 4 / 1024);
+                const imagePrompt =
+                  currentLine.trim() ||
+                  "Describe this image in detail. If it's code or a UI, identify the key elements.";
+
+                setPendingImage(imageData.data, imageData.media_type, imagePrompt);
+
+                // Success feedback
+                const truncatedPrompt =
+                  imagePrompt.length > 40 ? imagePrompt.slice(0, 40) + "…" : imagePrompt;
+                process.stdout.write("\r" + ansiEscapes.eraseDown);
+                process.stdout.write(
+                  chalk.green("  ✓ Image captured") +
+                    chalk.dim(` (${sizeKB} KB)`) +
+                    chalk.dim(` — "${truncatedPrompt}"`),
+                );
+
+                // Auto-submit: same sequence as Enter
+                cleanup();
+                console.log();
+                const result = currentLine.trim();
+                if (result) {
+                  sessionHistory.push(result);
+                }
+                // Resolve with empty string (not null) so REPL doesn't interpret as EOF
+                resolve(result || "");
+              })
+              .catch(() => {
+                isReadingClipboard = false;
+                render();
+              });
+
+            return;
           }
 
           // Enter - submit line or accept completion
@@ -330,15 +547,27 @@ export function createInputHandler(_session: ReplSession): InputHandler {
           if (key === "\t") {
             if (completions.length > 0 && completions[selectedCompletion]) {
               currentLine = completions[selectedCompletion]!.cmd;
+              cursorPos = currentLine.length;
               render();
             }
             return;
           }
 
-          // Backspace
+          // Backspace - delete character before cursor
           if (key === "\x7f" || key === "\b") {
-            if (currentLine.length > 0) {
-              currentLine = currentLine.slice(0, -1);
+            if (cursorPos > 0) {
+              currentLine = currentLine.slice(0, cursorPos - 1) + currentLine.slice(cursorPos);
+              cursorPos--;
+              selectedCompletion = 0;
+              render();
+            }
+            return;
+          }
+
+          // Delete key (fn+backspace on Mac) - delete character at cursor
+          if (key === "\x1b[3~") {
+            if (cursorPos < currentLine.length) {
+              currentLine = currentLine.slice(0, cursorPos) + currentLine.slice(cursorPos + 1);
               selectedCompletion = 0;
               render();
             }
@@ -372,6 +601,7 @@ export function createInputHandler(_session: ReplSession): InputHandler {
                 historyIndex--;
               }
               currentLine = sessionHistory[historyIndex] ?? "";
+              cursorPos = currentLine.length;
               render();
             }
             return;
@@ -404,36 +634,80 @@ export function createInputHandler(_session: ReplSession): InputHandler {
                 historyIndex = -1;
                 currentLine = tempLine;
               }
+              cursorPos = currentLine.length;
               render();
             }
             return;
           }
 
-          // Right arrow - navigate horizontally or accept ghost character
+          // Right arrow - navigate horizontally, accept ghost char, or move cursor
           if (key === "\x1b[C") {
             if (completions.length > 1) {
               // Navigate completions horizontally (move right one column)
               selectedCompletion = (selectedCompletion + 1) % completions.length;
               render();
-            } else if (completions.length > 0 && completions[selectedCompletion]) {
-              // Accept one character of ghost text
+            } else if (
+              cursorPos === currentLine.length &&
+              completions.length > 0 &&
+              completions[selectedCompletion]
+            ) {
+              // Accept one character of ghost text (cursor at end)
               const fullCmd = completions[selectedCompletion]!.cmd;
               if (currentLine.length < fullCmd.length) {
                 currentLine = fullCmd.slice(0, currentLine.length + 1);
+                cursorPos = currentLine.length;
                 render();
               }
+            } else if (cursorPos < currentLine.length) {
+              // Move cursor right within line
+              cursorPos++;
+              render();
             }
             return;
           }
 
-          // Left arrow - navigate horizontally
+          // Left arrow - navigate horizontally or move cursor
           if (key === "\x1b[D") {
             if (completions.length > 1) {
               // Navigate completions horizontally (move left one column)
               selectedCompletion =
                 (selectedCompletion - 1 + completions.length) % completions.length;
               render();
+            } else if (cursorPos > 0) {
+              // Move cursor left within line
+              cursorPos--;
+              render();
             }
+            return;
+          }
+
+          // Home key - move cursor to beginning
+          if (key === "\x1b[H" || key === "\x1bOH") {
+            cursorPos = 0;
+            render();
+            return;
+          }
+
+          // End key - move cursor to end
+          if (key === "\x1b[F" || key === "\x1bOF") {
+            cursorPos = currentLine.length;
+            render();
+            return;
+          }
+
+          // Option+Left (Alt+Left) - move cursor one word left
+          // macOS sends \x1bb (ESC b) or \x1b[1;3D
+          if (key === "\x1bb" || key === "\x1b[1;3D") {
+            cursorPos = findPrevWordBoundary(currentLine, cursorPos);
+            render();
+            return;
+          }
+
+          // Option+Right (Alt+Right) - move cursor one word right
+          // macOS sends \x1bf (ESC f) or \x1b[1;3C
+          if (key === "\x1bf" || key === "\x1b[1;3C") {
+            cursorPos = findNextWordBoundary(currentLine, cursorPos);
+            render();
             return;
           }
 
@@ -452,11 +726,11 @@ export function createInputHandler(_session: ReplSession): InputHandler {
             return;
           }
 
-          // Regular character input
-          if (key.length === 1 && key >= " ") {
-            currentLine += key;
-            selectedCompletion = 0; // Reset selection on new input
-            render();
+          // Regular character input or non-bracketed paste
+          // Handles both single chars and multi-character paste from terminals
+          // that don't support bracketed paste mode
+          if (key.charCodeAt(0) >= 32) {
+            insertTextAtCursor(key);
           }
         };
 
@@ -467,6 +741,8 @@ export function createInputHandler(_session: ReplSession): InputHandler {
     close(): void {
       if (!closed) {
         closed = true;
+        // Disable bracketed paste mode on close
+        process.stdout.write("\x1b[?2004l");
         saveHistory(sessionHistory);
       }
     },

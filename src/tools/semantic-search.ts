@@ -24,13 +24,36 @@ const DEFAULT_CHUNK_SIZE = 20;
  * Binary file extensions to skip
  */
 const BINARY_EXTENSIONS = new Set([
-  ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".ico", ".svg",
-  ".woff", ".woff2", ".ttf", ".eot",
-  ".zip", ".tar", ".gz", ".bz2", ".7z", ".rar",
-  ".exe", ".dll", ".so", ".dylib",
-  ".pdf", ".doc", ".docx",
-  ".mp3", ".mp4", ".avi", ".mov",
-  ".wasm", ".bin",
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".gif",
+  ".bmp",
+  ".ico",
+  ".svg",
+  ".woff",
+  ".woff2",
+  ".ttf",
+  ".eot",
+  ".zip",
+  ".tar",
+  ".gz",
+  ".bz2",
+  ".7z",
+  ".rar",
+  ".exe",
+  ".dll",
+  ".so",
+  ".dylib",
+  ".pdf",
+  ".doc",
+  ".docx",
+  ".mp3",
+  ".mp4",
+  ".avi",
+  ".mov",
+  ".wasm",
+  ".bin",
 ]);
 
 /**
@@ -162,7 +185,7 @@ function simpleEmbedding(text: string): number[] {
 
   // Create a deterministic hash-based vector (128 dimensions)
   const dimensions = 128;
-  const vector = new Array<number>(dimensions).fill(0);
+  const vector = Array.from<number>({ length: dimensions }).fill(0);
 
   for (const [word, count] of freq) {
     // Simple hash to distribute word into dimensions
@@ -198,10 +221,7 @@ async function getEmbedding(text: string): Promise<number[]> {
     try {
       // Try to use @xenova/transformers (optional dependency)
       const transformers = await import("@xenova/transformers");
-      const pipeline = await transformers.pipeline(
-        "feature-extraction",
-        "Xenova/all-MiniLM-L6-v2",
-      );
+      const pipeline = await transformers.pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
 
       embedFn = async (t: string) => {
         const output = await pipeline(t, {
@@ -235,10 +255,7 @@ async function loadIndex(indexDir: string): Promise<SearchIndex | null> {
 /**
  * Save search index
  */
-async function saveIndex(
-  indexDir: string,
-  index: SearchIndex,
-): Promise<void> {
+async function saveIndex(indexDir: string, index: SearchIndex): Promise<void> {
   await fs.mkdir(indexDir, { recursive: true });
   const indexPath = path.join(indexDir, "index.json");
   await fs.writeFile(indexPath, JSON.stringify(index), "utf-8");
@@ -276,22 +293,9 @@ Examples:
   category: "search",
   parameters: z.object({
     query: z.string().min(1).describe("Natural language search query"),
-    path: z
-      .string()
-      .optional()
-      .default(".")
-      .describe("Root directory to search"),
-    include: z
-      .string()
-      .optional()
-      .describe("Glob pattern for files to include (e.g., '**/*.ts')"),
-    maxResults: z
-      .number()
-      .min(1)
-      .max(50)
-      .optional()
-      .default(10)
-      .describe("Maximum results"),
+    path: z.string().optional().default(".").describe("Root directory to search"),
+    include: z.string().optional().describe("Glob pattern for files to include (e.g., '**/*.ts')"),
+    maxResults: z.number().min(1).max(50).optional().default(10).describe("Maximum results"),
     threshold: z
       .number()
       .min(0)
@@ -299,20 +303,9 @@ Examples:
       .optional()
       .default(0.3)
       .describe("Minimum similarity score (0-1)"),
-    reindex: z
-      .boolean()
-      .optional()
-      .default(false)
-      .describe("Force rebuild of search index"),
+    reindex: z.boolean().optional().default(false).describe("Force rebuild of search index"),
   }),
-  async execute({
-    query,
-    path: rootPath,
-    include,
-    maxResults,
-    threshold,
-    reindex,
-  }) {
+  async execute({ query, path: rootPath, include, maxResults, threshold, reindex }) {
     const startTime = performance.now();
     const effectivePath = rootPath ?? ".";
     const effectiveMaxResults = maxResults ?? 10;
@@ -398,8 +391,7 @@ Examples:
     // Build results
     const results: SemanticSearchResultItem[] = filtered.map((s) => {
       const lines = s.chunk.text.split("\n");
-      const snippet =
-        lines.length > 5 ? lines.slice(0, 5).join("\n") + "\n..." : s.chunk.text;
+      const snippet = lines.length > 5 ? lines.slice(0, 5).join("\n") + "\n..." : s.chunk.text;
 
       return {
         file: s.chunk.file,
@@ -414,10 +406,7 @@ Examples:
     const indexDate = new Date(index.lastUpdated);
     const ageMs = Date.now() - indexDate.getTime();
     const ageMinutes = Math.round(ageMs / 60000);
-    const indexAge =
-      ageMinutes < 60
-        ? `${ageMinutes}m ago`
-        : `${Math.round(ageMinutes / 60)}h ago`;
+    const indexAge = ageMinutes < 60 ? `${ageMinutes}m ago` : `${Math.round(ageMinutes / 60)}h ago`;
 
     return {
       results,

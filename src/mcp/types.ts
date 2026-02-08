@@ -215,10 +215,7 @@ export interface MCPClient {
   listPrompts(): Promise<{ prompts: MCPPrompt[] }>;
 
   /** Get a specific prompt with arguments */
-  getPrompt(
-    name: string,
-    args?: Record<string, string>,
-  ): Promise<MCPGetPromptResult>;
+  getPrompt(name: string, args?: Record<string, string>): Promise<MCPGetPromptResult>;
 
   /** Close the client connection */
   close(): Promise<void>;

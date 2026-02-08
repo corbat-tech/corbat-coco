@@ -61,11 +61,7 @@ async function loadCheckpoints(): Promise<Checkpoint[]> {
  */
 async function saveCheckpoints(checkpoints: Checkpoint[]): Promise<void> {
   await ensureCocoDir();
-  await fs.writeFile(
-    CHECKPOINT_FILE,
-    JSON.stringify(checkpoints, null, 2),
-    "utf-8",
-  );
+  await fs.writeFile(CHECKPOINT_FILE, JSON.stringify(checkpoints, null, 2), "utf-8");
 }
 
 /**
@@ -124,11 +120,7 @@ Examples:
 - Save progress: { "description": "working login implementation" }`,
   category: "memory",
   parameters: z.object({
-    description: z
-      .string()
-      .min(1)
-      .max(200)
-      .describe("Description of this checkpoint"),
+    description: z.string().min(1).max(200).describe("Description of this checkpoint"),
   }),
   async execute({ description }) {
     const id = crypto.randomUUID().slice(0, 8);
@@ -219,8 +211,7 @@ Examples:
         id: checkpoint.id,
         description: checkpoint.description,
         restored: false,
-        message:
-          "This checkpoint was created with no changes (clean state). Nothing to restore.",
+        message: "This checkpoint was created with no changes (clean state). Nothing to restore.",
       };
     }
 
@@ -245,8 +236,7 @@ Examples:
           id: checkpoint.id,
           description: checkpoint.description,
           restored: false,
-          message:
-            "Stash for this checkpoint was not found (may have been dropped).",
+          message: "Stash for this checkpoint was not found (may have been dropped).",
         };
       }
 
@@ -307,8 +297,4 @@ Examples:
 /**
  * All checkpoint tools
  */
-export const checkpointTools = [
-  createCheckpointTool,
-  restoreCheckpointTool,
-  listCheckpointsTool,
-];
+export const checkpointTools = [createCheckpointTool, restoreCheckpointTool, listCheckpointsTool];

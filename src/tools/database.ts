@@ -197,10 +197,7 @@ Examples:
   category: "build",
   parameters: z.object({
     database: z.string().min(1).describe("Path to SQLite database file"),
-    table: z
-      .string()
-      .optional()
-      .describe("Specific table to inspect"),
+    table: z.string().optional().describe("Specific table to inspect"),
   }),
   async execute({ database, table }) {
     const startTime = performance.now();
@@ -229,9 +226,7 @@ Examples:
 
         for (const tableName of tableNames) {
           // Get column info
-          const columns = db
-            .prepare(`PRAGMA table_info("${tableName}")`)
-            .all() as Array<{
+          const columns = db.prepare(`PRAGMA table_info("${tableName}")`).all() as Array<{
             name: string;
             type: string;
             notnull: number;
@@ -240,9 +235,9 @@ Examples:
           }>;
 
           // Get row count
-          const countResult = db
-            .prepare(`SELECT COUNT(*) as count FROM "${tableName}"`)
-            .get() as { count: number };
+          const countResult = db.prepare(`SELECT COUNT(*) as count FROM "${tableName}"`).get() as {
+            count: number;
+          };
 
           result.push({
             name: tableName,

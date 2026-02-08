@@ -109,6 +109,11 @@ export const helpCommand: SlashCommand = {
         chalk.yellow("/help tools") +
         chalk.dim(" to see all available tools"),
     );
+    console.log(
+      chalk.dim("  - Press ") +
+        chalk.cyan("Ctrl+V") +
+        chalk.dim(" to paste an image from clipboard"),
+    );
     console.log(chalk.dim("  - Use Ctrl+D or /exit to quit\n"));
 
     return false;

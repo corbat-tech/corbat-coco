@@ -88,10 +88,7 @@ export function parseDiff(raw: string): ParsedDiff {
   return { files, stats };
 }
 
-function parseFileBlock(
-  lines: string[],
-  start: number,
-): { file: DiffFile; nextIndex: number } {
+function parseFileBlock(lines: string[], start: number): { file: DiffFile; nextIndex: number } {
   const diffLine = lines[start]!;
   let i = start + 1;
 
@@ -153,10 +150,7 @@ function parseFileBlock(
   return { file, nextIndex: i };
 }
 
-function parseHunk(
-  lines: string[],
-  start: number,
-): { hunk: DiffHunk; nextIndex: number } {
+function parseHunk(lines: string[], start: number): { hunk: DiffHunk; nextIndex: number } {
   const header = lines[start]!;
   const match = header.match(/^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@(.*)$/);
 
@@ -282,19 +276,20 @@ export function renderDiff(diff: ParsedDiff, options?: DiffRenderOptions): void 
   console.log(chalk.dim(`\n  ${parts.join(", ")}\n`));
 }
 
-function renderFileBlock(
-  file: DiffFile,
-  opts: Required<DiffRenderOptions>,
-): void {
+function renderFileBlock(file: DiffFile, opts: Required<DiffRenderOptions>): void {
   const { maxWidth, showLineNumbers, compact } = opts;
   const lang = detectLanguage(file.path);
   const contentWidth = maxWidth - 4;
 
   // File header
-  const typeLabel = file.type === "modified" ? "modified" :
-    file.type === "added" ? "new file" :
-    file.type === "deleted" ? "deleted" :
-    `renamed from ${file.oldPath}`;
+  const typeLabel =
+    file.type === "modified"
+      ? "modified"
+      : file.type === "added"
+        ? "new file"
+        : file.type === "deleted"
+          ? "deleted"
+          : `renamed from ${file.oldPath}`;
   const statsLabel = ` +${file.additions} -${file.deletions}`;
   const title = ` ${file.path} (${typeLabel}${statsLabel}) `;
 
@@ -314,7 +309,9 @@ function renderFileBlock(
       console.log(
         chalk.magenta("│") +
           " " +
-          chalk.cyan(`@@ -${hunk.oldStart},${hunk.oldLines} +${hunk.newStart},${hunk.newLines} @@`) +
+          chalk.cyan(
+            `@@ -${hunk.oldStart},${hunk.oldLines} +${hunk.newStart},${hunk.newLines} @@`,
+          ) +
           hunkLabel,
       );
     }
@@ -336,15 +333,27 @@ function renderFileBlock(
 
       if (line.type === "add") {
         console.log(
-          chalk.magenta("│") + chalk.green(` ${lineStr}`) + " ".repeat(pad) + " " + chalk.magenta("│"),
+          chalk.magenta("│") +
+            chalk.green(` ${lineStr}`) +
+            " ".repeat(pad) +
+            " " +
+            chalk.magenta("│"),
         );
       } else if (line.type === "delete") {
         console.log(
-          chalk.magenta("│") + chalk.red(` ${lineStr}`) + " ".repeat(pad) + " " + chalk.magenta("│"),
+          chalk.magenta("│") +
+            chalk.red(` ${lineStr}`) +
+            " ".repeat(pad) +
+            " " +
+            chalk.magenta("│"),
         );
       } else {
         console.log(
-          chalk.magenta("│") + chalk.dim(` ${lineStr}`) + " ".repeat(pad) + " " + chalk.magenta("│"),
+          chalk.magenta("│") +
+            chalk.dim(` ${lineStr}`) +
+            " ".repeat(pad) +
+            " " +
+            chalk.magenta("│"),
         );
       }
     }

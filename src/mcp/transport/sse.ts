@@ -104,9 +104,7 @@ export class SSETransport implements MCPTransport {
       });
 
       if (!response.ok) {
-        throw new MCPTransportError(
-          `HTTP POST failed: ${response.status} ${response.statusText}`,
-        );
+        throw new MCPTransportError(`HTTP POST failed: ${response.status} ${response.statusText}`);
       }
     } catch (error) {
       if ((error as Error).name === "AbortError") return;
@@ -267,9 +265,7 @@ export class SSETransport implements MCPTransport {
     } catch (error) {
       if ((error as Error).name === "AbortError") return;
 
-      this.errorHandler?.(
-        error instanceof Error ? error : new Error(String(error)),
-      );
+      this.errorHandler?.(error instanceof Error ? error : new Error(String(error)));
 
       // Try to reconnect on error
       if (this.connected) {
@@ -309,10 +305,7 @@ export class SSETransport implements MCPTransport {
    * Handle reconnection with exponential backoff
    */
   private async handleReconnect(): Promise<void> {
-    if (
-      !this.connected ||
-      this.reconnectAttempts >= this.config.maxReconnectAttempts
-    ) {
+    if (!this.connected || this.reconnectAttempts >= this.config.maxReconnectAttempts) {
       this.connected = false;
       this.closeHandler?.();
       return;

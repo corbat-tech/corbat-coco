@@ -110,12 +110,5 @@ export type { MCPConfigFile } from "./config-loader.js";
 export { jsonSchemaToZod } from "./tools.js";
 
 // Lifecycle manager
-export {
-  MCPServerManager,
-  getMCPServerManager,
-  createMCPServerManager,
-} from "./lifecycle.js";
-export type {
-  ServerConnection,
-  HealthCheckResult,
-} from "./lifecycle.js";
+export { MCPServerManager, getMCPServerManager, createMCPServerManager } from "./lifecycle.js";
+export type { ServerConnection, HealthCheckResult } from "./lifecycle.js";

@@ -81,10 +81,9 @@ export function validateUrl(url: string): void {
   // Check private IPs (SSRF protection)
   for (const pattern of PRIVATE_IP_PATTERNS) {
     if (pattern.test(url)) {
-      throw new ToolError(
-        "Access to private/internal network addresses is not allowed",
-        { tool: "web_fetch" },
-      );
+      throw new ToolError("Access to private/internal network addresses is not allowed", {
+        tool: "web_fetch",
+      });
     }
   }
 }
@@ -279,7 +278,10 @@ export function htmlToMarkdown(html: string): string {
   md = md.replace(/<br\s*\/?>/gi, "\n");
 
   // Handle bold
-  md = md.replace(/<(?:strong|b)[^>]*>([\s\S]*?)<\/(?:strong|b)>/gi, (_, text) => `**${text.trim()}**`);
+  md = md.replace(
+    /<(?:strong|b)[^>]*>([\s\S]*?)<\/(?:strong|b)>/gi,
+    (_, text) => `**${text.trim()}**`,
+  );
 
   // Handle italic
   md = md.replace(/<(?:em|i)[^>]*>([\s\S]*?)<\/(?:em|i)>/gi, (_, text) => `*${text.trim()}*`);
@@ -408,8 +410,7 @@ Examples:
         });
       }
 
-      const contentType =
-        response.headers.get("content-type") ?? "text/plain";
+      const contentType = response.headers.get("content-type") ?? "text/plain";
 
       // Read response body with size limit
       const reader = response.body?.getReader();

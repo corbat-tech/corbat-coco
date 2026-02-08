@@ -16,6 +16,7 @@ import type {
   ToolDefinition,
   MessageContent,
   TextContent,
+  ImageContent,
   ToolUseContent,
   ToolResultContent,
 } from "./types.js";
@@ -395,6 +396,21 @@ export class AnthropicProvider implements LLMProvider {
           tool_use_id: toolResult.tool_use_id,
           content: toolResult.content,
           is_error: toolResult.is_error,
+        };
+      }
+      if (block.type === "image") {
+        const imageBlock = block as ImageContent;
+        return {
+          type: "image" as const,
+          source: {
+            type: "base64" as const,
+            media_type: imageBlock.source.media_type as
+              | "image/png"
+              | "image/jpeg"
+              | "image/gif"
+              | "image/webp",
+            data: imageBlock.source.data,
+          },
         };
       }
       return { type: "text" as const, text: "" };

@@ -85,8 +85,7 @@ describe("web-fetch", () => {
     it("should extract author", async () => {
       const { extractMetadata } = await import("./web-fetch.js");
 
-      const html =
-        '<html><head><meta name="author" content="John Doe"></head></html>';
+      const html = '<html><head><meta name="author" content="John Doe"></head></html>';
       const meta = extractMetadata(html);
       expect(meta.author).toBe("John Doe");
     });
@@ -168,7 +167,7 @@ describe("web-fetch", () => {
       const { htmlToMarkdown } = await import("./web-fetch.js");
 
       const md = htmlToMarkdown("<p>&amp; &lt; &gt; &quot;</p>");
-      expect(md).toContain("& < > \"");
+      expect(md).toContain('& < > "');
     });
 
     it("should strip remaining HTML tags", async () => {

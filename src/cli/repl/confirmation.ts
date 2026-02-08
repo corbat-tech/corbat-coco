@@ -510,9 +510,7 @@ function formatToolCallForConfirmation(
       const scope = String(input.scope ?? "project") as "global" | "project";
       const reason = input.reason ? String(input.reason) : undefined;
       const actionLabel =
-        action === "allow"
-          ? chalk.green.bold("ALLOW")
-          : chalk.red.bold(action.toUpperCase());
+        action === "allow" ? chalk.green.bold("ALLOW") : chalk.red.bold(action.toUpperCase());
       const scopeLabel =
         scope === "global"
           ? chalk.blue("Global (all projects)")
@@ -525,7 +523,9 @@ function formatToolCallForConfirmation(
       }
       for (const p of patterns) {
         lines.push(`${chalk.dim("  Risk:")}   ${getRiskDescription(p)}`);
-        lines.push(`${chalk.dim("  Effect:")} ${getEffectDescription(action as "allow" | "deny" | "ask", p, scope)}`);
+        lines.push(
+          `${chalk.dim("  Effect:")} ${getEffectDescription(action as "allow" | "deny" | "ask", p, scope)}`,
+        );
       }
       description = lines.join("\n  ");
       break;

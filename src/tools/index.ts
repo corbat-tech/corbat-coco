@@ -52,6 +52,16 @@ export {
   gitTools,
 } from "./git.js";
 
+// Git simple tools
+export { checkProtectedBranchTool, simpleAutoCommitTool, gitSimpleTools } from "./git-simple.js";
+
+// Simple agent tools
+export {
+  spawnSimpleAgentTool,
+  checkAgentCapabilityTool,
+  simpleAgentTools,
+} from "./simple-agent.js";
+
 // Test tools
 export {
   runTestsTool,
@@ -170,11 +180,7 @@ export {
 } from "./semantic-search.js";
 
 // Diagram tools
-export {
-  generateDiagramTool,
-  diagramTools,
-  type DiagramOutput,
-} from "./diagram.js";
+export { generateDiagramTool, diagramTools, type DiagramOutput } from "./diagram.js";
 
 // PDF tools
 export { readPdfTool, pdfTools, type PdfReadOutput } from "./pdf.js";
@@ -190,6 +196,72 @@ export {
   type SqlQueryOutput,
   type SchemaInspectOutput,
 } from "./database.js";
+
+// AST validator tools
+export {
+  validateCodeTool,
+  findMissingImportsTool,
+  astValidatorTools,
+  type ValidationResult,
+} from "./ast-validator.js";
+
+// Code analyzer tools
+export {
+  analyzeFileTool,
+  analyzeDirectoryTool,
+  codeAnalyzerTools,
+  type CodeAnalysisResult,
+  type FunctionInfo,
+  type ClassInfo,
+  type ImportInfo,
+  type ExportInfo,
+} from "./code-analyzer.js";
+
+// Agent coordinator tools
+export {
+  createAgentPlanTool,
+  delegateTaskTool,
+  aggregateResultsTool,
+  agentCoordinatorTools,
+  type AgentTask,
+  type ExecutionStrategy,
+} from "./agent-coordinator.js";
+
+// Smart suggestions tools
+export {
+  suggestImprovementsTool,
+  calculateCodeScoreTool,
+  smartSuggestionsTools,
+  type CodeSuggestion,
+} from "./smart-suggestions.js";
+
+// Context enhancer tools
+export {
+  addContextTool,
+  getRelevantContextTool,
+  recordLearningTool,
+  getLearnedPatternsTool,
+  contextEnhancerTools,
+  type ContextItem,
+  type LearningEntry,
+} from "./context-enhancer.js";
+
+// Skill enhancer tools
+export {
+  discoverSkillsTool,
+  validateSkillTool,
+  createCustomToolTool,
+  skillEnhancerTools,
+  type SkillDefinition,
+} from "./skill-enhancer.js";
+
+// Git enhanced tools
+export {
+  analyzeRepoHealthTool,
+  getCommitStatsTool,
+  recommendBranchTool,
+  gitEnhancedTools,
+} from "./git-enhanced.js";
 
 /**
  * Register all tools with a registry
@@ -215,12 +287,23 @@ import { diagramTools } from "./diagram.js";
 import { pdfTools } from "./pdf.js";
 import { imageTools } from "./image.js";
 import { databaseTools } from "./database.js";
+import { gitSimpleTools } from "./git-simple.js";
+import { simpleAgentTools } from "./simple-agent.js";
+import { astValidatorTools } from "./ast-validator.js";
+import { codeAnalyzerTools } from "./code-analyzer.js";
+import { agentCoordinatorTools } from "./agent-coordinator.js";
+import { smartSuggestionsTools } from "./smart-suggestions.js";
+import { contextEnhancerTools } from "./context-enhancer.js";
+import { skillEnhancerTools } from "./skill-enhancer.js";
+import { gitEnhancedTools } from "./git-enhanced.js";
 
 export function registerAllTools(registry: ToolRegistry): void {
   const allTools = [
     ...fileTools,
     ...bashTools,
     ...gitTools,
+    ...gitSimpleTools,
+    ...simpleAgentTools,
     ...testTools,
     ...qualityTools,
     ...searchTools,
@@ -238,6 +321,13 @@ export function registerAllTools(registry: ToolRegistry): void {
     ...pdfTools,
     ...imageTools,
     ...databaseTools,
+    ...astValidatorTools,
+    ...codeAnalyzerTools,
+    ...agentCoordinatorTools,
+    ...smartSuggestionsTools,
+    ...contextEnhancerTools,
+    ...skillEnhancerTools,
+    ...gitEnhancedTools,
   ];
 
   for (const tool of allTools) {

@@ -136,6 +136,9 @@ vi.mock("./commands/index.js", () => ({
   parseSlashCommand: vi.fn(),
   executeSlashCommand: vi.fn(),
   addTokenUsage: vi.fn(),
+  hasPendingImage: vi.fn().mockReturnValue(false),
+  consumePendingImage: vi.fn().mockReturnValue(null),
+  setPendingImage: vi.fn(),
 }));
 
 describe("REPL index", () => {
@@ -807,7 +810,7 @@ describe("REPL index", () => {
       const { startRepl } = await import("./index.js");
       await startRepl();
 
-      expect(createSpinner).toHaveBeenCalledWith("Running file_read...");
+      expect(createSpinner).toHaveBeenCalledWith("Running file_read…");
       expect(renderToolStart).toHaveBeenCalledWith("file_read", {
         path: "/test",
       });

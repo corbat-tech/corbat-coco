@@ -127,18 +127,14 @@ export function parseTypeScript(content: string): {
     const lineNum = i + 1;
 
     // Imports
-    const importMatch = line.match(
-      /^import\s+(?:(?:\{[^}]*\}|[\w*]+)\s+from\s+)?["']([^"']+)["']/,
-    );
+    const importMatch = line.match(/^import\s+(?:(?:\{[^}]*\}|[\w*]+)\s+from\s+)?["']([^"']+)["']/);
     if (importMatch) {
       imports.push(importMatch[1]!);
       continue;
     }
 
     // Export class
-    const exportClassMatch = line.match(
-      /^export\s+(default\s+)?(?:abstract\s+)?class\s+(\w+)/,
-    );
+    const exportClassMatch = line.match(/^export\s+(default\s+)?(?:abstract\s+)?class\s+(\w+)/);
     if (exportClassMatch) {
       definitions.push({
         name: exportClassMatch[2]!,
@@ -252,14 +248,10 @@ export function parseTypeScript(content: string): {
     }
 
     // Export const (arrow functions and values)
-    const exportConstMatch = line.match(
-      /^export\s+const\s+(\w+)\s*(?::\s*[^=]+)?\s*=/,
-    );
+    const exportConstMatch = line.match(/^export\s+const\s+(\w+)\s*(?::\s*[^=]+)?\s*=/);
     if (exportConstMatch) {
       const isFunction =
-        line.includes("=>") ||
-        line.includes("function") ||
-        line.includes("defineTool");
+        line.includes("=>") || line.includes("function") || line.includes("defineTool");
       definitions.push({
         name: exportConstMatch[1]!,
         type: isFunction ? "function" : "const",
@@ -272,7 +264,13 @@ export function parseTypeScript(content: string): {
     // Exported names (re-exports)
     const reExportMatch = line.match(/^export\s+\{([^}]+)\}/);
     if (reExportMatch) {
-      const names = reExportMatch[1]!.split(",").map((n) => n.trim().split(/\s+as\s+/).pop()!.trim());
+      const names = reExportMatch[1]!.split(",").map((n) =>
+        n
+          .trim()
+          .split(/\s+as\s+/)
+          .pop()!
+          .trim(),
+      );
       for (const name of names) {
         if (name && !name.startsWith("type ")) {
           exports.push(name);
@@ -405,7 +403,7 @@ export function parseJava(content: string): {
 
     // Method (public)
     const methodMatch = line.match(
-      /\s+(?:public|protected)\s+(?:static\s+)?(?:abstract\s+)?(?:final\s+)?(?:synchronized\s+)?[\w<>\[\],\s]+\s+(\w+)\s*\(/,
+      /\s+(?:public|protected)\s+(?:static\s+)?(?:abstract\s+)?(?:final\s+)?(?:synchronized\s+)?[\w<>[\],\s]+\s+(\w+)\s*\(/,
     );
     if (methodMatch && !line.includes("class ") && !line.includes("interface ")) {
       definitions.push({
@@ -623,9 +621,7 @@ export const codebaseMapTool: ToolDefinition<
     path?: string;
     include?: string;
     exclude?: string[];
-    languages?: Array<
-      "typescript" | "javascript" | "python" | "java" | "go" | "rust"
-    >;
+    languages?: Array<"typescript" | "javascript" | "python" | "java" | "go" | "rust">;
     maxFiles?: number;
     depth?: "overview" | "detailed";
   },
@@ -641,23 +637,11 @@ Examples:
 - With custom includes: { "path": ".", "include": "**/*.ts" }`,
   category: "search",
   parameters: z.object({
-    path: z
-      .string()
-      .optional()
-      .default(".")
-      .describe("Root directory to map"),
-    include: z
-      .string()
-      .optional()
-      .describe("Glob pattern for files to include"),
-    exclude: z
-      .array(z.string())
-      .optional()
-      .describe("Additional patterns to exclude"),
+    path: z.string().optional().default(".").describe("Root directory to map"),
+    include: z.string().optional().describe("Glob pattern for files to include"),
+    exclude: z.array(z.string()).optional().describe("Additional patterns to exclude"),
     languages: z
-      .array(
-        z.enum(["typescript", "javascript", "python", "java", "go", "rust"]),
-      )
+      .array(z.enum(["typescript", "javascript", "python", "java", "go", "rust"]))
       .optional()
       .describe("Languages to parse (auto-detected if not specified)"),
     maxFiles: z
@@ -673,14 +657,7 @@ Examples:
       .default("overview")
       .describe("Level of detail"),
   }),
-  async execute({
-    path: rootPath,
-    include,
-    exclude,
-    languages,
-    maxFiles,
-    depth,
-  }) {
+  async execute({ path: rootPath, include, exclude, languages, maxFiles, depth }) {
     const startTime = performance.now();
 
     // Resolve absolute path
@@ -708,13 +685,8 @@ Examples:
     if (include) {
       pattern = include;
     } else if (languages && languages.length > 0) {
-      const extensions = languages.flatMap(
-        (lang) => LANGUAGE_EXTENSIONS[lang] ?? [],
-      );
-      pattern =
-        extensions.length === 1
-          ? `**/*${extensions[0]}`
-          : `**/*{${extensions.join(",")}}`;
+      const extensions = languages.flatMap((lang) => LANGUAGE_EXTENSIONS[lang] ?? []);
+      pattern = extensions.length === 1 ? `**/*${extensions[0]}` : `**/*{${extensions.join(",")}}`;
     } else {
       // All supported extensions
       const allExts = Object.values(LANGUAGE_EXTENSIONS).flat();
@@ -745,7 +717,7 @@ Examples:
       if (!language) continue;
 
       // Filter by requested languages
-      if (languages && !languages.includes(language as typeof languages[number])) {
+      if (languages && !languages.includes(language as (typeof languages)[number])) {
         continue;
       }
 
@@ -756,9 +728,7 @@ Examples:
 
         // For overview mode, limit to exported items only
         const definitions =
-          depth === "overview"
-            ? parsed.definitions.filter((d) => d.exported)
-            : parsed.definitions;
+          depth === "overview" ? parsed.definitions.filter((d) => d.exported) : parsed.definitions;
 
         fileEntries.push({
           path: file,

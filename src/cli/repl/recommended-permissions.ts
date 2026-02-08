@@ -471,9 +471,7 @@ export function showPermissionDetails(): void {
   const allowBashSimple = allAllow.filter(
     (t) => t.startsWith("bash:") && t.split(":").length === 2,
   );
-  const allowBashSub = allAllow.filter(
-    (t) => t.startsWith("bash:") && t.split(":").length > 2,
-  );
+  const allowBashSub = allAllow.filter((t) => t.startsWith("bash:") && t.split(":").length > 2);
 
   const askNative = ALWAYS_ASK.filter((t) => !t.startsWith("bash:"));
   const askBash = ALWAYS_ASK.filter((t) => t.startsWith("bash:"));
@@ -513,12 +511,6 @@ export function showPermissionDetails(): void {
 
   // ── Deny ──
   console.log(chalk.red.bold(`  🚫 Deny — never auto-approve (${RECOMMENDED_DENY.length}):`));
-  printToolGroup(
-    [
-      ["Bash patterns:", denyBash],
-    ],
-    "✗",
-    chalk.red,
-  );
+  printToolGroup([["Bash patterns:", denyBash]], "✗", chalk.red);
   console.log();
 }

@@ -62,10 +62,17 @@ Examples:
   parameters: z.object({
     cwd: z.string().optional().describe("Repository directory"),
     staged: z.boolean().optional().default(false).describe("Show staged changes"),
-    base: z.string().optional().describe("Base ref for comparison (e.g. 'main', 'HEAD~3', commit hash)"),
+    base: z
+      .string()
+      .optional()
+      .describe("Base ref for comparison (e.g. 'main', 'HEAD~3', commit hash)"),
     ref: z.string().optional().describe("Target ref (defaults to HEAD if base is set)"),
     files: z.array(z.string()).optional().describe("Limit diff to specific files"),
-    compact: z.boolean().optional().default(false).describe("Compact output (hide first hunk header)"),
+    compact: z
+      .boolean()
+      .optional()
+      .default(false)
+      .describe("Compact output (hide first hunk header)"),
   }),
   async execute({ cwd, staged, base, ref, files, compact }) {
     const projectDir = cwd ?? process.cwd();

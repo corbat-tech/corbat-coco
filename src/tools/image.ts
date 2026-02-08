@@ -13,14 +13,7 @@ const path = await import("node:path");
 /**
  * Supported image formats
  */
-const SUPPORTED_FORMATS = new Set([
-  ".png",
-  ".jpg",
-  ".jpeg",
-  ".gif",
-  ".webp",
-  ".bmp",
-]);
+const SUPPORTED_FORMATS = new Set([".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp"]);
 
 /**
  * Maximum file size (20MB)
@@ -84,7 +77,8 @@ Examples:
   }),
   async execute({ path: filePath, prompt, provider }) {
     const startTime = performance.now();
-    const effectivePrompt = prompt ?? "Describe this image in detail. If it's code or a UI, identify the key elements.";
+    const effectivePrompt =
+      prompt ?? "Describe this image in detail. If it's code or a UI, identify the key elements.";
 
     // Resolve path
     const absPath = path.resolve(filePath);
@@ -194,16 +188,15 @@ Examples:
           },
         ];
 
-        const response = await client.chat.completions.create({
+        const response = (await client.chat.completions.create({
           model,
           max_tokens: 4096,
           messages: openaiMessages,
-        } as Parameters<typeof client.chat.completions.create>[0]) as unknown as {
+        } as Parameters<typeof client.chat.completions.create>[0])) as unknown as {
           choices: Array<{ message: { content: string | null } }>;
         };
 
-        description =
-          response.choices[0]?.message?.content ?? "No description generated";
+        description = response.choices[0]?.message?.content ?? "No description generated";
       } else if (selectedProvider === "gemini") {
         model = "gemini-2.0-flash";
 
@@ -229,8 +222,7 @@ Examples:
           },
         ]);
 
-        description =
-          result.response.text() ?? "No description generated";
+        description = result.response.text() ?? "No description generated";
       } else {
         throw new ToolError(`Unsupported provider: ${selectedProvider}`, {
           tool: "read_image",

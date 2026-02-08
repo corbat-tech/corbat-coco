@@ -47,7 +47,9 @@ describe("semantic-search", () => {
     it("should split content into chunks", async () => {
       const { chunkContent } = await import("./semantic-search.js");
 
-      const content = Array.from({ length: 50 }, (_, i) => `Line ${i + 1}: content here`).join("\n");
+      const content = Array.from({ length: 50 }, (_, i) => `Line ${i + 1}: content here`).join(
+        "\n",
+      );
       const chunks = chunkContent(content, 20);
 
       expect(chunks.length).toBe(3);
