@@ -1,5 +1,5 @@
 {
-  "name": "corbat-coco",
+  "name": "@corbat-tech/coco",
   "version": "1.0.2",
   "description": "Autonomous Coding Agent with Self-Review, Quality Convergence, and Production-Ready Output",
   "type": "module",
@@ -10,6 +10,9 @@
   "exports": {
     ".": "./dist/index.js",
     "./cli": "./dist/cli/index.js"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "files": [
     "dist/**",

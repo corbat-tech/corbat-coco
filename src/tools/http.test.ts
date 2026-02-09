@@ -71,7 +71,7 @@ describe("httpFetchTool", () => {
       expect.objectContaining({
         method: "GET",
         headers: expect.objectContaining({
-          "User-Agent": "Corbat-Coco/0.1.0",
+          "User-Agent": expect.stringMatching(/^Corbat-Coco\//),
         }),
       }),
     );

@@ -11,7 +11,7 @@ function findPackageJson(): { version: string } {
     try {
       const content = readFileSync(join(dir, "package.json"), "utf-8");
       const pkg = JSON.parse(content) as { name?: string; version: string };
-      if (pkg.name === "corbat-coco") return pkg;
+      if (pkg.name === "@corbat-tech/coco") return pkg;
     } catch {
       // Not found at this level, go up
     }

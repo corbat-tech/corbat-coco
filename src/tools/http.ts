@@ -6,6 +6,7 @@
 import { z } from "zod";
 import { defineTool, type ToolDefinition } from "./registry.js";
 import { ToolError, TimeoutError } from "../utils/errors.js";
+import { VERSION } from "../version.js";
 
 /**
  * Default timeout (30 seconds)
@@ -78,7 +79,7 @@ Examples:
         const response = await fetch(url, {
           method: method ?? "GET",
           headers: {
-            "User-Agent": "Corbat-Coco/0.1.0",
+            "User-Agent": `Corbat-Coco/${VERSION}`,
             ...headers,
           },
           // oxlint-disable-next-line unicorn/no-invalid-fetch-options -- Body is conditionally set only for non-GET methods
