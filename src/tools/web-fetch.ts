@@ -6,6 +6,7 @@
 import { z } from "zod";
 import { defineTool, type ToolDefinition } from "./registry.js";
 import { ToolError, TimeoutError } from "../utils/errors.js";
+import { VERSION } from "../version.js";
 
 /**
  * Default timeout (30 seconds)
@@ -395,7 +396,7 @@ Examples:
       const response = await fetch(url, {
         method: "GET",
         headers: {
-          "User-Agent": "Corbat-Coco/0.3.0",
+          "User-Agent": `Corbat-Coco/${VERSION}`,
           Accept: "text/html,application/json,text/plain,*/*",
         },
         signal: controller.signal,
