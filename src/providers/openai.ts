@@ -16,6 +16,7 @@ import type {
   ToolCall,
   ToolDefinition,
   MessageContent,
+  ImageContent,
   ToolResultContent,
 } from "./types.js";
 import { ProviderError } from "../utils/errors.js";
@@ -690,6 +691,29 @@ export class OpenAIProvider implements LLMProvider {
               });
             }
           }
+        } else if (Array.isArray(msg.content) && msg.content.some((b) => b.type === "image")) {
+          // Build OpenAI vision-format content parts for messages with images
+          const parts: Array<
+            { type: "text"; text: string } | { type: "image_url"; image_url: { url: string } }
+          > = [];
+
+          for (const block of msg.content) {
+            if (block.type === "text") {
+              parts.push({ type: "text", text: block.text });
+            } else if (block.type === "image") {
+              const imgBlock = block as ImageContent;
+              parts.push({
+                type: "image_url",
+                image_url: {
+                  url: `data:${imgBlock.source.media_type};base64,${imgBlock.source.data}`,
+                },
+              });
+            }
+          }
+          result.push({
+            role: "user",
+            content: parts,
+          } as OpenAI.ChatCompletionUserMessageParam);
         } else {
           result.push({ role: "user", content: this.contentToString(msg.content) });
         }
