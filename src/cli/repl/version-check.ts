@@ -6,8 +6,8 @@
 import chalk from "chalk";
 import { VERSION } from "../../version.js";
 
-const NPM_REGISTRY_URL = "https://registry.npmjs.org/corbat-coco";
-const CACHE_KEY = "corbat-coco-version-check";
+const NPM_REGISTRY_URL = "https://registry.npmjs.org/@corbat-tech/coco";
+const CACHE_KEY = "corbat-tech-coco-version-check";
 const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 interface VersionCache {
@@ -146,17 +146,17 @@ function getUpdateCommand(): string {
   const execPath = process.argv[1] || "";
 
   if (execPath.includes("pnpm")) {
-    return "pnpm add -g corbat-coco@latest";
+    return "pnpm add -g @corbat-tech/coco@latest";
   }
   if (execPath.includes("yarn")) {
-    return "yarn global add corbat-coco@latest";
+    return "yarn global add @corbat-tech/coco@latest";
   }
   if (execPath.includes("bun")) {
-    return "bun add -g corbat-coco@latest";
+    return "bun add -g @corbat-tech/coco@latest";
   }
 
   // Default to npm
-  return "npm install -g corbat-coco@latest";
+  return "npm install -g @corbat-tech/coco@latest";
 }
 
 /**
