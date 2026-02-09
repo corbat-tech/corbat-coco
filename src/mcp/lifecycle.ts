@@ -10,6 +10,7 @@ import { HTTPTransport } from "./transport/http.js";
 import { SSETransport } from "./transport/sse.js";
 import { MCPConnectionError } from "./errors.js";
 import { getLogger } from "../utils/logger.js";
+import { VERSION } from "../version.js";
 
 /**
  * Server connection state
@@ -101,7 +102,7 @@ export class MCPServerManager {
     await client.initialize({
       protocolVersion: "2024-11-05",
       capabilities: {},
-      clientInfo: { name: "coco-mcp-client", version: "0.3.0" },
+      clientInfo: { name: "coco-mcp-client", version: VERSION },
     });
 
     // Get tool count

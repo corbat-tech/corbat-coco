@@ -6,6 +6,7 @@
 import { z } from "zod";
 import { defineTool, type ToolDefinition } from "./registry.js";
 import { ToolError, TimeoutError } from "../utils/errors.js";
+import { VERSION } from "../version.js";
 
 /**
  * Default search timeout (15 seconds)
@@ -200,7 +201,7 @@ async function searchDuckDuckGo(
     const response = await fetch(url, {
       method: "GET",
       headers: {
-        "User-Agent": "Corbat-Coco/0.3.0",
+        "User-Agent": `Corbat-Coco/${VERSION}`,
         Accept: "text/html",
       },
       signal: controller.signal,
@@ -246,7 +247,7 @@ async function searchBrave(
     const response = await fetch(url, {
       method: "GET",
       headers: {
-        "User-Agent": "Corbat-Coco/0.3.0",
+        "User-Agent": `Corbat-Coco/${VERSION}`,
         Accept: "application/json",
         "X-Subscription-Token": apiKey,
       },
@@ -306,7 +307,7 @@ async function searchSerpApi(
     const response = await fetch(url, {
       method: "GET",
       headers: {
-        "User-Agent": "Corbat-Coco/0.3.0",
+        "User-Agent": `Corbat-Coco/${VERSION}`,
         Accept: "application/json",
       },
       signal: controller.signal,
