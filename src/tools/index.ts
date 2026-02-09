@@ -52,6 +52,16 @@ export {
   gitTools,
 } from "./git.js";
 
+// Git simple tools
+export { checkProtectedBranchTool, simpleAutoCommitTool, gitSimpleTools } from "./git-simple.js";
+
+// Simple agent tools
+export {
+  spawnSimpleAgentTool,
+  checkAgentCapabilityTool,
+  simpleAgentTools,
+} from "./simple-agent.js";
+
 // Test tools
 export {
   runTestsTool,
@@ -99,6 +109,160 @@ export {
   type BuildResult,
 } from "./build.js";
 
+// Permissions tools
+export {
+  managePermissionsTool,
+  permissionsTools,
+  getRiskLevel,
+  getRiskDescription,
+  getEffectDescription,
+  type RiskLevel,
+} from "./permissions.js";
+
+// Web tools
+export {
+  webSearchTool,
+  webFetchTool,
+  webTools,
+  type WebSearchOutput,
+  type WebSearchResultItem,
+  type WebFetchOutput,
+} from "./web.js";
+
+// Diff tools (visual)
+export { showDiffTool, diffTools } from "./diff.js";
+
+// Review tools
+export {
+  reviewCodeTool,
+  reviewTools,
+  type ReviewResult,
+  type ReviewFinding,
+  type ReviewSummary,
+  type ReviewSeverity,
+  type ReviewCategory,
+} from "./review.js";
+
+// Codebase map tools
+export {
+  codebaseMapTool,
+  codebaseMapTools,
+  type CodebaseMapOutput,
+  type FileMapEntry,
+  type CodeDefinition,
+  type DefinitionType,
+} from "./codebase-map.js";
+
+// Memory tools
+export {
+  createMemoryTool,
+  recallMemoryTool,
+  listMemoriesTool,
+  memoryTools,
+  type Memory,
+} from "./memory.js";
+
+// Checkpoint tools
+export {
+  createCheckpointTool,
+  restoreCheckpointTool,
+  listCheckpointsTool,
+  checkpointTools,
+  type Checkpoint,
+} from "./checkpoint.js";
+
+// Semantic search tools
+export {
+  semanticSearchTool,
+  semanticSearchTools,
+  type SemanticSearchOutput,
+  type SemanticSearchResultItem,
+} from "./semantic-search.js";
+
+// Diagram tools
+export { generateDiagramTool, diagramTools, type DiagramOutput } from "./diagram.js";
+
+// PDF tools
+export { readPdfTool, pdfTools, type PdfReadOutput } from "./pdf.js";
+
+// Image tools
+export { readImageTool, imageTools, type ImageReadOutput } from "./image.js";
+
+// Database tools
+export {
+  sqlQueryTool,
+  inspectSchemaTool,
+  databaseTools,
+  type SqlQueryOutput,
+  type SchemaInspectOutput,
+} from "./database.js";
+
+// AST validator tools
+export {
+  validateCodeTool,
+  findMissingImportsTool,
+  astValidatorTools,
+  type ValidationResult,
+} from "./ast-validator.js";
+
+// Code analyzer tools
+export {
+  analyzeFileTool,
+  analyzeDirectoryTool,
+  codeAnalyzerTools,
+  type CodeAnalysisResult,
+  type FunctionInfo,
+  type ClassInfo,
+  type ImportInfo,
+  type ExportInfo,
+} from "./code-analyzer.js";
+
+// Agent coordinator tools
+export {
+  createAgentPlanTool,
+  delegateTaskTool,
+  aggregateResultsTool,
+  agentCoordinatorTools,
+  type AgentTask,
+  type ExecutionStrategy,
+} from "./agent-coordinator.js";
+
+// Smart suggestions tools
+export {
+  suggestImprovementsTool,
+  calculateCodeScoreTool,
+  smartSuggestionsTools,
+  type CodeSuggestion,
+} from "./smart-suggestions.js";
+
+// Context enhancer tools
+export {
+  addContextTool,
+  getRelevantContextTool,
+  recordLearningTool,
+  getLearnedPatternsTool,
+  contextEnhancerTools,
+  type ContextItem,
+  type LearningEntry,
+} from "./context-enhancer.js";
+
+// Skill enhancer tools
+export {
+  discoverSkillsTool,
+  validateSkillTool,
+  createCustomToolTool,
+  skillEnhancerTools,
+  type SkillDefinition,
+} from "./skill-enhancer.js";
+
+// Git enhanced tools
+export {
+  analyzeRepoHealthTool,
+  getCommitStatsTool,
+  recommendBranchTool,
+  gitEnhancedTools,
+} from "./git-enhanced.js";
+
 /**
  * Register all tools with a registry
  */
@@ -111,17 +275,59 @@ import { qualityTools } from "./quality.js";
 import { searchTools } from "./search.js";
 import { httpTools } from "./http.js";
 import { buildTools } from "./build.js";
+import { permissionsTools } from "./permissions.js";
+import { webTools } from "./web.js";
+import { codebaseMapTools } from "./codebase-map.js";
+import { memoryTools } from "./memory.js";
+import { checkpointTools } from "./checkpoint.js";
+import { diffTools } from "./diff.js";
+import { reviewTools } from "./review.js";
+import { semanticSearchTools } from "./semantic-search.js";
+import { diagramTools } from "./diagram.js";
+import { pdfTools } from "./pdf.js";
+import { imageTools } from "./image.js";
+import { databaseTools } from "./database.js";
+import { gitSimpleTools } from "./git-simple.js";
+import { simpleAgentTools } from "./simple-agent.js";
+import { astValidatorTools } from "./ast-validator.js";
+import { codeAnalyzerTools } from "./code-analyzer.js";
+import { agentCoordinatorTools } from "./agent-coordinator.js";
+import { smartSuggestionsTools } from "./smart-suggestions.js";
+import { contextEnhancerTools } from "./context-enhancer.js";
+import { skillEnhancerTools } from "./skill-enhancer.js";
+import { gitEnhancedTools } from "./git-enhanced.js";
 
 export function registerAllTools(registry: ToolRegistry): void {
   const allTools = [
     ...fileTools,
     ...bashTools,
     ...gitTools,
+    ...gitSimpleTools,
+    ...simpleAgentTools,
     ...testTools,
     ...qualityTools,
     ...searchTools,
     ...httpTools,
     ...buildTools,
+    ...permissionsTools,
+    ...webTools,
+    ...codebaseMapTools,
+    ...memoryTools,
+    ...checkpointTools,
+    ...diffTools,
+    ...reviewTools,
+    ...semanticSearchTools,
+    ...diagramTools,
+    ...pdfTools,
+    ...imageTools,
+    ...databaseTools,
+    ...astValidatorTools,
+    ...codeAnalyzerTools,
+    ...agentCoordinatorTools,
+    ...smartSuggestionsTools,
+    ...contextEnhancerTools,
+    ...skillEnhancerTools,
+    ...gitEnhancedTools,
   ];
 
   for (const tool of allTools) {
