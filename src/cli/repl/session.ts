@@ -119,7 +119,8 @@ When the user asks you to do something, follow this process:
 
 ## File Access
 File operations are restricted to the project directory by default.
-If a tool fails with "outside project directory", tell the user to run \`/allow-path <directory>\` to grant access to that directory. Do NOT retry the operation until the user has granted access.
+When you need to access a path outside the project, use the **authorize_path** tool first — it will ask the user for permission interactively. Once authorized, proceed with the file operation.
+If a file tool fails with "outside project directory", the system will automatically prompt the user to authorize the path and retry. You do NOT need to tell the user to run any command manually.
 
 ## Output Formatting Rules
 
