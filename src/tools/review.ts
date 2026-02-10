@@ -197,7 +197,9 @@ async function getDiff(
 }
 
 /**
- * Run pattern detection on diff lines.
+ * Run pattern detection on added diff lines.
+ * Checks each added line against security, correctness, and style patterns.
+ * Patterns with `excludePaths` are skipped for matching file paths (e.g. CLI files).
  */
 export function analyzePatterns(diff: ParsedDiff): ReviewFinding[] {
   const findings: ReviewFinding[] = [];
