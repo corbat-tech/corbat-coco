@@ -233,13 +233,21 @@ export function analyzePatterns(diff: ParsedDiff): ReviewFinding[] {
 }
 
 /**
+ * Minimum additions threshold before flagging test coverage when tests exist on disk.
+ * Changes below this are likely refactors or fixes already covered by existing tests.
+ */
+const TEST_COVERAGE_LARGE_CHANGE_THRESHOLD = 15;
+
+/**
  * Check if source files changed without corresponding test changes.
  * When a test file exists on disk but wasn't modified in the diff,
- * the finding is downgraded to "info" instead of "minor".
+ * small changes (< 15 additions) are silently skipped — existing tests
+ * almost certainly cover them. Large changes still get an "info" nudge.
+ * Files with no test file on disk always get flagged as "minor".
  */
 export async function checkTestCoverage(diff: ParsedDiff, cwd: string): Promise<ReviewFinding[]> {
   const findings: ReviewFinding[] = [];
-  const changedSrc: string[] = [];
+  const changedSrc: { path: string; additions: number }[] = [];
   const changedTests = new Set<string>();
 
   for (const file of diff.files) {
@@ -249,36 +257,40 @@ export async function checkTestCoverage(diff: ParsedDiff, cwd: string): Promise<
     } else if (/\.(ts|tsx|js|jsx)$/.test(file.path)) {
       // Only flag source files with substantial changes
       if (file.additions > 5) {
-        changedSrc.push(file.path);
+        changedSrc.push({ path: file.path, additions: file.additions });
       }
     }
   }
 
   for (const src of changedSrc) {
     // Check if a corresponding test file was also changed
-    const baseName = src.replace(/\.(ts|tsx|js|jsx)$/, "");
+    const baseName = src.path.replace(/\.(ts|tsx|js|jsx)$/, "");
     const hasTestChange = [...changedTests].some(
       (t) => t.includes(baseName.split("/").pop()!) || t.startsWith(baseName),
     );
 
     if (!hasTestChange) {
       // Check if a test file exists on disk (just not in the diff)
-      const ext = src.match(/\.(ts|tsx|js|jsx)$/)?.[0] ?? ".ts";
+      const ext = src.path.match(/\.(ts|tsx|js|jsx)$/)?.[0] ?? ".ts";
       const testExists =
         (await fileExists(path.join(cwd, `${baseName}.test${ext}`))) ||
         (await fileExists(path.join(cwd, `${baseName}.spec${ext}`)));
 
       if (testExists) {
-        // Test file exists — existing tests likely cover the change
-        findings.push({
-          file: src,
-          severity: "info",
-          category: "testing",
-          message: "Test file exists but was not updated — verify existing tests cover these changes",
-        });
+        // Test file exists — only flag large changes, skip small refactors
+        if (src.additions >= TEST_COVERAGE_LARGE_CHANGE_THRESHOLD) {
+          findings.push({
+            file: src.path,
+            severity: "info",
+            category: "testing",
+            message:
+              "Test file exists but was not updated — verify existing tests cover these changes",
+          });
+        }
+        // Small changes with existing tests → silent, no finding
       } else {
         findings.push({
-          file: src,
+          file: src.path,
           severity: "minor",
           category: "testing",
           message: "Logic changes without corresponding test updates",

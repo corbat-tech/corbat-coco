@@ -214,7 +214,8 @@ index abc1234..def5678 100644
 +}
  export const AUTH_URL = "https://auth.example.com";`;
 
-const DIFF_SRC_WITH_MANY_ADDITIONS = `diff --git a/src/tools/git.ts b/src/tools/git.ts
+// 12 additions — below the 15-line threshold for "test exists" noise suppression
+const DIFF_SRC_SMALL_CHANGE = `diff --git a/src/tools/git.ts b/src/tools/git.ts
 index abc1234..def5678 100644
 --- a/src/tools/git.ts
 +++ b/src/tools/git.ts
@@ -233,6 +234,33 @@ index abc1234..def5678 100644
 +  return git.diff();
 +}
  export const GIT_VERSION = "1.0";`;
+
+// 18 additions — above the 15-line threshold
+const DIFF_SRC_LARGE_CHANGE = `diff --git a/src/tools/auth.ts b/src/tools/auth.ts
+index abc1234..def5678 100644
+--- a/src/tools/auth.ts
++++ b/src/tools/auth.ts
+@@ -1,3 +1,21 @@
++import { hash } from "node:crypto";
++export async function login(user, pass) {
++  const hashed = hash("sha256", pass);
++  const result = await db.query("SELECT * FROM users WHERE name = ?", [user]);
++  if (!result) throw new Error("User not found");
++  if (result.password !== hashed) throw new Error("Invalid password");
++  const token = generateToken(result.id);
++  await saveSession(token, result.id);
++  return { token, user: result.name };
++}
++export async function logout(token) {
++  await deleteSession(token);
++  return { success: true };
++}
++export async function register(user, pass, email) {
++  const hashed = hash("sha256", pass);
++  await db.insert("users", { name: user, password: hashed, email });
++  return login(user, pass);
++}
+ export const AUTH_VERSION = "1.0";`;
 
 describe("review tool: console.log path exclusion", () => {
   it("should NOT flag console.log in CLI/REPL files", () => {
@@ -255,12 +283,24 @@ describe("review tool: console.log path exclusion", () => {
 });
 
 describe("review tool: test file existence check", () => {
-  it("should downgrade to info when test file exists on disk", async () => {
+  it("should suppress finding when test exists and change is small (< 15 additions)", async () => {
     const { fileExists } = await import("../utils/files.js");
     const mockFileExists = fileExists as ReturnType<typeof vi.fn>;
     mockFileExists.mockResolvedValue(true);
 
-    const diff = parseDiff(DIFF_SRC_WITH_MANY_ADDITIONS);
+    const diff = parseDiff(DIFF_SRC_SMALL_CHANGE);
+    const findings = await checkTestCoverage(diff, "/project");
+
+    const testFindings = findings.filter((f) => f.category === "testing");
+    expect(testFindings).toHaveLength(0);
+  });
+
+  it("should emit info when test exists but change is large (>= 15 additions)", async () => {
+    const { fileExists } = await import("../utils/files.js");
+    const mockFileExists = fileExists as ReturnType<typeof vi.fn>;
+    mockFileExists.mockResolvedValue(true);
+
+    const diff = parseDiff(DIFF_SRC_LARGE_CHANGE);
     const findings = await checkTestCoverage(diff, "/project");
 
     const testFindings = findings.filter((f) => f.category === "testing");
@@ -274,7 +314,7 @@ describe("review tool: test file existence check", () => {
     const mockFileExists = fileExists as ReturnType<typeof vi.fn>;
     mockFileExists.mockResolvedValue(false);
 
-    const diff = parseDiff(DIFF_SRC_WITH_MANY_ADDITIONS);
+    const diff = parseDiff(DIFF_SRC_SMALL_CHANGE);
     const findings = await checkTestCoverage(diff, "/project");
 
     const testFindings = findings.filter((f) => f.category === "testing");
