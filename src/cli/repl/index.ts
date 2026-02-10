@@ -486,8 +486,12 @@ async function printWelcome(session: { projectPath: string; config: ReplConfig }
   // Box dimensions — fixed width for consistency.
   // Using the same approach as `boxen`: measure content with `stringWidth`,
   // pad with spaces to a uniform inner width, then wrap with border chars.
+  // IMPORTANT: Emoji MUST stay outside the box.  Terminal emoji widths are
+  // unpredictable (some render 🥥 as 2 cols, others as 3) and no JS lib
+  // can query the actual terminal width.  Only ASCII content goes inside
+  // so the right │ always aligns perfectly with the corners.
   const boxWidth = 41;
-  const innerWidth = boxWidth - 2; // space between the two │ characters
+  const innerWidth = boxWidth - 2; // visible columns between the two │ chars
 
   const versionText = `v${VERSION}`;
   const subtitleText = "open source \u2022 corbat.tech";
@@ -498,25 +502,30 @@ async function printWelcome(session: { projectPath: string; config: ReplConfig }
   // columns.  The right │ is always placed immediately after the padding.
   const boxLine = (content: string): string => {
     const pad = Math.max(0, innerWidth - stringWidth(content));
-    return chalk.magenta("  \u2502") + content + " ".repeat(pad) + chalk.magenta("\u2502");
+    return chalk.magenta("\u2502") + content + " ".repeat(pad) + chalk.magenta("\u2502");
   };
 
-  // Title line: " 🥥 CORBAT-COCO      v1.2.x "
-  const titleLeftRaw = " \u{1F965} CORBAT-COCO";
+  // Title line: " CORBAT-COCO             v1.2.x " (only ASCII inside the box)
+  const titleLeftRaw = " CORBAT-COCO";
   const titleRightRaw = versionText + " ";
-  const titleLeftStyled = titleLeftRaw.replace("CORBAT-COCO", chalk.bold.white("CORBAT-COCO"));
+  const titleLeftStyled = " " + chalk.bold.white("CORBAT-COCO");
   const titleGap = Math.max(1, innerWidth - stringWidth(titleLeftRaw) - stringWidth(titleRightRaw));
   const titleContent = titleLeftStyled + " ".repeat(titleGap) + chalk.dim(titleRightRaw);
 
   // Subtitle line: " open source • corbat.tech "
   const subtitleContent = " " + chalk.dim(subtitleText) + " ";
 
-  // Always show the styled header box
+  // Always show the styled header box.
+  // The 🥥 emoji sits BEFORE the top-left corner — outside the box —
+  // so terminal emoji-width variance cannot break the right border.
+  // Indent: "🥥 " before top border (emoji col 1-2, space col 3, ╭ col 4),
+  //         "   " (3 spaces) before content/bottom so │/╰ align at col 4.
+  const indent = "   "; // 3 spaces to align with ╭ after "🥥 "
   console.log();
-  console.log(chalk.magenta("  \u256D" + "\u2500".repeat(boxWidth - 2) + "\u256E"));
-  console.log(boxLine(titleContent));
-  console.log(boxLine(subtitleContent));
-  console.log(chalk.magenta("  \u2570" + "\u2500".repeat(boxWidth - 2) + "\u256F"));
+  console.log("\u{1F965} " + chalk.magenta("\u256D" + "\u2500".repeat(boxWidth - 2) + "\u256E"));
+  console.log(indent + boxLine(titleContent));
+  console.log(indent + boxLine(subtitleContent));
+  console.log(indent + chalk.magenta("\u2570" + "\u2500".repeat(boxWidth - 2) + "\u256F"));
 
   // Check for updates (non-blocking, with 3s timeout)
   const updateInfo = await checkForUpdates();
