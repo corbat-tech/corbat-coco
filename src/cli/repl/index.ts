@@ -505,14 +505,18 @@ async function printWelcome(session: { projectPath: string; config: ReplConfig }
     return chalk.magenta("\u2502") + content + " ".repeat(pad) + chalk.magenta("\u2502");
   };
 
-  // Title line: " COCO - Coding Agent     v1.2.x " (only ASCII inside the box)
-  const titleLeftRaw = " COCO - Coding Agent";
+  // Line 1: " COCO                    v1.2.x "
+  const titleLeftRaw = " COCO";
   const titleRightRaw = versionText + " ";
-  const titleLeftStyled = " " + chalk.bold.white("COCO") + chalk.dim(" - Coding Agent");
+  const titleLeftStyled = " " + chalk.bold.white("COCO");
   const titleGap = Math.max(1, innerWidth - stringWidth(titleLeftRaw) - stringWidth(titleRightRaw));
   const titleContent = titleLeftStyled + " ".repeat(titleGap) + chalk.dim(titleRightRaw);
 
-  // Subtitle line: " open source • corbat.tech "
+  // Line 2: tagline in brand color
+  const taglineText = "code that converges to quality";
+  const taglineContent = " " + chalk.magenta(taglineText) + " ";
+
+  // Line 3: attribution (dim)
   const subtitleContent = " " + chalk.dim(subtitleText) + " ";
 
   // Always show the styled header box.
@@ -520,6 +524,7 @@ async function printWelcome(session: { projectPath: string; config: ReplConfig }
   console.log();
   console.log(chalk.magenta("  \u256D" + "\u2500".repeat(boxWidth - 2) + "\u256E"));
   console.log("  " + boxLine(titleContent));
+  console.log("  " + boxLine(taglineContent));
   console.log("  " + boxLine(subtitleContent));
   console.log(chalk.magenta("  \u2570" + "\u2500".repeat(boxWidth - 2) + "\u256F"));
 
