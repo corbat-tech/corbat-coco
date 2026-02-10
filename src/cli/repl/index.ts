@@ -2,8 +2,6 @@
  * REPL main entry point
  */
 
-import { existsSync } from "node:fs";
-import path from "node:path";
 import chalk from "chalk";
 import {
   createSession,
@@ -521,27 +519,13 @@ export async function startRepl(
  * Brand color: Magenta/Purple
  */
 async function printWelcome(session: { projectPath: string; config: ReplConfig }): Promise<void> {
-  const providerType = session.config.provider.type;
-  const model = session.config.provider.model || "default";
-
-  // Compact welcome for returning users
-  const isReturningUser = existsSync(path.join(session.projectPath, ".coco"));
-  if (isReturningUser) {
-    const versionStr = chalk.dim(`v${VERSION}`);
-    const providerStr = chalk.dim(`${providerType}/${model}`);
-    console.log(
-      `\n  \u{1F965} Coco ${versionStr} ${chalk.dim("\u2502")} ${providerStr} ${chalk.dim("\u2502")} ${chalk.yellow("/help")}\n`,
-    );
-    return;
-  }
-
   const trustStore = createTrustStore();
   await trustStore.init();
   const trustLevel = trustStore.getLevel(session.projectPath);
 
   // Box dimensions - fixed width for consistency
   const boxWidth = 41;
-  const innerWidth = boxWidth - 4; // Account for "\u2502 " and " \u2502"
+  const innerWidth = boxWidth - 4; // Account for "│ " and " │"
 
   // Build content lines with proper padding using visualWidth()
   const titleContent = "\u{1F965} CORBAT-COCO";
@@ -554,6 +538,7 @@ async function printWelcome(session: { projectPath: string; config: ReplConfig }
   const subtitleVisualWidth = visualWidth(subtitleText);
   const subtitlePadding = innerWidth - subtitleVisualWidth;
 
+  // Always show the styled header box
   console.log();
   console.log(chalk.magenta("  \u256D" + "\u2500".repeat(boxWidth - 2) + "\u256E"));
   console.log(
