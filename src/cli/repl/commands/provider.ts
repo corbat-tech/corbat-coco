@@ -6,6 +6,7 @@
 import chalk from "chalk";
 import ansiEscapes from "ansi-escapes";
 import * as p from "@clack/prompts";
+import { truncate } from "../../../utils/strings.js";
 import type { SlashCommand, ReplSession } from "../types.js";
 import {
   getAllProviders,
@@ -50,36 +51,47 @@ async function selectProviderInteractively(
 
     const renderMenu = () => {
       process.stdout.write(ansiEscapes.eraseDown);
+      const termWidth = process.stdout.columns || 80;
+      // Prefix takes ~22 chars: " ○ ✓ 🦙 ollama       "
+      const descWidth = Math.max(20, termWidth - 22);
+
+      let totalLines = 0;
 
       for (let i = 0; i < providers.length; i++) {
         const provider = providers[i]!;
         const isCurrent = provider.id === currentProviderId;
         const isSelected = i === selectedIndex;
 
-        let line = "";
-
         if (isSelected) {
-          line += chalk.bgBlue.white(` ▶ ${provider.emoji} ${provider.id.padEnd(12)} `);
-          line += chalk.bgBlue.white(provider.description.slice(0, 40));
+          let line = chalk.bgBlue.white(` ▶ ${provider.emoji} ${provider.id.padEnd(12)} `);
+          line += chalk.bgBlue.white(truncate(provider.description, descWidth, "…"));
+          console.log(line);
+          totalLines++;
+          // Show full description on a second line if it was truncated
+          if (provider.description.length > descWidth) {
+            console.log(chalk.bgBlue.white(`    ${provider.description}`));
+            totalLines++;
+          }
         } else {
           const marker = isCurrent ? chalk.green(" ● ") : chalk.dim(" ○ ");
           const status = provider.isConfigured ? chalk.green("✓") : chalk.dim("○");
-          line += marker;
+          let line = marker;
           line += `${status} ${provider.emoji} `;
           line += isCurrent
             ? chalk.green(provider.id.padEnd(12))
             : chalk.yellow(provider.id.padEnd(12));
-          line += chalk.dim(provider.description.slice(0, 40));
+          line += chalk.dim(truncate(provider.description, descWidth, "…"));
+          console.log(line);
+          totalLines++;
         }
-
-        console.log(line);
       }
 
       console.log(chalk.dim("\n↑/↓ navigate • Enter select • Esc cancel"));
       console.log(chalk.dim("✓ = API key configured"));
+      totalLines += 3; // 2 footer lines + 1 blank line from \n
 
-      // Move cursor back up
-      process.stdout.write(ansiEscapes.cursorUp(providers.length + 3));
+      // Move cursor back up to redraw on next keypress
+      process.stdout.write(ansiEscapes.cursorUp(totalLines));
     };
 
     const cleanup = () => {
