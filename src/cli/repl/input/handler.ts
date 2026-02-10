@@ -231,11 +231,15 @@ export function createInputHandler(_session: ReplSession): InputHandler {
     // This determines where to place the bottom separator.
     const totalContentLen = prompt.visualLen + currentLine.length;
     const contentRows = totalContentLen === 0 ? 1 : Math.ceil(totalContentLen / termCols);
-    // If content exactly fills a row, the terminal wraps the cursor but there's
-    // no extra row of content, so contentRows is already correct via Math.ceil.
+
+    // When content exactly fills a row (totalContentLen is a multiple of termCols),
+    // the terminal auto-wraps the cursor to col 0 of the next row. In that case
+    // we must NOT emit an extra "\n" before the bottom separator, because the
+    // cursor is already on the next row. Emitting "\n" would create a blank line.
+    const contentExactFill = totalContentLen > 0 && totalContentLen % termCols === 0;
 
     // Bottom separator — always drawn below the input content
-    output += "\n" + separator;
+    output += (contentExactFill ? "" : "\n") + separator;
 
     // Draw dropdown menu if we have completions
     const showMenu =

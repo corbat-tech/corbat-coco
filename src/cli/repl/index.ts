@@ -527,34 +527,45 @@ async function printWelcome(session: { projectPath: string; config: ReplConfig }
   const boxWidth = 41;
   const innerWidth = boxWidth - 4; // Account for "│ " and " │"
 
-  // Build content lines with proper padding using visualWidth()
-  const titleContent = "\u{1F965} CORBAT-COCO";
   const versionText = `v${VERSION}`;
-  const titleContentVisualWidth = visualWidth(titleContent);
-  const versionVisualWidth = visualWidth(versionText);
-  const titlePadding = innerWidth - titleContentVisualWidth - versionVisualWidth;
-
   const subtitleText = "open source \u2022 corbat.tech";
-  const subtitleVisualWidth = visualWidth(subtitleText);
-  const subtitlePadding = innerWidth - subtitleVisualWidth;
+
+  // We use ANSI absolute column positioning (\x1b[<col>G) to place the
+  // right border at a fixed column, so the box closes perfectly regardless
+  // of how wide the terminal renders the emoji.
+  // Top/bottom corners (╮/╯) are at 1-indexed column: 2 (indent) + boxWidth.
+  // Content right "│" must land at the same column, so we position the
+  // cursor one column earlier (for the padding space) and write " │".
+  const rightBorderCol = 2 + boxWidth - 1; // 1-indexed column for space before │
+
+  // Helper: build a content line that places " │" at a fixed column
+  const boxLine = (content: string): string => {
+    return (
+      chalk.magenta("  \u2502 ") +
+      content +
+      `\x1b[${rightBorderCol}G` +
+      chalk.magenta(" \u2502")
+    );
+  };
+
+  // Title line: "🥥 CORBAT-COCO" ... "v1.2.x"
+  const titleLeft = "\u{1F965} CORBAT-COCO";
+  const titleRight = versionText;
+  const titleUsed = visualWidth(titleLeft) + visualWidth(titleRight);
+  const titlePad = Math.max(1, innerWidth - titleUsed);
+  const titleContent =
+    titleLeft.replace("CORBAT-COCO", chalk.bold.white("CORBAT-COCO")) +
+    " ".repeat(titlePad) +
+    chalk.dim(titleRight);
+
+  // Subtitle line
+  const subtitleContent = chalk.dim(subtitleText);
 
   // Always show the styled header box
   console.log();
   console.log(chalk.magenta("  \u256D" + "\u2500".repeat(boxWidth - 2) + "\u256E"));
-  console.log(
-    chalk.magenta("  \u2502 ") +
-      "\u{1F965} " +
-      chalk.bold.white("CORBAT-COCO") +
-      " ".repeat(Math.max(0, titlePadding)) +
-      chalk.dim(versionText) +
-      chalk.magenta(" \u2502"),
-  );
-  console.log(
-    chalk.magenta("  \u2502 ") +
-      chalk.dim(subtitleText) +
-      " ".repeat(Math.max(0, subtitlePadding)) +
-      chalk.magenta(" \u2502"),
-  );
+  console.log(boxLine(titleContent));
+  console.log(boxLine(subtitleContent));
   console.log(chalk.magenta("  \u2570" + "\u2500".repeat(boxWidth - 2) + "\u256F"));
 
   // Check for updates (non-blocking, with 3s timeout)
