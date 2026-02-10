@@ -31,7 +31,9 @@ const DEFAULT_MODEL = "gpt-5.3-codex";
  * Context windows for models
  */
 const CONTEXT_WINDOWS: Record<string, number> = {
-  // OpenAI models - Legacy
+  // OpenAI models
+  "gpt-4o": 128000,
+  "gpt-4o-mini": 128000,
   "gpt-4-turbo": 128000,
   "gpt-4": 8192,
   "gpt-3.5-turbo": 16385,
@@ -48,6 +50,7 @@ const CONTEXT_WINDOWS: Record<string, number> = {
   "gpt-5.2-codex": 400000,
   "gpt-5.2-thinking": 400000,
   "gpt-5.2-instant": 400000,
+  "gpt-5.2-pro": 400000,
   "gpt-5.3-codex": 400000,
   // Kimi/Moonshot models
   "kimi-k2.5": 262144,

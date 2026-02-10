@@ -20,13 +20,15 @@
  *    - Google Gemini: https://ai.google.dev/gemini-api/docs/models/gemini
  *    - Moonshot Kimi: https://platform.moonshot.ai/docs
  *    - LM Studio: Check popular models on Hugging Face
+ *    - Ollama: https://ollama.com/library (check coding models)
  *
  * 2. Update these files (in order):
  *    a) THIS FILE (providers-config.ts):
- *       - models[] array for each provider
+ *       - ADD new models to models[] array for each provider
  *       - contextWindow and maxOutputTokens
  *       - description with release date
  *       - recommended: true for best model
+ *       - Move recommended to the new best model
  *
  *    b) src/providers/{provider}.ts:
  *       - DEFAULT_MODEL constant
@@ -35,10 +37,24 @@
  *    c) src/config/env.ts:
  *       - getDefaultModel() switch cases
  *
+ *    d) src/providers/pricing.ts:
+ *       - MODEL_PRICING entries for new models
+ *
  * 3. Verify:
  *    - apiKeyUrl is still valid
  *    - baseUrl hasn't changed
  *    - OAuth client IDs (if any) in src/auth/oauth.ts
+ *
+ * === IMPORTANT RULES ===
+ *
+ * - NEVER remove models that are still available in the provider's API.
+ *   Users may prefer older/cheaper models. Always ADD new models and
+ *   reorder so the best is first (recommended: true), but keep all
+ *   available models in the list. Only remove a model if the provider
+ *   has fully retired/disabled it and it no longer works.
+ * - Order models from best/newest to oldest/cheapest.
+ * - Include RAM requirements in descriptions for local providers
+ *   (Ollama, LM Studio) so users can choose based on their hardware.
  *
  * === FILES TO SYNC ===
  *
@@ -51,6 +67,7 @@
  * - src/providers/gemini.ts
  * - src/providers/codex.ts
  * - src/config/env.ts (getDefaultModel function)
+ * - src/providers/pricing.ts (MODEL_PRICING for new models)
  *
  * CONSUMERS (no changes needed, they read from this file):
  * - src/cli/repl/commands/model.ts
@@ -246,6 +263,34 @@ export const PROVIDER_DEFINITIONS: Record<ProviderType, ProviderDefinition> = {
         contextWindow: 200000,
         maxOutputTokens: 100000,
       },
+      {
+        id: "gpt-5.2-pro",
+        name: "GPT-5.2 Pro",
+        description: "Most intelligent for hard problems (Dec 2025)",
+        contextWindow: 400000,
+        maxOutputTokens: 128000,
+      },
+      {
+        id: "gpt-5.2-instant",
+        name: "GPT-5.2 Instant",
+        description: "Fast everyday workhorse (Dec 2025)",
+        contextWindow: 400000,
+        maxOutputTokens: 128000,
+      },
+      {
+        id: "gpt-4o",
+        name: "GPT-4o",
+        description: "Multimodal model — cheaper option (May 2024)",
+        contextWindow: 128000,
+        maxOutputTokens: 16384,
+      },
+      {
+        id: "gpt-4o-mini",
+        name: "GPT-4o Mini",
+        description: "Cheapest OpenAI model (Jul 2024)",
+        contextWindow: 128000,
+        maxOutputTokens: 16384,
+      },
     ],
   },
 
@@ -349,6 +394,27 @@ export const PROVIDER_DEFINITIONS: Record<ProviderType, ProviderDefinition> = {
         description: "Production stable - fast with thinking budgets (GA)",
         contextWindow: 1048576,
         maxOutputTokens: 65536,
+      },
+      {
+        id: "gemini-2.5-pro-preview-05-06",
+        name: "Gemini 2.5 Pro (Preview)",
+        description: "Preview version of 2.5 Pro — use stable instead",
+        contextWindow: 1048576,
+        maxOutputTokens: 65536,
+      },
+      {
+        id: "gemini-2.5-flash-preview-05-20",
+        name: "Gemini 2.5 Flash (Preview)",
+        description: "Preview version of 2.5 Flash — use stable instead",
+        contextWindow: 1048576,
+        maxOutputTokens: 65536,
+      },
+      {
+        id: "gemini-2.0-flash",
+        name: "Gemini 2.0 Flash",
+        description: "Stable GA model — cheaper option (2024)",
+        contextWindow: 1048576,
+        maxOutputTokens: 8192,
       },
     ],
   },
