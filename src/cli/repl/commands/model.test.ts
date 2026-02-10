@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { modelCommand } from "./model.js";
+import { modelCommand, fetchLocalModels, buildLocalModelList } from "./model.js";
 import type { ReplSession } from "../types.js";
 
 // Mock chalk with chainable methods (bgBlue.white, etc.)
@@ -164,5 +164,152 @@ describe("modelCommand", () => {
       const allOutput = consoleLogSpy.mock.calls.map((call) => call[0]).join("\n");
       expect(allOutput).toContain("gemini");
     });
+  });
+});
+
+describe("fetchLocalModels", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("should return model IDs from server response", async () => {
+    const mockResponse = {
+      ok: true,
+      json: async () => ({
+        data: [{ id: "qwen2.5-coder:14b" }, { id: "llama3.1:8b" }],
+      }),
+    };
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(mockResponse as Response);
+
+    const models = await fetchLocalModels("ollama");
+
+    expect(models).toEqual(["qwen2.5-coder:14b", "llama3.1:8b"]);
+  });
+
+  it("should return empty array when server is unreachable", async () => {
+    vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("ECONNREFUSED"));
+
+    const models = await fetchLocalModels("ollama");
+
+    expect(models).toEqual([]);
+  });
+
+  it("should return empty array when response is not ok", async () => {
+    const mockResponse = { ok: false };
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(mockResponse as Response);
+
+    const models = await fetchLocalModels("ollama");
+
+    expect(models).toEqual([]);
+  });
+
+  it("should return empty array when response has no data", async () => {
+    const mockResponse = {
+      ok: true,
+      json: async () => ({}),
+    };
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(mockResponse as Response);
+
+    const models = await fetchLocalModels("ollama");
+
+    expect(models).toEqual([]);
+  });
+});
+
+describe("buildLocalModelList", () => {
+  const staticModels = [
+    {
+      id: "qwen2.5-coder:14b",
+      name: "Qwen 2.5 Coder 14B",
+      description: "best coding model (16GB RAM)",
+      recommended: true,
+      contextWindow: 32768,
+    },
+    {
+      id: "qwen3-coder:30b",
+      name: "Qwen3 Coder 30B",
+      description: "MoE 30B/3B active (24GB RAM)",
+      recommended: false,
+      contextWindow: 262144,
+    },
+    {
+      id: "deepseek-r1:14b",
+      name: "DeepSeek R1 14B",
+      description: "reasoning model (16GB RAM)",
+      recommended: false,
+      contextWindow: 128000,
+    },
+  ];
+
+  it("should mark downloaded models as enabled and rest as disabled", () => {
+    const result = buildLocalModelList(["qwen2.5-coder:14b"], staticModels, "ollama");
+
+    // Downloaded model is enabled
+    const downloaded = result.find((m) => m.id === "qwen2.5-coder:14b");
+    expect(downloaded?.disabled).toBe(false);
+    expect(downloaded?.name).toBe("Qwen 2.5 Coder 14B");
+    expect(downloaded?.recommended).toBe(true);
+
+    // Not downloaded models are disabled with hints
+    const notDownloaded = result.filter((m) => m.disabled);
+    expect(notDownloaded).toHaveLength(2);
+    expect(notDownloaded[0]?.hint).toContain("ollama pull");
+  });
+
+  it("should include custom downloaded models not in static list", () => {
+    const result = buildLocalModelList(
+      ["qwen2.5-coder:14b", "my-custom-model:7b"],
+      staticModels,
+      "ollama",
+    );
+
+    const custom = result.find((m) => m.id === "my-custom-model:7b");
+    expect(custom).toBeDefined();
+    expect(custom?.disabled).toBe(false);
+    expect(custom?.name).toBeUndefined();
+  });
+
+  it("should put downloaded models before not-downloaded models", () => {
+    const result = buildLocalModelList(["deepseek-r1:14b"], staticModels, "ollama");
+
+    // First model should be downloaded (enabled)
+    expect(result[0]?.id).toBe("deepseek-r1:14b");
+    expect(result[0]?.disabled).toBe(false);
+
+    // Rest should be disabled
+    expect(result[1]?.disabled).toBe(true);
+    expect(result[2]?.disabled).toBe(true);
+  });
+
+  it("should use lmstudio hints for lmstudio provider", () => {
+    const result = buildLocalModelList([], staticModels, "lmstudio");
+
+    // All are disabled since none downloaded
+    expect(result.every((m) => m.disabled)).toBe(true);
+    expect(result[0]?.hint).toContain("search '");
+    expect(result[0]?.hint).toContain("in LM Studio");
+  });
+
+  it("should handle fuzzy matching for LM Studio model IDs", () => {
+    const result = buildLocalModelList(
+      ["lmstudio-community/qwen2.5-coder-14b-GGUF"],
+      staticModels,
+      "lmstudio",
+    );
+
+    // Should match via fuzzy and enrich with static definition
+    const matched = result.find((m) => m.id === "lmstudio-community/qwen2.5-coder-14b-GGUF");
+    expect(matched?.disabled).toBe(false);
+    expect(matched?.name).toBe("Qwen 2.5 Coder 14B");
+
+    // The original qwen2.5-coder:14b should NOT appear as not-downloaded
+    const notDownloadedIds = result.filter((m) => m.disabled).map((m) => m.id);
+    expect(notDownloadedIds).not.toContain("qwen2.5-coder:14b");
+  });
+
+  it("should return empty array when no downloaded and no static models", () => {
+    const result = buildLocalModelList([], [], "ollama");
+
+    expect(result).toEqual([]);
   });
 });

@@ -155,8 +155,8 @@ Bring your own API keys. Coco works with:
 | **Anthropic** | API key / OAuth PKCE | Claude Opus, Sonnet, Haiku |
 | **OpenAI** | API key | GPT-5.3 Codex, GPT-4.1, o4-mini |
 | **Google** | API key / gcloud ADC | Gemini 3, 2.5 Pro/Flash |
-| **Ollama** | Local | Any local model |
-| **LM Studio** | Local | Any GGUF model |
+| **Ollama** | Local | Any local model (8-24GB RAM) |
+| **LM Studio** | Local | Any GGUF model (8-32GB RAM) |
 | **Moonshot** | API key | Kimi models |
 
 ### Multi-Agent Architecture
