@@ -140,6 +140,7 @@ export function createInputHandler(_session: ReplSession): InputHandler {
   let tempLine = "";
   let lastMenuLines = 0;
   let lastCursorRow = 0; // Track cursor row from previous render for accurate clearing
+  let lastContentRows = 1; // Track content rows so clearMenu can preserve the bottom separator
   let isFirstRender = true;
 
   // Bracketed paste mode state
@@ -347,19 +348,29 @@ export function createInputHandler(_session: ReplSession): InputHandler {
       output += ansiEscapes.cursorForward(finalCol);
     }
 
-    // Track cursor row for next render's clearing calculation
+    // Track cursor row and content height for next render / clearMenu
     lastCursorRow = finalLine;
+    lastContentRows = contentRows;
 
     // Write everything at once
     process.stdout.write(output);
   }
 
   /**
-   * Clear the menu before exiting or submitting
+   * Clear the menu and margin while preserving the bottom separator.
+   * Moves the cursor from its current editing position down to one row
+   * past the bottom separator, then erases everything below (menu + margin).
+   * The bottom separator line remains on screen.
    */
   function clearMenu() {
-    // Always erase below to clear menu and/or bottom margin
-    process.stdout.write(ansiEscapes.eraseDown);
+    // Cursor is on row `lastCursorRow` (0-indexed, relative to prompt start).
+    // Bottom separator is on row `lastContentRows` (one row past the content).
+    // Move cursor to one row AFTER the separator, then erase below.
+    const rowsDown = lastContentRows - lastCursorRow + 1; // +1 to go past the separator
+    if (rowsDown > 0) {
+      process.stdout.write(ansiEscapes.cursorDown(rowsDown));
+    }
+    process.stdout.write("\r" + ansiEscapes.eraseDown);
     lastMenuLines = 0;
   }
 
@@ -396,6 +407,7 @@ export function createInputHandler(_session: ReplSession): InputHandler {
         tempLine = "";
         lastMenuLines = 0;
         lastCursorRow = 0;
+        lastContentRows = 1;
         isFirstRender = true;
 
         // Initial render

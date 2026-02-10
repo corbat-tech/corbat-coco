@@ -530,21 +530,30 @@ async function printWelcome(session: { projectPath: string; config: ReplConfig }
   const versionText = `v${VERSION}`;
   const subtitleText = "open source \u2022 corbat.tech";
 
-  // We use ANSI absolute column positioning (\x1b[<col>G) to place the
-  // right border at a fixed column, so the box closes perfectly regardless
-  // of how wide the terminal renders the emoji.
-  // Top/bottom corners (╮/╯) are at 1-indexed column: 2 (indent) + boxWidth.
-  // Content right "│" must land at the same column, so we position the
-  // cursor one column earlier (for the padding space) and write " │".
-  const rightBorderCol = 2 + boxWidth - 1; // 1-indexed column for space before │
+  // We use ANSI CHA (Cursor Horizontal Absolute – \x1b[<col>G) to place
+  // the right "│" at a fixed terminal column.  This guarantees perfect
+  // alignment with the top/bottom corners regardless of how wide the
+  // terminal renders the emoji (some show 🥥 as 2-wide, others as 3).
+  //
+  // Column layout (1-indexed):
+  //   cols 1-2    "  " indent
+  //   col  3      ╭ / │ / ╰
+  //   cols 4-42   ─ content ─   (boxWidth-2 = 39 inner chars)
+  //   col  43     ╮ / │ / ╯
+  //
+  // So the right border character must land on column 2 + boxWidth = 43.
+  const rightCol = 2 + boxWidth; // column where │/╮/╯ sits (43)
 
-  // Helper: build a content line that places " │" at a fixed column
+  // Helper: build a content line whose right "│" is always at `rightCol`.
+  // We jump the cursor to `rightCol`, erase anything to the right (\x1b[K),
+  // then write the "│" character.
   const boxLine = (content: string): string => {
     return (
       chalk.magenta("  \u2502 ") +
       content +
-      `\x1b[${rightBorderCol}G` +
-      chalk.magenta(" \u2502")
+      `\x1b[${rightCol}G` + // CHA: move cursor to rightCol
+      "\x1b[K" + // EL: erase from cursor to end of line (clear any overflow)
+      chalk.magenta("\u2502")
     );
   };
 
@@ -552,10 +561,10 @@ async function printWelcome(session: { projectPath: string; config: ReplConfig }
   const titleLeft = "\u{1F965} CORBAT-COCO";
   const titleRight = versionText;
   const titleUsed = visualWidth(titleLeft) + visualWidth(titleRight);
-  const titlePad = Math.max(1, innerWidth - titleUsed);
+  const titleGap = Math.max(1, innerWidth - titleUsed);
   const titleContent =
     titleLeft.replace("CORBAT-COCO", chalk.bold.white("CORBAT-COCO")) +
-    " ".repeat(titlePad) +
+    " ".repeat(titleGap) +
     chalk.dim(titleRight);
 
   // Subtitle line
