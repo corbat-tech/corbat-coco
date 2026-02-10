@@ -73,6 +73,7 @@ import {
  */
 function visualWidth(str: string): number {
   // Strip ANSI escape codes
+  // eslint-disable-next-line no-control-regex
   const stripped = str.replace(/\x1b\[[0-9;]*m/g, "");
   let width = 0;
   for (const char of stripped) {
@@ -85,7 +86,7 @@ function visualWidth(str: string): number {
       (cp >= 0x1f900 && cp <= 0x1f9ff) ||
       (cp >= 0x2702 && cp <= 0x27b0) ||
       (cp >= 0xfe00 && cp <= 0xfe0f) ||
-      (cp >= 0x200d && cp <= 0x200d)
+      cp === 0x200d
     ) {
       width += 2;
     } else if (

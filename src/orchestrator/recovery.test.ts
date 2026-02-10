@@ -142,7 +142,6 @@ describe("RecoverySystem", () => {
     });
 
     it("should classify invalid LLM request errors as non-recoverable", async () => {
-      const error = new Error("Invalid request: bad parameters");
       // Need to match as llm_error, so include "api error" in message
       const llmError = new Error("API error: Invalid request parameters");
       const context = createContext();

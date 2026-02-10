@@ -121,9 +121,9 @@ const mockedFormatModelInfo = vi.mocked(formatModelInfo);
 const mockedSupportsOAuth = vi.mocked(supportsOAuth);
 const mockedRunOAuthFlow = vi.mocked(runOAuthFlow);
 const mockedCreateProvider = vi.mocked(createProvider);
-const mockedIsGcloudInstalled = vi.mocked(isGcloudInstalled);
-const mockedIsADCConfigured = vi.mocked(isADCConfigured);
-const mockedGetADCAccessToken = vi.mocked(getADCAccessToken);
+const _mockedIsGcloudInstalled = vi.mocked(isGcloudInstalled);
+const _mockedIsADCConfigured = vi.mocked(isADCConfigured);
+const _mockedGetADCAccessToken = vi.mocked(getADCAccessToken);
 
 function makeProviderDef(overrides: Partial<ProviderDefinition> = {}): ProviderDefinition {
   return {

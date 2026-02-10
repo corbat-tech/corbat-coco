@@ -163,7 +163,7 @@ export class TestFailureAnalyzer {
         .join("\n");
 
       return contextWithLineNumbers;
-    } catch (_error) {
+    } catch {
       return `Could not read source file: ${location.file}`;
     }
   }
@@ -241,7 +241,7 @@ Respond in JSON format:
         confidence: Math.min(100, Math.max(0, diagnosis.confidence || 50)),
         affectedFiles: diagnosis.affectedFiles || [location.file],
       };
-    } catch (_error) {
+    } catch {
       // Fallback diagnosis
       return {
         rootCause: `Test failed with: ${testResult.error?.message || "Unknown error"}`,

@@ -39,7 +39,7 @@ function simulateRequest(url: string): Promise<{ status: number; body: string }>
     const res: MockResponse = {
       writeHead: (statusCode, headers) => {
         responseState.status = statusCode;
-        responseState.body = responseState.body;
+        // body is set via end(), not writeHead
         responseState.headers = headers;
       },
       end: (body) => {
