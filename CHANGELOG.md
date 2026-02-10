@@ -7,35 +7,74 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [1.1.0] - 2025-02-10
+
 ### Added
-- Initial test infrastructure with mocks
-- GitHub Actions CI/CD workflows
-- Contributing guidelines
-- Example projects
-- SECURITY.md with vulnerability reporting guidelines
-- Complete phase executor implementations
-- Agent coordination coverage tests
-- Unresolved dependency reporting in multi-agent planning
+- 12-dimension quality scoring system with real analyzers
+- Comprehensive test suite: 4,350+ tests across 171 test files
+- Test coverage for 19 previously untested modules (cost-estimator, convergence-analyzer, context-enhancer, git-simple, skill-enhancer, diff-preview, provider-bridge, hooks, code-analyzer, git-enhanced, smart-suggestions, coordinator, progress, recovery, build-verifier, import-analyzer, simple-agent, agent-coordinator, fix-generator, test-analyzer, onboarding-v2)
+- Multi-agent coordination with weighted scoring and tool-use
+- Interactive onboarding with multi-provider support (Anthropic, OpenAI, Google, LM Studio)
+- REPL with image attachment, diff preview, and smart suggestions
+- Budget tracking and cost estimation for LLM operations
+- Convergence analyzer for quality iteration loops
+- Build verifier with real compilation and lint checks
+- Import analyzer with circular dependency detection
+- Recovery system with automatic LLM provider fallback cycling
+- IMPROVEMENT_RESULTS.md documenting v1.1.0 audit and improvements
 
 ### Changed
+- Test coverage increased from ~55% to 80%+ across all metrics
+- Quality thresholds raised to 80% (lines, functions, branches, statements)
+- Removed all excluded files from vitest.config.ts coverage exclusion list
 - Enhanced README with badges and demo
 - Connected Orchestrator with real Phase Executors
 - Improved CLI commands (plan, status, build, resume, config)
-- Reduced test coverage threshold to 55% temporarily
 - Multi-agent planning uses deterministic task IDs and normalized dependencies
 - REPL initializes multi-agent provider bridge automatically
 - Code review overall score recalculated after applying real coverage
 
 ### Fixed
+- Recovery system now correctly classifies "overloaded" and "capacity" as LLM errors
+- Cost estimator partial model matching uses longest-match-first ordering
+- Smart suggestions empty catch block detection uses `endsWith()` for accuracy
+- Test failure analyzer stack trace parsing with separate regex patterns for Node.js and simple formats
+- Test failure analyzer root cause categorization ordering (syntax before type)
+- Import analyzer circular dependency detection with .js→.ts extension mapping
+- Onboarding LM Studio tests properly mock fetch to prevent real network calls
+- All 9 lint warnings resolved (unused variables, self-assignments, regex patterns)
 - Phase executor exports (Converge, Orchestrate, Complete, Output)
 - CLI command exports and registrations
 - TypeScript compilation errors in persistence.ts
-- Lint errors (unused imports, regex escapes, async/await)
 - Re-export conflicts in phases/index.ts
-- Agent coordinator now preserves task metadata through dependency levels
+- Agent coordinator preserves task metadata through dependency levels
 - Avoid false build-failure issues when correctness analysis is unavailable
-- Multi-agent planning documentation updated with dependency notes
 - OAuth callback server cleanup and test reliability improvements
+
+---
+
+## [1.0.2] - 2025-01-XX
+
+### Fixed
+- Package renamed to @corbat-tech/coco
+- Version read dynamically from package.json
+
+---
+
+## [1.0.1] - 2025-01-XX
+
+### Fixed
+- Quality scoring and iteration improvements
+
+---
+
+## [1.0.0] - 2025-01-XX
+
+### Added
+- Initial stable release
+- All core COCO methodology features
 
 ---
 
@@ -125,7 +164,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Date | Highlights |
 |---------|------|------------|
-| 0.1.0 | TBD | Initial release |
+| 1.1.0 | 2025-02-10 | Pre-release quality improvements, 80%+ coverage, 12-dimension scoring |
+| 1.0.2 | 2025-01 | Package rename, dynamic version |
+| 1.0.1 | 2025-01 | Quality scoring improvements |
+| 1.0.0 | 2025-01 | Initial stable release |
+| 0.1.0 | TBD | Initial pre-release |
 
 ---
 
@@ -145,5 +188,9 @@ Future versions will include upgrade guides here.
 - [Documentation](https://github.com/corbat/corbat-coco/tree/main/docs)
 - [Issues](https://github.com/corbat/corbat-coco/issues)
 
-[Unreleased]: https://github.com/corbat/corbat-coco/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/corbat/corbat-coco/releases/tag/v0.1.0
+[Unreleased]: https://github.com/corbat-tech/corbat-coco/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/corbat-tech/corbat-coco/compare/v1.0.2...v1.1.0
+[1.0.2]: https://github.com/corbat-tech/corbat-coco/compare/v1.0.1...v1.0.2
+[1.0.1]: https://github.com/corbat-tech/corbat-coco/compare/v1.0.0...v1.0.1
+[1.0.0]: https://github.com/corbat-tech/corbat-coco/compare/v0.1.0...v1.0.0
+[0.1.0]: https://github.com/corbat-tech/corbat-coco/releases/tag/v0.1.0
