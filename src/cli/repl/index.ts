@@ -2,9 +2,8 @@
  * REPL main entry point
  */
 
-import { existsSync } from "node:fs";
-import path from "node:path";
 import chalk from "chalk";
+import stringWidth from "string-width";
 import {
   createSession,
   initializeSessionTrust,
@@ -63,50 +62,9 @@ import {
   type CocoQualityResult,
 } from "./coco-mode.js";
 
-/**
- * Calculate the visual width of a string, accounting for ANSI escape codes
- * and wide characters (emoji, CJK).
- *
- * - Strips ANSI escape sequences (zero width)
- * - Counts emoji and wide Unicode characters as width 2
- * - Counts all other printable characters as width 1
- */
-function visualWidth(str: string): number {
-  // Strip ANSI escape codes
-  // eslint-disable-next-line no-control-regex
-  const stripped = str.replace(/\x1b\[[0-9;]*m/g, "");
-  let width = 0;
-  for (const char of stripped) {
-    const cp = char.codePointAt(0) || 0;
-    // Emoji ranges (common emoji blocks)
-    if (
-      cp > 0x1f600 ||
-      (cp >= 0x2600 && cp <= 0x27bf) ||
-      (cp >= 0x1f300 && cp <= 0x1fad6) ||
-      (cp >= 0x1f900 && cp <= 0x1f9ff) ||
-      (cp >= 0x2702 && cp <= 0x27b0) ||
-      (cp >= 0xfe00 && cp <= 0xfe0f) ||
-      cp === 0x200d
-    ) {
-      width += 2;
-    } else if (
-      // CJK Unified Ideographs and other wide characters
-      (cp >= 0x1100 && cp <= 0x115f) ||
-      (cp >= 0x2e80 && cp <= 0x303e) ||
-      (cp >= 0x3040 && cp <= 0x33bf) ||
-      (cp >= 0x4e00 && cp <= 0x9fff) ||
-      (cp >= 0xf900 && cp <= 0xfaff) ||
-      (cp >= 0xfe30 && cp <= 0xfe6f) ||
-      (cp >= 0xff01 && cp <= 0xff60) ||
-      (cp >= 0xffe0 && cp <= 0xffe6)
-    ) {
-      width += 2;
-    } else {
-      width += 1;
-    }
-  }
-  return width;
-}
+// stringWidth (from 'string-width') is the industry-standard way to measure
+// visual terminal width of strings.  It correctly handles ANSI codes, emoji
+// (including ZWJ sequences), CJK, and grapheme clusters via Intl.Segmenter.
 
 /**
  * Start the REPL
@@ -521,55 +479,53 @@ export async function startRepl(
  * Brand color: Magenta/Purple
  */
 async function printWelcome(session: { projectPath: string; config: ReplConfig }): Promise<void> {
-  const providerType = session.config.provider.type;
-  const model = session.config.provider.model || "default";
-
-  // Compact welcome for returning users
-  const isReturningUser = existsSync(path.join(session.projectPath, ".coco"));
-  if (isReturningUser) {
-    const versionStr = chalk.dim(`v${VERSION}`);
-    const providerStr = chalk.dim(`${providerType}/${model}`);
-    console.log(
-      `\n  \u{1F965} Coco ${versionStr} ${chalk.dim("\u2502")} ${providerStr} ${chalk.dim("\u2502")} ${chalk.yellow("/help")}\n`,
-    );
-    return;
-  }
-
   const trustStore = createTrustStore();
   await trustStore.init();
   const trustLevel = trustStore.getLevel(session.projectPath);
 
-  // Box dimensions - fixed width for consistency
+  // Box dimensions — fixed width for consistency.
+  // Using the same approach as `boxen`: measure content with `stringWidth`,
+  // pad with spaces to a uniform inner width, then wrap with border chars.
+  // IMPORTANT: Emoji MUST stay outside the box.  Terminal emoji widths are
+  // unpredictable (some render 🥥 as 2 cols, others as 3) and no JS lib
+  // can query the actual terminal width.  Only ASCII content goes inside
+  // so the right │ always aligns perfectly with the corners.
   const boxWidth = 41;
-  const innerWidth = boxWidth - 4; // Account for "\u2502 " and " \u2502"
+  const innerWidth = boxWidth - 2; // visible columns between the two │ chars
 
-  // Build content lines with proper padding using visualWidth()
-  const titleContent = "\u{1F965} CORBAT-COCO";
   const versionText = `v${VERSION}`;
-  const titleContentVisualWidth = visualWidth(titleContent);
-  const versionVisualWidth = visualWidth(versionText);
-  const titlePadding = innerWidth - titleContentVisualWidth - versionVisualWidth;
-
   const subtitleText = "open source \u2022 corbat.tech";
-  const subtitleVisualWidth = visualWidth(subtitleText);
-  const subtitlePadding = innerWidth - subtitleVisualWidth;
 
+  // Helper: build a padded content line inside the box.
+  // Measures the visual width of `content` with stringWidth, then pads it
+  // with trailing spaces so every line has exactly `innerWidth` visible
+  // columns.  The right │ is always placed immediately after the padding.
+  const boxLine = (content: string): string => {
+    const pad = Math.max(0, innerWidth - stringWidth(content));
+    return chalk.magenta("\u2502") + content + " ".repeat(pad) + chalk.magenta("\u2502");
+  };
+
+  // Line 1: " COCO                    v1.2.x "
+  const titleLeftRaw = " COCO";
+  const titleRightRaw = versionText + " ";
+  const titleLeftStyled = " " + chalk.bold.white("COCO");
+  const titleGap = Math.max(1, innerWidth - stringWidth(titleLeftRaw) - stringWidth(titleRightRaw));
+  const titleContent = titleLeftStyled + " ".repeat(titleGap) + chalk.dim(titleRightRaw);
+
+  // Line 2: tagline in brand color
+  const taglineText = "code that converges to quality";
+  const taglineContent = " " + chalk.magenta(taglineText) + " ";
+
+  // Line 3: attribution (dim)
+  const subtitleContent = " " + chalk.dim(subtitleText) + " ";
+
+  // Always show the styled header box.
+  // Only ASCII inside the box — emoji widths are unpredictable across terminals.
   console.log();
   console.log(chalk.magenta("  \u256D" + "\u2500".repeat(boxWidth - 2) + "\u256E"));
-  console.log(
-    chalk.magenta("  \u2502 ") +
-      "\u{1F965} " +
-      chalk.bold.white("CORBAT-COCO") +
-      " ".repeat(Math.max(0, titlePadding)) +
-      chalk.dim(versionText) +
-      chalk.magenta(" \u2502"),
-  );
-  console.log(
-    chalk.magenta("  \u2502 ") +
-      chalk.dim(subtitleText) +
-      " ".repeat(Math.max(0, subtitlePadding)) +
-      chalk.magenta(" \u2502"),
-  );
+  console.log("  " + boxLine(titleContent));
+  console.log("  " + boxLine(taglineContent));
+  console.log("  " + boxLine(subtitleContent));
   console.log(chalk.magenta("  \u2570" + "\u2500".repeat(boxWidth - 2) + "\u256F"));
 
   // Check for updates (non-blocking, with 3s timeout)
@@ -650,7 +606,7 @@ async function checkProjectTrust(projectPath: string): Promise<boolean> {
 
   // Compact first-time access warning
   console.log();
-  console.log(chalk.cyan.bold("  \u{1F965} Corbat-Coco") + chalk.dim(` v${VERSION}`));
+  console.log(chalk.cyan.bold("  \u{1F965} Coco") + chalk.dim(` v${VERSION}`));
   console.log(chalk.dim(`  \u{1F4C1} ${projectPath}`));
   console.log();
   console.log(chalk.yellow("  \u26A0 First time accessing this directory"));

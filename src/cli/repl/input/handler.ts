@@ -140,6 +140,7 @@ export function createInputHandler(_session: ReplSession): InputHandler {
   let tempLine = "";
   let lastMenuLines = 0;
   let lastCursorRow = 0; // Track cursor row from previous render for accurate clearing
+  let lastContentRows = 1; // Track content rows so clearMenu can preserve the bottom separator
   let isFirstRender = true;
 
   // Bracketed paste mode state
@@ -192,9 +193,9 @@ export function createInputHandler(_session: ReplSession): InputHandler {
     const termCols = process.stdout.columns || 80;
     const prompt = getPrompt();
 
-    // On re-renders, move cursor up from previous position to the separator line,
-    // then clear everything. lastCursorRow tracks where the cursor was left,
-    // +1 accounts for the separator line drawn above the prompt.
+    // On re-renders, move cursor up from previous position to the top separator,
+    // then clear everything. lastCursorRow tracks the cursor row relative to
+    // the prompt start; +1 accounts for the top separator line.
     if (!isFirstRender) {
       const linesToGoUp = lastCursorRow + 1;
       if (linesToGoUp > 0) {
@@ -204,7 +205,7 @@ export function createInputHandler(_session: ReplSession): InputHandler {
     isFirstRender = false;
     process.stdout.write("\r" + ansiEscapes.eraseDown);
 
-    // Build separator line above input area
+    // Build top separator line
     const separator = chalk.dim("\u2500".repeat(termCols));
     let output = separator + "\n";
 
@@ -227,9 +228,26 @@ export function createInputHandler(_session: ReplSession): InputHandler {
       }
     }
 
+    // Calculate how many visual rows the content (prompt + full text) occupies.
+    // This determines where to place the bottom separator.
+    const totalContentLen = prompt.visualLen + currentLine.length;
+    const contentRows = totalContentLen === 0 ? 1 : Math.ceil(totalContentLen / termCols);
+
+    // When content exactly fills a row (totalContentLen is a multiple of termCols),
+    // the terminal auto-wraps the cursor to col 0 of the next row. In that case
+    // we must NOT emit an extra "\n" before the bottom separator, because the
+    // cursor is already on the next row. Emitting "\n" would create a blank line.
+    const contentExactFill = totalContentLen > 0 && totalContentLen % termCols === 0;
+
+    // Bottom separator — always drawn below the input content
+    output += (contentExactFill ? "" : "\n") + separator;
+
     // Draw dropdown menu if we have completions
     const showMenu =
       completions.length > 0 && currentLine.startsWith("/") && currentLine.length >= 1;
+
+    // Count extra lines below the bottom separator (menu + margin)
+    let extraLinesBelow = 0;
 
     if (showMenu) {
       const cols = getColumnCount();
@@ -257,11 +275,13 @@ export function createInputHandler(_session: ReplSession): InputHandler {
         output += "\n";
         output += chalk.dim(`  \u2191 ${startIndex} more above`);
         lastMenuLines++;
+        extraLinesBelow++;
       }
 
       // Render items in columns (items flow left-to-right, top-to-bottom)
       for (let row = 0; row < rowCount; row++) {
         output += "\n";
+        extraLinesBelow++;
 
         for (let col = 0; col < cols; col++) {
           const itemIndex = row * cols + col;
@@ -287,33 +307,38 @@ export function createInputHandler(_session: ReplSession): InputHandler {
         output += "\n";
         output += chalk.dim(`  \u2193 ${completions.length - endIndex} more below`);
         lastMenuLines++;
+        extraLinesBelow++;
       }
-
-      // Add bottom margin below menu, then move cursor back to prompt line
-      for (let i = 0; i < BOTTOM_MARGIN; i++) {
-        output += "\n";
-      }
-      // +1 for the separator line we added above the prompt
-      output += ansiEscapes.cursorUp(lastMenuLines + BOTTOM_MARGIN + 1);
     } else {
       lastMenuLines = 0;
-
-      // Add bottom margin below prompt, then move cursor back
-      for (let i = 0; i < BOTTOM_MARGIN; i++) {
-        output += "\n";
-      }
-      // +1 for the separator line
-      output += ansiEscapes.cursorUp(BOTTOM_MARGIN + 1);
     }
 
-    // Account for the separator line: cursor is now on the separator line.
-    // Move down 1 to the prompt line.
+    // Add bottom margin
+    for (let i = 0; i < BOTTOM_MARGIN; i++) {
+      output += "\n";
+      extraLinesBelow++;
+    }
+
+    // Move cursor back up to the top separator line.
+    // From current position we need to go up past:
+    //   extraLinesBelow + 1 (bottom separator) + contentRows (input) rows
+    // to reach the top separator, then down 1 to the prompt start.
+    const totalUp = extraLinesBelow + 1 + contentRows;
+    output += ansiEscapes.cursorUp(totalUp);
+
+    // We're now on the top separator. Move down 1 to the prompt line.
     output += ansiEscapes.cursorDown(1);
 
-    // Position cursor correctly within the input, accounting for wrapping
+    // Position cursor correctly within the input, accounting for wrapping.
+    // When cursorAbsolutePos is an exact multiple of termCols, the terminal
+    // auto-wraps to col 0 of the next row. We treat this as staying on the
+    // last content row to prevent the "extra line" bug on next re-render.
     const cursorAbsolutePos = prompt.visualLen + cursorPos;
-    const finalLine = Math.floor(cursorAbsolutePos / termCols);
-    const finalCol = cursorAbsolutePos % termCols;
+    const onExactBoundary = cursorAbsolutePos > 0 && cursorAbsolutePos % termCols === 0;
+    const finalLine = onExactBoundary
+      ? cursorAbsolutePos / termCols - 1
+      : Math.floor(cursorAbsolutePos / termCols);
+    const finalCol = onExactBoundary ? 0 : cursorAbsolutePos % termCols;
 
     output += "\r";
     if (finalLine > 0) {
@@ -323,19 +348,29 @@ export function createInputHandler(_session: ReplSession): InputHandler {
       output += ansiEscapes.cursorForward(finalCol);
     }
 
-    // Track cursor row for next render's clearing calculation
+    // Track cursor row and content height for next render / clearMenu
     lastCursorRow = finalLine;
+    lastContentRows = contentRows;
 
     // Write everything at once
     process.stdout.write(output);
   }
 
   /**
-   * Clear the menu before exiting or submitting
+   * Clear the menu and margin while preserving the bottom separator.
+   * Moves the cursor from its current editing position down to one row
+   * past the bottom separator, then erases everything below (menu + margin).
+   * The bottom separator line remains on screen.
    */
   function clearMenu() {
-    // Always erase below to clear menu and/or bottom margin
-    process.stdout.write(ansiEscapes.eraseDown);
+    // Cursor is on row `lastCursorRow` (0-indexed, relative to prompt start).
+    // Bottom separator is on row `lastContentRows` (one row past the content).
+    // Move cursor to one row AFTER the separator, then erase below.
+    const rowsDown = lastContentRows - lastCursorRow + 1; // +1 to go past the separator
+    if (rowsDown > 0) {
+      process.stdout.write(ansiEscapes.cursorDown(rowsDown));
+    }
+    process.stdout.write("\r" + ansiEscapes.eraseDown);
     lastMenuLines = 0;
   }
 
@@ -372,6 +407,7 @@ export function createInputHandler(_session: ReplSession): InputHandler {
         tempLine = "";
         lastMenuLines = 0;
         lastCursorRow = 0;
+        lastContentRows = 1;
         isFirstRender = true;
 
         // Initial render
@@ -580,10 +616,8 @@ export function createInputHandler(_session: ReplSession): InputHandler {
             }
 
             cleanup();
-            // Print closing separator after submission
-            const termWidth = process.stdout.columns || 80;
+            // Bottom separator is already rendered live; just move past it
             console.log(); // New line after input
-            console.log(chalk.dim("\u2500".repeat(termWidth)));
             const result = currentLine.trim();
             if (result) {
               sessionHistory.push(result);
