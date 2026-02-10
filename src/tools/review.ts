@@ -6,10 +6,12 @@
  * structured review findings ordered by severity.
  */
 
+import path from "node:path";
 import { z } from "zod";
 import { simpleGit, type SimpleGit } from "simple-git";
 import { defineTool, type ToolDefinition } from "./registry.js";
 import { ToolError } from "../utils/errors.js";
+import { fileExists } from "../utils/files.js";
 import { parseDiff, getChangedLines, type ParsedDiff } from "../cli/repl/output/diff-renderer.js";
 import { detectMaturity, type MaturityLevel } from "../utils/maturity.js";
 import { runLinterTool, type LintIssue } from "./quality.js";
@@ -66,6 +68,8 @@ interface Pattern {
   category: ReviewCategory;
   message: string;
   suggestion?: { old: string; new: string };
+  /** Skip this pattern for files matching these paths (e.g. CLI output files) */
+  excludePaths?: RegExp;
 }
 
 const SECURITY_PATTERNS: Pattern[] = [
@@ -92,6 +96,7 @@ const SECURITY_PATTERNS: Pattern[] = [
     severity: "minor",
     category: "best-practice",
     message: "Remove console.log — use structured logging instead",
+    excludePaths: /\/(cli|repl|bin|scripts)\//,
   },
 ];
 
@@ -194,7 +199,7 @@ async function getDiff(
 /**
  * Run pattern detection on diff lines.
  */
-function analyzePatterns(diff: ParsedDiff): ReviewFinding[] {
+export function analyzePatterns(diff: ParsedDiff): ReviewFinding[] {
   const findings: ReviewFinding[] = [];
 
   for (const file of diff.files) {
@@ -204,6 +209,7 @@ function analyzePatterns(diff: ParsedDiff): ReviewFinding[] {
         if (line.type !== "add") continue;
 
         for (const pattern of ALL_PATTERNS) {
+          if (pattern.excludePaths?.test(file.path)) continue;
           if (pattern.regex.test(line.content)) {
             findings.push({
               file: file.path,
@@ -226,8 +232,10 @@ function analyzePatterns(diff: ParsedDiff): ReviewFinding[] {
 
 /**
  * Check if source files changed without corresponding test changes.
+ * When a test file exists on disk but wasn't modified in the diff,
+ * the finding is downgraded to "info" instead of "minor".
  */
-function checkTestCoverage(diff: ParsedDiff): ReviewFinding[] {
+export async function checkTestCoverage(diff: ParsedDiff, cwd: string): Promise<ReviewFinding[]> {
   const findings: ReviewFinding[] = [];
   const changedSrc: string[] = [];
   const changedTests = new Set<string>();
@@ -252,12 +260,28 @@ function checkTestCoverage(diff: ParsedDiff): ReviewFinding[] {
     );
 
     if (!hasTestChange) {
-      findings.push({
-        file: src,
-        severity: "minor",
-        category: "testing",
-        message: "Logic changes without corresponding test updates",
-      });
+      // Check if a test file exists on disk (just not in the diff)
+      const ext = src.match(/\.(ts|tsx|js|jsx)$/)?.[0] ?? ".ts";
+      const testExists =
+        (await fileExists(path.join(cwd, `${baseName}.test${ext}`))) ||
+        (await fileExists(path.join(cwd, `${baseName}.spec${ext}`)));
+
+      if (testExists) {
+        // Test file exists — existing tests likely cover the change
+        findings.push({
+          file: src,
+          severity: "info",
+          category: "testing",
+          message: "Test file exists but was not updated — verify existing tests cover these changes",
+        });
+      } else {
+        findings.push({
+          file: src,
+          severity: "minor",
+          category: "testing",
+          message: "Logic changes without corresponding test updates",
+        });
+      }
     }
   }
 
@@ -487,7 +511,7 @@ Examples:
       allFindings.push(...analyzePatterns(diff));
 
       // 2. Test coverage check
-      allFindings.push(...checkTestCoverage(diff));
+      allFindings.push(...(await checkTestCoverage(diff, projectDir)));
 
       // 3. Documentation check
       allFindings.push(...checkDocumentation(diff));
