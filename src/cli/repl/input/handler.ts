@@ -864,17 +864,15 @@ export function createInputHandler(_session: ReplSession): InputHandler {
         chalk.dim("\n  ↓ Type to add context (press Enter to queue) ↓\n\n"),
       );
 
-      // Re-enable stdin in cooked mode (line buffered, not raw)
-      if (process.stdin.isTTY) {
-        process.stdin.setRawMode(false);
-      }
-      process.stdin.resume();
-
       // Listen for complete lines
       const backgroundDataHandler = (chunk: Buffer) => {
         if (!backgroundCaptureEnabled) return;
 
         const text = chunk.toString();
+
+        // Echo the input so user can see what they're typing
+        process.stdout.write(text);
+
         backgroundBuffer += text;
 
         // Check for complete lines (ended with \n or \r\n)
@@ -892,10 +890,29 @@ export function createInputHandler(_session: ReplSession): InputHandler {
         }
       };
 
-      process.stdin.on("data", backgroundDataHandler);
-
       // Store handler reference for cleanup
       (process.stdin as any)._backgroundDataHandler = backgroundDataHandler;
+
+      // Attach listener BEFORE resuming
+      process.stdin.on("data", backgroundDataHandler);
+
+      // Re-enable stdin in cooked mode (line buffered, not raw)
+      if (process.stdin.isTTY) {
+        process.stdin.setRawMode(false);
+      }
+
+      // CRITICAL: Force stdin into reading state
+      // Set encoding to ensure proper text handling
+      process.stdin.setEncoding("utf8");
+
+      // Check if paused and resume multiple times to ensure it "takes"
+      if ((process.stdin as any).isPaused?.()) {
+        process.stdin.resume();
+      }
+      process.stdin.resume(); // Call again to be absolutely sure
+
+      // Also set readable property to trigger reading
+      (process.stdin as any).read?.(0);
     },
 
     disableBackgroundCapture(): void {
