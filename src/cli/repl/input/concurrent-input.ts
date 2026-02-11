@@ -58,10 +58,11 @@ function renderBottomPrompt(): void {
   const bottomSeparator = chalk.dim("─".repeat(termCols));
 
   // Render at fixed position (last 3 lines), outside scroll region
-  // Don't save/restore cursor - just position at bottom and write
+  // CRITICAL: Erase from cursor to end to clear previous renders
   const promptStart = termRows - 3;
   const output =
     ansiEscapes.cursorTo(0, promptStart) +
+    ansiEscapes.eraseDown + // Clear everything from here down
     topSeparator +
     "\n" +
     promptLine +
