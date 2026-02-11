@@ -388,7 +388,10 @@ export async function startRepl(
         },
         onThinkingEnd: () => {
           clearThinkingInterval();
-          clearSpinner();
+          // Don't clear spinner yet if there are interruptions to process
+          if (!hasInterruptions()) {
+            clearSpinner();
+          }
           setWorking(false); // LED green (idle)
         },
         onToolPreparing: (toolName) => {
@@ -419,13 +422,14 @@ export async function startRepl(
         const currentTask =
           typeof currentTaskMsg?.content === "string" ? currentTaskMsg.content : "Unknown task";
 
-        // Keep spinner running while classifying
-        setSpinner("Processing your message...");
+        // Keep the current spinner running, just update the message
+        updateConcurrentSpinner("Processing your message...");
 
         // Classify interruptions using LLM
         const routing = await classifyInterruptions(interruptions, currentTask, provider);
 
-        clearSpinner();
+        // DON'T clear spinner - let it continue with current task
+        // The explanation will appear as normal text output
 
         // Show natural explanation as if the assistant is speaking
         const combinedInput = interruptions.map((i) => i.message).join("; ");
@@ -462,6 +466,8 @@ export async function startRepl(
 
         // Display the explanation naturally as part of the conversation flow
         if (assistantExplanation) {
+          // Clear spinner before showing explanation
+          clearSpinner();
           console.log(chalk.cyan(`\n${assistantExplanation}\n`));
         }
 
@@ -469,6 +475,9 @@ export async function startRepl(
         if (shouldContinue && !wasAborted && !result.aborted) {
           continue; // Jump back to beginning of REPL loop
         }
+
+        // Clear spinner after processing interruption (if not continuing)
+        clearSpinner();
       }
 
       // Show abort summary if cancelled, preserving partial content
