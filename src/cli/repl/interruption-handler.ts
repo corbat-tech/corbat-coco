@@ -53,8 +53,14 @@ export function handleBackgroundLine(line: string): void {
       timestamp: Date.now(),
     });
 
-    // No immediate feedback - the LLM will explain what it's doing with the message
-    // after classification is complete. This avoids breaking the spinner rendering.
+    // Show immediate feedback that message was captured
+    // Uses logUpdate.done() to freeze frame, avoiding duplication
+    import("./output/concurrent-ui.js").then(({ showMessageCaptured }) => {
+      showMessageCaptured(trimmed);
+    }).catch(() => {
+      // Fallback if import fails
+      console.log(`\n💬 You: "${trimmed}"`);
+    });
   }
 }
 

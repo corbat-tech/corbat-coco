@@ -292,6 +292,21 @@ export function setWorking(working: boolean): void {
 }
 
 /**
+ * Show immediate feedback that user message was captured
+ * Uses logUpdate.done() to freeze current frame, then shows message
+ */
+export function showMessageCaptured(message: string): void {
+  // Freeze current frame (makes it permanent)
+  logUpdate.done();
+
+  // Show feedback message
+  console.log(chalk.dim("\n💬 You: ") + chalk.cyan(`"${message}"`));
+
+  // Re-render current state (spinner continues)
+  render();
+}
+
+/**
  * Check if concurrent UI is active
  */
 export function isActive(): boolean {
