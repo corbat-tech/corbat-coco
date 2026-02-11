@@ -20,6 +20,7 @@ import {
   startSpinner as startConcurrentSpinner,
   updateSpinner as updateConcurrentSpinner,
   clearSpinner as clearConcurrentSpinner,
+  setQueuedMessageFeedback,
 } from "./output/concurrent-ui.js";
 import {
   renderStreamChunk,
@@ -426,13 +427,22 @@ export async function startRepl(
 
         console.log(chalk.dim(`Action: ${routing.action} - ${routing.reasoning}\n`));
 
+        // Update visual feedback with classified action
+        const combinedInput = interruptions.map((i) => i.message).join("; ");
+        if (routing.action === "modify" || routing.action === "queue" || routing.action === "clarification") {
+          setQueuedMessageFeedback(combinedInput, routing.action);
+        }
+
+        let shouldContinue = false;
+
         if (routing.action === "modify" && routing.synthesizedMessage) {
           // Add synthesized message to session for next turn
           session.messages.push({
             role: "user",
             content: routing.synthesizedMessage,
           });
-          console.log(chalk.green(`✓ Context added to current task`));
+          console.log(chalk.green(`✓ Context added to current task - continuing with updated requirements\n`));
+          shouldContinue = true; // Continue immediately with the new context
         } else if (routing.action === "interrupt") {
           // Abort was already handled if user pressed Ctrl+C
           console.log(chalk.yellow(`⚠️  Task cancelled by user request`));
@@ -453,6 +463,12 @@ export async function startRepl(
         }
 
         console.log(); // Blank line
+
+        // If modify action, continue agent turn immediately with new context
+        if (shouldContinue && !wasAborted && !result.aborted) {
+          console.log(chalk.dim("Continuing with updated context...\n"));
+          continue; // Jump back to beginning of REPL loop
+        }
       }
 
       // Show abort summary if cancelled, preserving partial content
