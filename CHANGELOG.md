@@ -9,6 +9,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.6.0] - 2026-02-11
+
+### Added
+- **Real-time command streaming with heartbeat:** Long-running shell/build commands now show live progress instead of black box spinner
+  - Stream stdout/stderr output in real-time instead of buffering until completion
+  - CommandHeartbeat monitor shows elapsed time every 10 seconds for commands running >10s
+  - Warning alerts when command silent for >30 seconds to detect hung processes
+  - Applied to bash tool (bash_exec) for all shell commands
+  - Applied to all build tools: runScriptTool (npm/pnpm/yarn scripts), installDepsTool (package installation), makeTool (Makefile targets), tscTool (TypeScript compilation)
+  - Eliminates "black box" experience during npm install, webpack builds, and other long operations (360+ second operations now have visible progress)
+
+- **Concurrent task management:** ✅ **FULLY WORKING** - Users can now provide input while COCO works
+  - Interruption handler captures user input during agent execution using background line capture
+  - LLM-based interruption classifier intelligently routes user input:
+    - **Modify:** Add context to current task ("also add validation", "use PostgreSQL instead")
+    - **Interrupt:** Cancel current work ("stop", "cancel", "wait")
+    - **Queue:** Add new tasks to background queue ("also create a README", "add tests for X")
+    - **Clarification:** Ask questions about ongoing work ("why did you choose X?", "what's the status?")
+  - Background task manager integration for queued tasks
+  - Visual feedback showing received interruptions and routing decisions
+  - Synthesized messages automatically added to session for "modify" actions
+  - **UX:** Clean visual indicator shows when interruption mode is active
+  - **Input:** User sees their typing normally, not mixed with agent output
+
+### Changed
+- Bash tool (`bashExecTool`) now uses streaming mode with `buffer: false` for immediate output visibility
+- All build tools now use streaming mode for real-time feedback
+- Command execution provides live feedback with heartbeat statistics showing elapsed time
+- Test mocks updated to use Promise with Object.assign instead of thenable pattern (oxlint compliance)
+- `consumeInterruptions()` returns full `QueuedInterruption[]` objects instead of just strings
+- `QueuedInterruption` type exported from interruption-handler for external use
+- Input handler refactored with `enableBackgroundCapture()` and `disableBackgroundCapture()` methods
+- REPL loop now uses background capture instead of full pause during agent turns
+- Main REPL loop integrates interruption classification and background task management
+
+### Fixed
+- Long-running commands no longer appear frozen or hung - users see real-time progress
+- Users can now tell if command is progressing or actually stalled
+- Oxlint warnings in test mocks resolved (no-thenable, no-unused-vars)
+- Users can now interact during long-running agent tasks - stdin capture works in background
+- User input during agent work is properly classified and routed (modify/interrupt/queue/clarification)
+
+---
+
 ## [1.5.0] - 2026-02-11
 
 ### Added

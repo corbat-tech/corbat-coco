@@ -6,12 +6,11 @@
  */
 
 import readline from "node:readline";
-import chalk from "chalk";
 
 /**
  * Queued user interruption
  */
-interface QueuedInterruption {
+export interface QueuedInterruption {
   message: string;
   timestamp: number;
 }
@@ -36,14 +35,38 @@ export function hasInterruptions(): boolean {
 /**
  * Get and clear all pending interruptions
  */
-export function consumeInterruptions(): string[] {
-  const messages = interruptions.map((i) => i.message);
+export function consumeInterruptions(): QueuedInterruption[] {
+  const pending = [...interruptions];
   interruptions = [];
-  return messages;
+  return pending;
+}
+
+/**
+ * Callback for background capture - adds interruptions to queue
+ * Use with inputHandler.enableBackgroundCapture()
+ */
+export function handleBackgroundLine(line: string): void {
+  const trimmed = line.trim();
+  if (trimmed) {
+    interruptions.push({
+      message: trimmed,
+      timestamp: Date.now(),
+    });
+
+    // Show immediate feedback that message was captured
+    // Uses logUpdate.done() to freeze frame, avoiding duplication
+    import("./output/concurrent-ui.js").then(({ showMessageCaptured }) => {
+      showMessageCaptured(trimmed);
+    }).catch(() => {
+      // Fallback if import fails
+      console.log(`\n💬 You: "${trimmed}"`);
+    });
+  }
 }
 
 /**
  * Start listening for user interruptions during agent processing
+ * @deprecated Use inputHandler.enableBackgroundCapture(handleBackgroundLine) instead
  */
 export function startInterruptionListener(): void {
   if (rl) {
@@ -57,23 +80,7 @@ export function startInterruptionListener(): void {
   });
 
   rl.on("line", (line) => {
-    const trimmed = line.trim();
-    if (trimmed) {
-      interruptions.push({
-        message: trimmed,
-        timestamp: Date.now(),
-      });
-
-      // Show feedback that input was received
-      console.log(
-        chalk.dim("\n  ↳ ") +
-          chalk.cyan("Additional context queued") +
-          chalk.dim(": ") +
-          chalk.white(trimmed.slice(0, 60)) +
-          (trimmed.length > 60 ? chalk.dim("...") : "") +
-          "\n",
-      );
-    }
+    handleBackgroundLine(line);
   });
 }
 

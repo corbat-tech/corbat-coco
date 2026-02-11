@@ -14,6 +14,14 @@ import {
 } from "./session.js";
 import { createInputHandler } from "./input/handler.js";
 import {
+  startConcurrentInput,
+  stopConcurrentInput,
+  setWorking,
+  startSpinner as startConcurrentSpinner,
+  updateSpinner as updateConcurrentSpinner,
+  clearSpinner as clearConcurrentSpinner,
+} from "./output/concurrent-ui.js";
+import {
   renderStreamChunk,
   renderToolStart,
   renderToolEnd,
@@ -21,7 +29,6 @@ import {
   renderError,
   renderInfo,
 } from "./output/renderer.js";
-import { createSpinner, type Spinner } from "./output/spinner.js";
 import { executeAgentTurn, formatAbortSummary } from "./agent-loop.js";
 import { createProvider } from "../../providers/index.js";
 import { createFullToolRegistry } from "../../tools/index.js";
@@ -62,6 +69,13 @@ import {
   type CocoQualityResult,
 } from "./coco-mode.js";
 import { loadFullAccessPreference } from "./full-access-mode.js";
+import {
+  hasInterruptions,
+  consumeInterruptions,
+  handleBackgroundLine,
+} from "./interruption-handler.js";
+import { classifyInterruptions } from "./interruption-classifier.js";
+import { getBackgroundTaskManager } from "./background/index.js";
 
 // stringWidth (from 'string-width') is the industry-standard way to measure
 // visual terminal width of strings.  It correctly handles ANSI codes, emoji
@@ -177,6 +191,9 @@ export async function startRepl(
     process.exit(0);
   });
 
+  // Spinner state - MUST be outside loop to persist across iterations
+  let spinnerActive = false;
+
   // Main loop
   while (true) {
     const input = await inputHandler.prompt();
@@ -264,24 +281,24 @@ export async function startRepl(
     }
 
     // Execute agent turn
-    // Single spinner for all states - avoids concurrent spinner issues
-    let activeSpinner: Spinner | null = null;
+    // Use concurrent UI for spinner (works alongside input prompt)
+    // Note: spinnerActive is declared outside loop to persist across iterations
 
-    // Helper to safely clear spinner - defined outside try for access in catch
+    // Helper to safely clear spinner
     const clearSpinner = () => {
-      if (activeSpinner) {
-        activeSpinner.clear();
-        activeSpinner = null;
+      if (spinnerActive) {
+        clearConcurrentSpinner();
+        spinnerActive = false;
       }
     };
 
-    // Helper to set spinner message (creates if needed)
+    // Helper to set spinner message
     const setSpinner = (message: string) => {
-      if (activeSpinner) {
-        activeSpinner.update(message);
+      if (!spinnerActive) {
+        startConcurrentSpinner(message);
+        spinnerActive = true;
       } else {
-        activeSpinner = createSpinner(message);
-        activeSpinner.start();
+        updateConcurrentSpinner(message);
       }
     };
 
@@ -330,8 +347,8 @@ export async function startRepl(
         session.config.agent.systemPrompt = originalSystemPrompt + "\n" + getCocoModeSystemPrompt();
       }
 
-      // Pause input to prevent typing interference during agent response
-      inputHandler.pause();
+      // Start concurrent input (renders persistent bottom prompt with LED)
+      startConcurrentInput(handleBackgroundLine);
 
       process.once("SIGINT", sigintHandler);
 
@@ -360,6 +377,7 @@ export async function startRepl(
         },
         onThinkingStart: () => {
           setSpinner("Thinking...");
+          setWorking(true); // LED pulsing red/orange/yellow
           thinkingStartTime = Date.now();
           thinkingInterval = setInterval(() => {
             if (!thinkingStartTime) return;
@@ -373,7 +391,11 @@ export async function startRepl(
         },
         onThinkingEnd: () => {
           clearThinkingInterval();
-          clearSpinner();
+          // Don't clear spinner yet if there are interruptions to process
+          if (!hasInterruptions()) {
+            clearSpinner();
+          }
+          setWorking(false); // LED green (idle)
         },
         onToolPreparing: (toolName) => {
           setSpinner(`Preparing: ${toolName}\u2026`);
@@ -388,6 +410,78 @@ export async function startRepl(
       // Remove SIGINT handler and clean up thinking interval after agent turn
       clearThinkingInterval();
       process.off("SIGINT", sigintHandler);
+
+      // Set LED to idle (green)
+      setWorking(false);
+
+      // Stop concurrent input (clears bottom prompt)
+      stopConcurrentInput();
+
+      if (hasInterruptions()) {
+        const interruptions = consumeInterruptions();
+
+        // Get current task from last message
+        const currentTaskMsg = session.messages[session.messages.length - 1];
+        const currentTask =
+          typeof currentTaskMsg?.content === "string" ? currentTaskMsg.content : "Unknown task";
+
+        // Keep the current spinner running, just update the message
+        updateConcurrentSpinner("Processing your message...");
+
+        // Classify interruptions using LLM
+        const routing = await classifyInterruptions(interruptions, currentTask, provider);
+
+        // DON'T clear spinner - let it continue with current task
+        // The explanation will appear as normal text output
+
+        // Show natural explanation as if the assistant is speaking
+        const combinedInput = interruptions.map((i) => i.message).join("; ");
+
+        let shouldContinue = false;
+        let assistantExplanation = "";
+
+        if (routing.action === "modify" && routing.synthesizedMessage) {
+          assistantExplanation = `I see you want me to: "${combinedInput}"\n\nI'll incorporate this into the current task and continue working with these updated requirements.`;
+
+          // Add synthesized message to session for next turn
+          session.messages.push({
+            role: "user",
+            content: routing.synthesizedMessage,
+          });
+
+          shouldContinue = true;
+        } else if (routing.action === "interrupt") {
+          assistantExplanation = `Understood - cancelling the current work as requested.`;
+        } else if (routing.action === "queue" && routing.queuedTasks) {
+          const taskTitles = routing.queuedTasks.map((t) => `"${t.title}"`).join(", ");
+          assistantExplanation = `I see you want me to: "${combinedInput}"\n\nThis looks like a separate task, so I'll add it to my queue (${taskTitles}) and handle it after finishing the current work.`;
+
+          // Add tasks to background queue
+          const bgManager = getBackgroundTaskManager();
+          for (const task of routing.queuedTasks) {
+            bgManager.createTask(task.title, task.description, async () => {
+              return `Task "${task.title}" would be executed here`;
+            });
+          }
+        } else if (routing.action === "clarification" && routing.response) {
+          assistantExplanation = routing.response;
+        }
+
+        // Display the explanation naturally as part of the conversation flow
+        if (assistantExplanation) {
+          // Clear spinner before showing explanation
+          clearSpinner();
+          console.log(chalk.cyan(`\n${assistantExplanation}\n`));
+        }
+
+        // If modify action, continue agent turn immediately with new context
+        if (shouldContinue && !wasAborted && !result.aborted) {
+          continue; // Jump back to beginning of REPL loop
+        }
+
+        // Clear spinner after processing interruption (if not continuing)
+        clearSpinner();
+      }
 
       // Show abort summary if cancelled, preserving partial content
       if (wasAborted || result.aborted) {

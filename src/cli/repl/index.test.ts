@@ -136,6 +136,16 @@ vi.mock("./output/spinner.js", () => ({
   })),
 }));
 
+vi.mock("./output/concurrent-ui.js", () => ({
+  startConcurrentInput: vi.fn(),
+  stopConcurrentInput: vi.fn(),
+  setWorking: vi.fn(),
+  startSpinner: vi.fn(),
+  updateSpinner: vi.fn(),
+  stopSpinner: vi.fn(),
+  clearSpinner: vi.fn(),
+}));
+
 vi.mock("./agent-loop.js", () => ({
   executeAgentTurn: vi.fn(),
   formatAbortSummary: vi.fn(),
@@ -213,6 +223,8 @@ describe("REPL index", () => {
         close: vi.fn(),
         resume: vi.fn(),
         pause: vi.fn(),
+        enableBackgroundCapture: vi.fn(),
+        disableBackgroundCapture: vi.fn(),
       };
       vi.mocked(createInputHandler).mockReturnValue(mockInputHandler);
 
@@ -260,6 +272,8 @@ describe("REPL index", () => {
         close: vi.fn(),
         resume: vi.fn(),
         pause: vi.fn(),
+        enableBackgroundCapture: vi.fn(),
+        disableBackgroundCapture: vi.fn(),
       };
       vi.mocked(createInputHandler).mockReturnValue(mockInputHandler);
       const mockRegistry = { getAll: vi.fn(() => []), get: vi.fn() };
@@ -310,6 +324,8 @@ describe("REPL index", () => {
         close: vi.fn(),
         resume: vi.fn(),
         pause: vi.fn(),
+        enableBackgroundCapture: vi.fn(),
+        disableBackgroundCapture: vi.fn(),
       };
       vi.mocked(createInputHandler).mockReturnValue(mockInputHandler);
 
@@ -352,6 +368,8 @@ describe("REPL index", () => {
         close: vi.fn(),
         resume: vi.fn(),
         pause: vi.fn(),
+        enableBackgroundCapture: vi.fn(),
+        disableBackgroundCapture: vi.fn(),
       };
       vi.mocked(createInputHandler).mockReturnValue(mockInputHandler);
       vi.mocked(isSlashCommand).mockReturnValue(true);
@@ -399,6 +417,8 @@ describe("REPL index", () => {
         close: vi.fn(),
         resume: vi.fn(),
         pause: vi.fn(),
+        enableBackgroundCapture: vi.fn(),
+        disableBackgroundCapture: vi.fn(),
       };
       vi.mocked(createInputHandler).mockReturnValue(mockInputHandler);
       vi.mocked(isSlashCommand).mockReturnValue(true);
@@ -448,6 +468,8 @@ describe("REPL index", () => {
         close: vi.fn(),
         resume: vi.fn(),
         pause: vi.fn(),
+        enableBackgroundCapture: vi.fn(),
+        disableBackgroundCapture: vi.fn(),
       };
       vi.mocked(createInputHandler).mockReturnValue(mockInputHandler);
       vi.mocked(isSlashCommand).mockReturnValue(false);
@@ -499,6 +521,8 @@ describe("REPL index", () => {
         close: vi.fn(),
         resume: vi.fn(),
         pause: vi.fn(),
+        enableBackgroundCapture: vi.fn(),
+        disableBackgroundCapture: vi.fn(),
       };
       vi.mocked(createInputHandler).mockReturnValue(mockInputHandler);
       vi.mocked(isSlashCommand).mockReturnValue(false);
@@ -550,6 +574,8 @@ describe("REPL index", () => {
         close: vi.fn(),
         resume: vi.fn(),
         pause: vi.fn(),
+        enableBackgroundCapture: vi.fn(),
+        disableBackgroundCapture: vi.fn(),
       };
       vi.mocked(createInputHandler).mockReturnValue(mockInputHandler);
       vi.mocked(isSlashCommand).mockReturnValue(false);
@@ -594,6 +620,8 @@ describe("REPL index", () => {
         close: vi.fn(),
         resume: vi.fn(),
         pause: vi.fn(),
+        enableBackgroundCapture: vi.fn(),
+        disableBackgroundCapture: vi.fn(),
       };
       vi.mocked(createInputHandler).mockReturnValue(mockInputHandler);
       vi.mocked(isSlashCommand).mockReturnValue(false);
@@ -642,6 +670,8 @@ describe("REPL index", () => {
         close: vi.fn(),
         resume: vi.fn(),
         pause: vi.fn(),
+        enableBackgroundCapture: vi.fn(),
+        disableBackgroundCapture: vi.fn(),
       };
       vi.mocked(createInputHandler).mockReturnValue(mockInputHandler);
       vi.mocked(isSlashCommand).mockReturnValue(false);
@@ -683,6 +713,8 @@ describe("REPL index", () => {
         close: vi.fn(),
         resume: vi.fn(),
         pause: vi.fn(),
+        enableBackgroundCapture: vi.fn(),
+        disableBackgroundCapture: vi.fn(),
       };
       vi.mocked(createInputHandler).mockReturnValue(mockInputHandler);
 
@@ -701,7 +733,7 @@ describe("REPL index", () => {
       const { createInputHandler } = await import("./input/handler.js");
       const { isSlashCommand } = await import("./commands/index.js");
       const { executeAgentTurn } = await import("./agent-loop.js");
-      const { createSpinner } = await import("./output/spinner.js");
+      const { startSpinner } = await import("./output/concurrent-ui.js");
 
       const mockProvider: Partial<LLMProvider> = {
         isAvailable: vi.fn().mockResolvedValue(true),
@@ -728,19 +760,11 @@ describe("REPL index", () => {
         close: vi.fn(),
         resume: vi.fn(),
         pause: vi.fn(),
+        enableBackgroundCapture: vi.fn(),
+        disableBackgroundCapture: vi.fn(),
       };
       vi.mocked(createInputHandler).mockReturnValue(mockInputHandler);
       vi.mocked(isSlashCommand).mockReturnValue(false);
-
-      const mockSpinner = {
-        start: vi.fn(),
-        stop: vi.fn(),
-        clear: vi.fn(),
-        update: vi.fn(),
-        fail: vi.fn(),
-        setToolCount: vi.fn(),
-      };
-      vi.mocked(createSpinner).mockReturnValue(mockSpinner);
 
       // Capture callbacks and call them
       vi.mocked(executeAgentTurn).mockImplementation(
@@ -761,8 +785,7 @@ describe("REPL index", () => {
       const { startRepl } = await import("./index.js");
       await startRepl();
 
-      expect(createSpinner).toHaveBeenCalledWith("Thinking...");
-      expect(mockSpinner.start).toHaveBeenCalled();
+      expect(startSpinner).toHaveBeenCalledWith("Thinking...");
     });
 
     it("should call onToolStart, onToolEnd, and onToolSkipped callbacks", async () => {
@@ -771,7 +794,7 @@ describe("REPL index", () => {
       const { createInputHandler } = await import("./input/handler.js");
       const { isSlashCommand } = await import("./commands/index.js");
       const { executeAgentTurn } = await import("./agent-loop.js");
-      const { createSpinner } = await import("./output/spinner.js");
+      const { startSpinner } = await import("./output/concurrent-ui.js");
       const { renderToolStart, renderToolEnd } = await import("./output/renderer.js");
 
       const mockProvider: Partial<LLMProvider> = {
@@ -799,19 +822,11 @@ describe("REPL index", () => {
         close: vi.fn(),
         resume: vi.fn(),
         pause: vi.fn(),
+        enableBackgroundCapture: vi.fn(),
+        disableBackgroundCapture: vi.fn(),
       };
       vi.mocked(createInputHandler).mockReturnValue(mockInputHandler);
       vi.mocked(isSlashCommand).mockReturnValue(false);
-
-      const mockSpinner = {
-        start: vi.fn(),
-        stop: vi.fn(),
-        clear: vi.fn(),
-        update: vi.fn(),
-        fail: vi.fn(),
-        setToolCount: vi.fn(),
-      };
-      vi.mocked(createSpinner).mockReturnValue(mockSpinner);
 
       // Capture callbacks and call them
       vi.mocked(executeAgentTurn).mockImplementation(
@@ -839,7 +854,7 @@ describe("REPL index", () => {
       const { startRepl } = await import("./index.js");
       await startRepl();
 
-      expect(createSpinner).toHaveBeenCalledWith("Running file_read…");
+      expect(startSpinner).toHaveBeenCalled();
       expect(renderToolStart).toHaveBeenCalledWith("file_read", {
         path: "/test",
       });
