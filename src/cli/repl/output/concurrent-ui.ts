@@ -293,14 +293,15 @@ export function setWorking(working: boolean): void {
 
 /**
  * Show immediate feedback that user message was captured
- * Uses logUpdate.done() to freeze current frame, then shows message
+ * Clears current frame, shows message, then re-renders
  */
 export function showMessageCaptured(message: string): void {
-  // Freeze current frame (makes it permanent)
-  logUpdate.done();
+  // Clear current frame
+  logUpdate.clear();
 
-  // Show feedback message
-  console.log(chalk.dim("\n💬 You: ") + chalk.cyan(`"${message}"`));
+  // Show feedback message using regular console.log
+  console.log(chalk.dim("💬 You: ") + chalk.cyan(`"${message}"`));
+  console.log(); // Blank line for spacing
 
   // Re-render current state (spinner continues)
   render();
