@@ -17,7 +17,10 @@ import {
   startConcurrentInput,
   stopConcurrentInput,
   setWorking,
-} from "./input/concurrent-input.js";
+  startSpinner as startConcurrentSpinner,
+  updateSpinner as updateConcurrentSpinner,
+  clearSpinner as clearConcurrentSpinner,
+} from "./output/concurrent-ui.js";
 import {
   renderStreamChunk,
   renderToolStart,
@@ -26,7 +29,6 @@ import {
   renderError,
   renderInfo,
 } from "./output/renderer.js";
-import { createSpinner, type Spinner } from "./output/spinner.js";
 import { executeAgentTurn, formatAbortSummary } from "./agent-loop.js";
 import { createProvider } from "../../providers/index.js";
 import { createFullToolRegistry } from "../../tools/index.js";
@@ -276,24 +278,24 @@ export async function startRepl(
     }
 
     // Execute agent turn
-    // Single spinner for all states - avoids concurrent spinner issues
-    let activeSpinner: Spinner | null = null;
+    // Use concurrent UI for spinner (works alongside input prompt)
+    let spinnerActive = false;
 
-    // Helper to safely clear spinner - defined outside try for access in catch
+    // Helper to safely clear spinner
     const clearSpinner = () => {
-      if (activeSpinner) {
-        activeSpinner.clear();
-        activeSpinner = null;
+      if (spinnerActive) {
+        clearConcurrentSpinner();
+        spinnerActive = false;
       }
     };
 
-    // Helper to set spinner message (creates if needed)
+    // Helper to set spinner message
     const setSpinner = (message: string) => {
-      if (activeSpinner) {
-        activeSpinner.update(message);
+      if (!spinnerActive) {
+        startConcurrentSpinner(message);
+        spinnerActive = true;
       } else {
-        activeSpinner = createSpinner(message);
-        activeSpinner.start();
+        updateConcurrentSpinner(message);
       }
     };
 

@@ -85,6 +85,7 @@
     "glob": "^13.0.1",
     "highlight.js": "^11.11.1",
     "json5": "^2.2.3",
+    "log-update": "^7.1.0",
     "marked": "^15.0.0",
     "marked-terminal": "^7.0.0",
     "minimatch": "^10.1.2",
