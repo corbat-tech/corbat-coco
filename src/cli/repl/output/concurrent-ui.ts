@@ -30,6 +30,10 @@ interface UIState {
   working: boolean; // LED color
   ledFrame: number;
 
+  // Feedback state (shows queued message)
+  lastQueuedMessage: string | null;
+  queuedMessageTime: number | null;
+
   // Callbacks
   onInputLine: ((line: string) => void) | null;
 }
@@ -44,6 +48,9 @@ const state: UIState = {
   inputLine: "",
   working: false,
   ledFrame: 0,
+
+  lastQueuedMessage: null,
+  queuedMessageTime: null,
 
   onInputLine: null,
 };
@@ -86,6 +93,18 @@ function render(): void {
     lines.push(chalk.dim("─".repeat(termCols)));
     lines.push(`${led} ${chalk.magenta("[coco]")} › ${state.inputLine}${chalk.dim("_")}`);
     lines.push(chalk.dim("─".repeat(termCols)));
+
+    // Show queued message feedback (disappears after 3 seconds)
+    if (state.lastQueuedMessage && state.queuedMessageTime) {
+      const elapsed = Date.now() - state.queuedMessageTime;
+      if (elapsed < 3000) {
+        lines.push(chalk.dim(`  ✓ Queued: "${state.lastQueuedMessage}"`));
+      } else {
+        // Clear after 3 seconds
+        state.lastQueuedMessage = null;
+        state.queuedMessageTime = null;
+      }
+    }
   }
 
   // Atomic update (replaces previous frame)
@@ -199,6 +218,10 @@ export function startConcurrentInput(onLine: (line: string) => void): void {
     if (char === "\r" || char === "\n") {
       const line = state.inputLine.trim();
       if (line && state.onInputLine) {
+        // Save message for visual feedback
+        state.lastQueuedMessage = line;
+        state.queuedMessageTime = Date.now();
+
         state.onInputLine(line);
       }
       state.inputLine = "";
